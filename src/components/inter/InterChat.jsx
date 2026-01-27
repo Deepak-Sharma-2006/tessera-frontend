@@ -1,223 +1,144 @@
-// --- CHANGE THIS BLOCK ---
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import axios from "axios";
+import SockJS from "sockjs-client";
+import { over } from "stompjs";
 import { Card } from "@/components/ui/card.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
-import { Avatar } from "@/components/ui/avatar.jsx";
 import { Input } from "@/components/ui/input.jsx";
-import { Textarea } from "@/components/ui/textarea.jsx";
 
-const mockChats = [
-  {
-    id: 1,
-    user: {
-      name: 'Ananya Sharma',
-      college: 'IIT Delhi',
-      avatar: 'A',
-      isOnline: true,
-      lastSeen: 'Active now'
-    },
-    lastMessage: 'Thanks for the collaboration on the AI project!',
-    lastMessageTime: '2 hours ago',
-    unreadCount: 2,
-    messages: [
-      {
-        id: 101,
-        senderId: 1,
-        senderName: 'Ananya Sharma',
-        content: 'Hey! I saw your post about the machine learning project. Interested in collaborating?',
-        timestamp: '2024-02-14T10:00:00Z',
-        isOwnMessage: false
-      },
-      {
-        id: 102,
-        senderId: 'current',
-        senderName: 'You',
-        content: 'Absolutely! I was looking for someone with your expertise in NLP.',
-        timestamp: '2024-02-14T10:15:00Z',
-        isOwnMessage: true
-      },
-      {
-        id: 103,
-        senderId: 1,
-        senderName: 'Ananya Sharma',
-        content: 'Great! Should we start a collab room to discuss the project details?',
-        timestamp: '2024-02-14T10:30:00Z',
-        isOwnMessage: false
-      },
-      {
-        id: 104,
-        senderId: 1,
-        senderName: 'Ananya Sharma',
-        content: 'Thanks for the collaboration on the AI project!',
-        timestamp: '2024-02-14T14:00:00Z',
-        isOwnMessage: false
-      }
-    ]
-  },
-  {
-    id: 2,
-    user: {
-      name: 'Rahul Gupta',
-      college: 'BITS Pilani',
-      avatar: 'R',
-      isOnline: false,
-      lastSeen: '1 day ago'
-    },
-    lastMessage: 'Let me know when you\'re free for the hackathon prep!',
-    lastMessageTime: '1 day ago',
-    unreadCount: 0,
-    messages: [
-      {
-        id: 201,
-        senderId: 2,
-        senderName: 'Rahul Gupta',
-        content: 'Hey! Are you participating in the upcoming hackathon?',
-        timestamp: '2024-02-13T15:00:00Z',
-        isOwnMessage: false
-      },
-      {
-        id: 202,
-        senderId: 'current',
-        senderName: 'You',
-        content: 'Yes! Looking for team members. Interested?',
-        timestamp: '2024-02-13T15:30:00Z',
-        isOwnMessage: true
-      },
-      {
-        id: 203,
-        senderId: 2,
-        senderName: 'Rahul Gupta',
-        content: 'Let me know when you\'re free for the hackathon prep!',
-        timestamp: '2024-02-13T16:00:00Z',
-        isOwnMessage: false
-      }
-    ]
-  },
-  {
-    id: 3,
-    user: {
-      name: 'Priya Patel',
-      college: 'VIT Chennai',
-      avatar: 'P',
-      isOnline: true,
-      lastSeen: 'Active now'
-    },
-    lastMessage: 'The UI designs look amazing! 🎨',
-    lastMessageTime: '30 minutes ago',
-    unreadCount: 1,
-    messages: [
-      {
-        id: 301,
-        senderId: 3,
-        senderName: 'Priya Patel',
-        content: 'Hi! I loved your portfolio. Could you review my UI designs?',
-        timestamp: '2024-02-14T13:00:00Z',
-        isOwnMessage: false
-      },
-      {
-        id: 302,
-        senderId: 'current',
-        senderName: 'You',
-        content: 'Sure! Send them over, I\'d be happy to help.',
-        timestamp: '2024-02-14T13:15:00Z',
-        isOwnMessage: true
-      },
-      {
-        id: 303,
-        senderId: 3,
-        senderName: 'Priya Patel',
-        content: 'The UI designs look amazing! 🎨',
-        timestamp: '2024-02-14T15:30:00Z',
-        isOwnMessage: false
-      }
-    ]
-  }
-]
+const API_BASE = "/api/messages";
+const WS_URL = "http://localhost:8080/ws-studcollab";
 
-const reportReasons = [
-  'Spam or unwanted messages',
-  'Harassment or bullying',
-  'Inappropriate content',
-  'Impersonation',
-  'Hate speech',
-  'Other'
-]
+// Hook to fetch conversations for a user
+function useConversations(userId) {
+  const [conversations, setConversations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  
+  useEffect(() => {
+    if (!userId) return;
+    setLoading(true);
+    axios.get(`${API_BASE}/conversations/${userId}`)
+      .then(res => setConversations(res.data || []))
+      .catch(err => console.error("Failed to fetch conversations:", err))
+      .finally(() => setLoading(false));
+  }, [userId]);
+  
+  return [conversations, setConversations, loading];
+}
 
+// Hook to fetch messages for a conversation
+function useMessages(conversationId) {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  
+  useEffect(() => {
+    if (!conversationId) return;
+    setLoading(true);
+    axios.get(`${API_BASE}/conversation/${conversationId}/messages`)
+      .then(res => setMessages(res.data || []))
+      .catch(err => console.error("Failed to fetch messages:", err))
+      .finally(() => setLoading(false));
+  }, [conversationId]);
+  
+  return [messages, setMessages, loading];
+}
+
+// Main InterChat Component
 export default function InterChat({ user }) {
-  const [chats, setChats] = useState(mockChats)
-  const [selectedChat, setSelectedChat] = useState(null)
-  const [newMessage, setNewMessage] = useState('')
-  const [showReportModal, setShowReportModal] = useState(false)
-  const [reportData, setReportData] = useState({
-    reason: '',
-    details: '',
-    targetUserId: null
-  })
+  const userId = user?.id;
+  const [conversations, , convLoading] = useConversations(userId);
+  const [selected, setSelected] = useState(null);
+  const [messages, setMessages, msgLoading] = useMessages(selected?.id);
+  const [input, setInput] = useState("");
+  const [stompClient, setStompClient] = useState(null);
+  const [attachments, setAttachments] = useState([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const messagesEndRef = useRef(null);
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim() || !selectedChat) return
+  // Connect WebSocket
+  useEffect(() => {
+    const sock = new SockJS(WS_URL);
+    const stomp = over(sock);
+    
+    stomp.connect({}, () => {
+      console.log("WebSocket connected");
+      setStompClient(stomp);
+      setIsConnected(true);
+    }, (error) => {
+      console.error("WebSocket connection error:", error);
+      setIsConnected(false);
+    });
+    
+    return () => {
+      if (stomp.connected) {
+        stomp.disconnect(() => {
+          console.log("WebSocket disconnected");
+          setIsConnected(false);
+        });
+      }
+    };
+  }, []);
 
-    const message = {
-      id: Date.now(),
-      senderId: 'current',
-      senderName: 'You',
-      content: newMessage.trim(),
-      timestamp: new Date().toISOString(),
-      isOwnMessage: true
+  // Subscribe to selected conversation
+  useEffect(() => {
+    if (!stompClient?.connected || !selected) return;
+    
+    const sub = stompClient.subscribe(
+      `/topic/conversation.${selected.id}`,
+      msg => {
+        try {
+          const message = JSON.parse(msg.body);
+          console.log("Received message:", message);
+          setMessages(prev => [...prev, message]);
+        } catch (err) {
+          console.error("Failed to parse message:", err);
+        }
+      }
+    );
+    
+    return () => sub.unsubscribe();
+  }, [stompClient, selected, setMessages]);
+
+  // Scroll to bottom on new message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Send message
+  const sendMessage = async () => {
+    if (!input.trim() && attachments.length === 0) return;
+    if (!stompClient?.connected || !selected) {
+      alert("WebSocket not connected. Please wait...");
+      return;
     }
 
-    // Update the chat with new message
-    setChats(chats.map(chat => 
-      chat.id === selectedChat.id
-        ? {
-            ...chat,
-            messages: [...chat.messages, message],
-            lastMessage: newMessage.trim(),
-            lastMessageTime: 'Just now'
-          }
-        : chat
-    ))
-
-    // Update selected chat
-    setSelectedChat({
-      ...selectedChat,
-      messages: [...selectedChat.messages, message],
-      lastMessage: newMessage.trim(),
-      lastMessageTime: 'Just now'
-    })
-
-    setNewMessage('')
-  }
-
-  const handleReportUser = (userId) => {
-    setReportData({ ...reportData, targetUserId: userId })
-    setShowReportModal(true)
-  }
-
-  const submitReport = () => {
-    if (!reportData.reason || !reportData.details.trim()) {
-      alert('Please select a reason and provide details')
-      return
+    const msg = {
+      conversationId: selected.id,
+      senderId: userId,
+      text: input,
+      attachmentUrls: attachments.length > 0 ? attachments : null,
+    };
+    
+    try {
+      stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(msg));
+      setInput("");
+      setAttachments([]);
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      alert("Failed to send message. Please try again.");
     }
+  };
 
-    const targetChat = chats.find(chat => chat.id === reportData.targetUserId)
-    
-    // In real implementation, this would send to the user's college moderator
-    alert(`Report submitted successfully!\n\nUser: ${targetChat?.user.name}\nCollege: ${targetChat?.user.college}\nReason: ${reportData.reason}\n\nThis report has been sent to ${targetChat?.user.college}'s moderator team for review.`)
-    
-    setShowReportModal(false)
-    setReportData({ reason: '', details: '', targetUserId: null })
-  }
+  // Get other participant info
+  const getOtherUserInfo = (conv) => {
+    if (!conv || !conv.participantIds) return { name: "Unknown", college: "Unknown", id: null };
+    const otherId = conv.participantIds.find(id => id !== userId);
+    // TODO: Fetch user profile from API
+    return { name: otherId || "User", college: "College", id: otherId };
+  };
 
-  const markChatAsRead = (chatId) => {
-    setChats(chats.map(chat =>
-      chat.id === chatId ? { ...chat, unreadCount: 0 } : chat
-    ))
-  }
-
-  const totalUnreadCount = chats.reduce((sum, chat) => sum + chat.unreadCount, 0)
-
+  // Render
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -226,122 +147,103 @@ export default function InterChat({ user }) {
       </div>
 
       <div className="grid md:grid-cols-3 gap-6 h-[70vh]">
-        {/* Chat List */}
+        {/* Conversations Sidebar */}
         <Card className="p-4 overflow-y-auto">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">Messages</h3>
-            {totalUnreadCount > 0 && (
-              <Badge className="bg-red-500 text-white">
-                {totalUnreadCount} unread
-              </Badge>
-            )}
+            {convLoading && <span className="text-xs text-muted-foreground">Loading...</span>}
           </div>
 
           <div className="space-y-2">
-            {chats.map((chat) => (
-              <button
-                key={chat.id}
-                onClick={() => {
-                  setSelectedChat(chat)
-                  markChatAsRead(chat.id)
-                }}
-                className={`w-full p-3 rounded-lg text-left transition-colors ${
-                  selectedChat?.id === chat.id
-                    ? 'bg-primary/10 border-2 border-primary/20'
-                    : 'hover:bg-muted/50 border-2 border-transparent'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <Avatar className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 text-white">
-                      {chat.user.avatar}
-                    </Avatar>
-                    {chat.user.isOnline && (
-                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-                    )}
-                    {chat.unreadCount > 0 && (
-                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                        {chat.unreadCount}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-sm truncate">{chat.user.name}</span>
-                      <span className="text-xs text-muted-foreground">{chat.lastMessageTime}</span>
+            {conversations.map((conv) => {
+              const other = getOtherUserInfo(conv);
+              return (
+                <button
+                  key={conv.id}
+                  onClick={() => setSelected(conv)}
+                  className={`w-full p-3 rounded-lg text-left transition-colors ${
+                    selected?.id === conv.id
+                      ? 'bg-primary/10 border-2 border-primary/20'
+                      : 'hover:bg-muted/50 border-2 border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-full flex items-center justify-center font-bold">
+                      {other.name?.[0] || "?"}
                     </div>
-                    <div className="text-xs text-muted-foreground mb-1">{chat.user.college}</div>
-                    <p className="text-sm text-muted-foreground truncate">{chat.lastMessage}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm truncate">{other.name}</div>
+                      <div className="text-xs text-muted-foreground">{other.college}</div>
+                    </div>
                   </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
 
-          {chats.length === 0 && (
+          {conversations.length === 0 && !convLoading && (
             <div className="text-center py-8">
               <div className="text-4xl mb-2">💬</div>
-              <p className="text-muted-foreground text-sm">No chats yet</p>
+              <p className="text-muted-foreground text-sm">No conversations yet</p>
             </div>
           )}
         </Card>
 
-        {/* Chat Messages */}
+        {/* Chat Area */}
         <Card className="md:col-span-2 flex flex-col">
-          {selectedChat ? (
+          {selected ? (
             <>
               {/* Chat Header */}
               <div className="p-4 border-b border-border flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <Avatar className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 text-white">
-                      {selectedChat.user.avatar}
-                    </Avatar>
-                    {selectedChat.user.isOnline && (
-                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-                    )}
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-full flex items-center justify-center font-bold">
+                    {getOtherUserInfo(selected).name?.[0] || "?"}
                   </div>
                   <div>
-                    <h4 className="font-semibold">{selectedChat.user.name}</h4>
-                    <div className="text-sm text-muted-foreground">
-                      {selectedChat.user.college} • {selectedChat.user.lastSeen}
-                    </div>
+                    <h4 className="font-semibold">{getOtherUserInfo(selected).name}</h4>
+                    <div className="text-sm text-muted-foreground">{getOtherUserInfo(selected).college} • Active now</div>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleReportUser(selectedChat.id)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
+                <Button variant="outline" size="sm" className="text-red-600">
                   🚨 Report
                 </Button>
               </div>
 
-              {/* Messages */}
+              {/* Messages Area */}
               <div className="flex-1 p-4 overflow-y-auto space-y-4">
-                {selectedChat.messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.isOwnMessage ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div className={`max-w-[70%] p-3 rounded-lg ${
-                      message.isOwnMessage
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
-                    }`}>
-                      <p className="text-sm">{message.content}</p>
-                      <div className={`text-xs mt-1 ${
-                        message.isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                {msgLoading ? (
+                  <div className="text-center text-muted-foreground py-8">Loading messages...</div>
+                ) : messages.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-8">No messages yet. Start the conversation!</div>
+                ) : (
+                  messages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`flex ${msg.senderId === userId ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div className={`max-w-[70%] p-3 rounded-lg ${
+                        msg.senderId === userId ? 'bg-primary text-primary-foreground' : 'bg-muted'
                       }`}>
-                        {new Date(message.timestamp).toLocaleTimeString([], { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}
+                        <p className="text-sm">{msg.text}</p>
+                        {msg.attachmentUrls && msg.attachmentUrls.length > 0 && (
+                          <div className="mt-2 flex gap-2">
+                            {msg.attachmentUrls.map((url, i) => (
+                              <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="underline text-xs">
+                                Attachment {i + 1}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                        <div className={`text-xs mt-1 ${
+                          msg.senderId === userId ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                        }`}>
+                          {new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Message Input */}
@@ -349,17 +251,18 @@ export default function InterChat({ user }) {
                 <div className="flex space-x-2">
                   <Input
                     placeholder="Type your message..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMessage())}
+                    disabled={!isConnected}
                     className="flex-1"
                   />
-                  <Button 
-                    onClick={handleSendMessage}
-                    disabled={!newMessage.trim()}
-                  >
+                  <Button onClick={sendMessage} disabled={!isConnected || (!input.trim() && attachments.length === 0)}>
                     Send
                   </Button>
+                </div>
+                <div className="text-xs mt-2 text-muted-foreground">
+                  {isConnected ? "🟢 Connected" : "🔴 Connecting..."}
                 </div>
               </div>
             </>
@@ -368,107 +271,12 @@ export default function InterChat({ user }) {
               <div className="text-center">
                 <div className="text-6xl mb-4">💬</div>
                 <h3 className="font-semibold text-lg mb-2">Select a chat to start messaging</h3>
-                <p className="text-muted-foreground">
-                  Choose a conversation from the left to view messages
-                </p>
+                <p className="text-muted-foreground">Choose a conversation from the left to view messages</p>
               </div>
             </div>
           )}
         </Card>
       </div>
-
-      {/* Report User Modal */}
-      {showReportModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-red-600">🚨 Report User</h3>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setShowReportModal(false)}
-              >
-                ✕
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800">
-                  <strong>Important:</strong> Reports are sent to the user's college moderator team for review. Please provide accurate information.
-                </p>
-              </div>
-
-              <div>
-                <label className="block font-medium mb-2">Reason for reporting</label>
-                <select
-                  value={reportData.reason}
-                  onChange={(e) => setReportData({ ...reportData, reason: e.target.value })}
-                  className="w-full p-2 border border-border rounded-lg"
-                  required
-                >
-                  <option value="">Select a reason...</option>
-                  {reportReasons.map((reason) => (
-                    <option key={reason} value={reason}>
-                      {reason}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-medium mb-2">Additional details</label>
-                <Textarea
-                  placeholder="Please provide specific details about the issue..."
-                  value={reportData.details}
-                  onChange={(e) => setReportData({ ...reportData, details: e.target.value })}
-                  rows={4}
-                  required
-                />
-              </div>
-
-              <div className="bg-red-50 p-3 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-800">
-                  This report will be sent to <strong>{chats.find(c => c.id === reportData.targetUserId)?.user.college}</strong>'s moderator team.
-                </p>
-              </div>
-
-              <div className="flex space-x-3">
-                <Button
-                  onClick={submitReport}
-                  disabled={!reportData.reason || !reportData.details.trim()}
-                  className="flex-1 bg-red-600 hover:bg-red-700"
-                >
-                  Submit Report
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowReportModal(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* Info Panel */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-2xl border border-blue-200">
-        <h4 className="font-semibold text-lg mb-3 text-blue-800">💬 Cross-College Messaging</h4>
-        <div className="grid md:grid-cols-2 gap-4 text-sm text-blue-700">
-          <div>
-            <strong>Direct Communication:</strong> Chat one-on-one with students from other colleges
-          </div>
-          <div>
-            <strong>Report System:</strong> Reports are sent to the user's college moderator for review
-          </div>
-        </div>
-        <div className="mt-3 text-xs text-blue-600">
-          🛡️ All conversations are monitored for safety and can be reported if inappropriate
-        </div>
-      </div>
     </div>
-  )
+  );
 }

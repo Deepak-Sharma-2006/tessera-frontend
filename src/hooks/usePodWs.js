@@ -6,8 +6,12 @@ export default function usePodWs({ podId, onMessage }) {
     const clientRef = useRef(null)
 
     useEffect(() => {
+        if (!podId) return
+
         const client = new Client({
-            webSocketFactory: () => new SockJS('http://localhost:8080/ws-studcollab'),
+            webSocketFactory: () => new SockJS('http://localhost:8080/ws-studcollab', null, {
+                transports: ['websocket']
+            }),
             reconnectDelay: 5000,
             onConnect: () => {
                 client.subscribe(`/topic/pod.${podId}.chat`, (msg) => {
@@ -18,6 +22,9 @@ export default function usePodWs({ podId, onMessage }) {
                         console.error('Invalid WS message', e)
                     }
                 })
+            },
+            onStompError: (frame) => {
+                console.error('STOMP error:', frame)
             }
         })
 

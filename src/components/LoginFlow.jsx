@@ -159,7 +159,7 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
     setError('');
     try {
       // Call /api/auth/check-email to see if user exists
-      const response = await api.post('/auth/check-email', { email: formData.email });
+      const response = await api.post('/api/auth/check-email', { email: formData.email });
       const data = response.data;
 
       // Branch based on whether email exists
@@ -181,7 +181,7 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
     setError('');
     try {
       // Call /api/auth/register
-      const response = await api.post('/auth/register', {
+      const response = await api.post('/api/auth/register', {
         email: formData.email,
         password: password
       });
@@ -209,7 +209,7 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
     setIsLoading(true);
     setError('');
     try {
-      const response = await api.post('/auth/login', {
+      const response = await api.post('/api/auth/login', {
         email: formData.email,
         password: password
       });
@@ -275,21 +275,30 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
     setError('');
 
     try {
-      console.log("🖱️ Using /users/profile endpoint (extracts identity from JWT token)");
+      console.log("🖱️ Using /users/{userId} endpoint");
 
-      // ✅ PLAN B: Use '/users/profile'
-      // This endpoint extracts user identity directly from the JWT token.
-      // We do NOT send 'userId', 'username', or 'email' to avoid validation conflicts.
+      // Get userId from activeUser
+      const userId = activeUser?.id || formData.userId;
+      if (!userId) {
+        setError("User ID not found. Please log in again.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Update payload with all profile data
       const cleanPayload = {
         fullName: nameVal,
         collegeName: collegeVal,
         yearOfStudy: yearVal,
-        department: deptVal
+        department: deptVal,
+        id: userId,
+        email: activeUser?.email,
+        username: activeUser?.username
       };
 
-      console.log("📦 Sending Clean Payload to /users/profile:", cleanPayload);
+      console.log("📦 Sending Clean Payload to /users/" + userId + ":", cleanPayload);
 
-      const res = await api.put('/users/profile', cleanPayload);
+      const res = await api.put(`/api/users/${userId}`, cleanPayload);
 
       console.log("✅ Update Success:", res.data);
 
@@ -336,10 +345,10 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
       setIsLoading(true);
       setError('');
 
-      console.log("📤 Step 2: Sending skills to /users/" + activeId);
+      console.log("📤 Step 2: Sending skills to /api/users/" + activeId);
 
-      // ✅ FIX: Send SKILLS Payload
-      await api.put(`/users/${activeId}`, {
+      // ✅ FIX: Send SKILLS Payload to correct endpoint
+      await api.put(`/api/users/${activeId}`, {
         userId: activeId,
         skills: formData.skills
       });
@@ -380,10 +389,10 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
     setIsLoading(true);
     setError('');
     try {
-      console.log("📤 Step 4: Submitting final profile to /users/" + activeId);
+      console.log("📤 Step 4: Submitting final profile to /api/users/" + activeId);
 
-      // ✅ FIX 3: Use ID in URL (Safer than /profile endpoint)
-      const response = await api.put(`/users/${activeId}`, {
+      // ✅ FIX 3: Use ID in URL with /api prefix
+      const response = await api.put(`/api/users/${activeId}`, {
         username: formData.username,
         fullName: formData.fullName,
         ...formData

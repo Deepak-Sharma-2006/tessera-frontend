@@ -40,7 +40,14 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
 
                 // Fetch messages from separate endpoint
                 const messagesRes = await api.get(`/pods/${podId}/messages`);
-                setMessages(messagesRes.data || []);
+                // Normalize message fields: convert backend format to UI format
+                const normalizedMessages = (messagesRes.data || []).map(msg => ({
+                    ...msg,
+                    content: msg.content || msg.text, // Use content if available, fall back to text
+                    timestamp: msg.timestamp || msg.sentAt, // Use timestamp if available, fall back to sentAt
+                    id: msg.id || msg._id // Ensure id field exists
+                }));
+                setMessages(normalizedMessages);
             } catch (err) {
                 console.error("Failed to load pod", err);
                 setError("Could not load pod");
@@ -102,8 +109,8 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                 attachmentType = res.data.type;
             }
 
-            // Send WebSocket message with text + attachment + reply
-            const payload = {
+            // Create message object
+            const messagePayload = {
                 content: inputText || (inputAttachment ? `Shared ${attachmentType === 'IMAGE' ? 'an image' : 'a file'}` : ''),
                 parentId: null,
                 authorName: currentUserName,
@@ -113,9 +120,15 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                 replyToName: replyingTo?.senderName || null,
                 replyToContent: replyingTo?.content || null,
                 attachmentUrl: attachmentUrl,
-                attachmentType: attachmentType
+                attachmentType: attachmentType,
+                timestamp: new Date().toISOString()
             };
-            podWs.send(payload);
+
+            // IMPORTANT: Add message to local state immediately so user sees it
+            setMessages(prev => [...prev, messagePayload]);
+
+            // Send WebSocket message
+            podWs.send(messagePayload);
 
             // Reset state
             setAttachment(null);

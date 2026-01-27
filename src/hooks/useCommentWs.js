@@ -6,8 +6,12 @@ export default function useCommentWs({ postId, onMessage }) {
     const clientRef = useRef(null)
 
     useEffect(() => {
+        if (!postId) return
+
         const client = new Client({
-            webSocketFactory: () => new SockJS('http://localhost:8080/ws-studcollab'),
+            webSocketFactory: () => new SockJS('http://localhost:8080/ws-studcollab', null, {
+                transports: ['websocket']
+            }),
             reconnectDelay: 5000,
             onConnect: () => {
                 client.subscribe(`/topic/post.${postId}.comments`, (msg) => {
@@ -18,6 +22,9 @@ export default function useCommentWs({ postId, onMessage }) {
                         console.error('Invalid WS message', e)
                     }
                 })
+            },
+            onStompError: (frame) => {
+                console.error('STOMP error:', frame)
             }
         })
 

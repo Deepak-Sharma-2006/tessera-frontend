@@ -20,7 +20,7 @@ const usePostsWithRefresh = (activeFilter, refreshTrigger) => {
     const fetchPosts = async () => {
       setLoading(true)
       try {
-        let url = '/posts'
+        let url = '/api/posts/campus'
         if (activeFilter && activeFilter !== 'all') url += `?type=${activeFilter}`
         const response = await api.get(url)
         if (!mounted) return
@@ -64,9 +64,17 @@ export default function CampusFeed() {
     let mounted = true
     const fetchCounts = async () => {
       try {
-        const res = await api.get('/posts/counts')
+        const res = await api.get('/api/posts/campus')
         if (!mounted) return
-        setCounts(res.data)
+        // Count posts by type
+        const data = res.data || []
+        const countObj = {
+          ASK_HELP: data.filter(p => p.type === 'ASK_HELP').length,
+          OFFER_HELP: data.filter(p => p.type === 'OFFER_HELP').length,
+          POLL: data.filter(p => p.type === 'POLL').length,
+          LOOKING_FOR: data.filter(p => p.type === 'LOOKING_FOR').length
+        }
+        setCounts(countObj)
       } catch (e) {
         // ignore
       }
@@ -135,7 +143,7 @@ export default function CampusFeed() {
       // POLL, ASK_HELP, OFFER_HELP are also sent to /social
       // TEAM_FINDING posts go to /team-finding endpoint
       const isLookingForOrSocialPost = ['POLL', 'ASK_HELP', 'OFFER_HELP', 'LOOKING_FOR'].includes(selectedPostType);
-      const endpoint = isLookingForOrSocialPost ? '/posts/social' : '/posts/team-finding';
+      const endpoint = isLookingForOrSocialPost ? '/api/posts/social' : '/api/posts/team-finding';
 
       // 2. CONSTRUCT CLEAN PAYLOAD
       const cleanPayload = {
@@ -143,6 +151,7 @@ export default function CampusFeed() {
         content: newPost.content,
         // Use the mapped value, or fallback to the original if not found
         type: typeMapping[selectedPostType] || selectedPostType.toUpperCase().replace(/ /g, '_'),
+        category: 'CAMPUS',
         // ✅ Backend now extracts authorId from JWT token via @AuthenticationPrincipal
         // Do not include authorId in payload
         likes: [],
@@ -196,7 +205,7 @@ export default function CampusFeed() {
   // Function to handle voting
   const handleVote = async (postId, optionId) => {
     try {
-      const response = await api.put(`/posts/${postId}/vote/${optionId}`);
+      const response = await api.put(`/api/posts/${postId}/vote/${optionId}`);
       const updatedPost = response.data;
       setPosts(currentPosts => currentPosts.map(p => p.id === postId ? updatedPost : p));
     } catch (err) {

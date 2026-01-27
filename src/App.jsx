@@ -28,8 +28,13 @@ const ProfileSetupHandler = ({ setAppUser, setInitialLoginFlowState }) => {
 
   useEffect(() => {
     const userId = searchParams.get('userId');
+    // We need the token here too for authenticated requests
+    const token = localStorage.getItem('token');
+
     if (userId) {
-      fetch(`http://localhost:8080/api/users/${userId}`, { credentials: 'include' })
+      fetch(`http://localhost:8080/api/users/${userId}`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      })
         .then(res => {
           if (!res.ok) throw new Error("Could not fetch user profile after login.");
           return res.json();
@@ -52,7 +57,6 @@ const ProfileSetupHandler = ({ setAppUser, setInitialLoginFlowState }) => {
 };
 
 // --- 2. MOVED OUTSIDE: Authenticated App Logic ---
-// Now accepts props instead of closing over state
 const AuthenticatedApp = ({ user, setUser }) => {
   const [currentView, setCurrentView] = useState('campus');
   const [viewContext, setViewContext] = useState(null);
@@ -80,8 +84,7 @@ const AuthenticatedApp = ({ user, setUser }) => {
   );
 };
 
-// --- 3. NEW HELPER: Protected Route Wrapper ---
-// Removes repetitive logic from the main return block
+// --- 3. Protected Route Wrapper ---
 const ProtectedRoute = ({ user, loading, isProfileComplete, children, loginProps }) => {
   if (loading) return <LoadingSpinner />;
 
@@ -89,13 +92,11 @@ const ProtectedRoute = ({ user, loading, isProfileComplete, children, loginProps
     return children;
   }
 
-  // If not logged in, render LoginFlow (or redirect)
   return <LoginFlow {...loginProps} />;
 };
 
 // --- Main App Component ---
 export default function App() {
-  // ✅ Correct Initialization
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
@@ -122,16 +123,31 @@ export default function App() {
     saveUser(finalUserData);
   };
 
-  // Session Restoration
+  // ✅ FIXED: Session Restoration with Bearer Token
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/auth/me', { credentials: 'include' });
+        const token = localStorage.getItem('token');
+
+        // If no token, don't bother hitting the server, just stop loading
+        if (!token) {
+          setAuthLoading(false);
+          return;
+        }
+
+        const res = await fetch('http://localhost:8080/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`, // <--- CRITICAL FIX HERE
+            'Content-Type': 'application/json'
+          }
+        });
+
         if (res.ok) {
           const serverUser = await res.json();
           setUser(serverUser);
           saveUser(serverUser);
         } else {
+          // Token invalid or expired
           const stored = loadUser();
           if (stored) setUser(stored);
         }
@@ -158,40 +174,31 @@ export default function App() {
         <ThemeBackground theme={theme} />
         <Router>
           <Routes>
-            {/* Root: Redirect based on auth */}
             <Route path="/" element={
               authLoading ? <LoadingSpinner /> : (user && isProfileComplete ? <Navigate to="/campus" /> : <Navigate to="/login" />)
             } />
 
-            {/* Login Route */}
             <Route path="/login" element={
               authLoading ? <LoadingSpinner /> : (!user ? <LoginFlow {...loginProps} /> : <Navigate to="/campus" />)
             } />
 
-            {/* Logout Route */}
             <Route path="/logout" element={<Logout />} />
 
-            {/* Public Routes */}
             <Route path="/profile-setup" element={<ProfileSetupHandler setAppUser={setUser} setInitialLoginFlowState={setInitialLoginFlowState} />} />
             <Route path="/login-failed" element={<div><h1>Login Failed</h1><p>Please try again.</p></div>} />
 
-            {/* Protected Route: Main Dashboard */}
             <Route path="/campus" element={
               <ProtectedRoute user={user} loading={authLoading} isProfileComplete={isProfileComplete} loginProps={loginProps}>
                 <AuthenticatedApp user={user} setUser={setUser} />
               </ProtectedRoute>
             } />
 
-            {/* Protected Route: Dynamic Pods */}
-            {/* Note: Currently this renders AuthenticatedApp which defaults to 'campus' view. 
-                Ideally, AuthenticatedApp should read the URL to decide which view to show. */}
             <Route path="/campus/collab-pods/:podId" element={
               <ProtectedRoute user={user} loading={authLoading} isProfileComplete={isProfileComplete} loginProps={loginProps}>
                 <AuthenticatedApp user={user} setUser={setUser} />
               </ProtectedRoute>
             } />
 
-            {/* Protected Route: Post Comments */}
             <Route path="/post/:postId/comments" element={
               <ProtectedRoute user={user} loading={authLoading} isProfileComplete={isProfileComplete} loginProps={loginProps}>
                 <>

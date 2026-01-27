@@ -276,7 +276,15 @@ export default function BuddyBeacon({ user }) {
         const msg = (applicationData.message || '').trim();
         if (!msg || msg.length > MAX_MESSAGE_LENGTH) return;
         try {
-            const res = await api.post(`/beacon/apply/${selectedPost.id}`, { message: msg });
+            const token = localStorage.getItem('token');
+            const res = await api.post(`/api/beacon/apply/${selectedPost.id}`, 
+                { message: msg },
+                { 
+                    headers: { 
+                        Authorization: `Bearer ${token}` 
+                    } 
+                }
+            );
             // Update UI
             setShowApplicationModal(false);
             setAppliedPosts(prev => [...prev, { applicationId: res.data.id, post: selectedPost, applicationStatus: res.data.status }]);

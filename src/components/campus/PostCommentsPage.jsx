@@ -15,7 +15,7 @@ export default function PostCommentsPage({ user }) {
         let mounted = true
         const load = async () => {
             try {
-                const res = await api.get(`/api/posts/${postId}`)
+                const res = await api.get(`/posts/${postId}`)
                 if (mounted) setPost({ ...res.data, type: res.data.postType || res.data.type })
             } catch (err) {
                 console.error('Failed to load post', err)
