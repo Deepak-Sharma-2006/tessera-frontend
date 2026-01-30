@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Text, Sphere, MeshDistortMaterial, Stars, OrbitControls, Float } from '@react-three/drei';
 import * as THREE from 'three';

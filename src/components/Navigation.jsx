@@ -1,14 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { clearUser } from '@/lib/session.js'
 import { Button } from '@/components/ui/button.jsx'
 import { Avatar } from '@/components/ui/avatar.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
 import { useTheme } from '@/lib/theme.js';
 
-export default function Navigation({ currentView, onViewChange, user, setUser }) {
+export default function Navigation({ currentView, onViewChange, user }) {
   const { theme, setTheme } = useTheme()
-  const navigate = useNavigate()
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [showThemeMenu, setShowThemeMenu] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)

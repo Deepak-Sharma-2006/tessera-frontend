@@ -40,8 +40,8 @@ api.interceptors.request.use(
             if (userId) {
                 config.headers['X-User-Id'] = userId;
             }
-        } catch (e) {
-            // Ignore
+        } catch {
+            // ignore
         }
 
         // Don't override Content-Type if FormData is being sent
