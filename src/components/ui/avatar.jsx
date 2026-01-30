@@ -1,6 +1,6 @@
 import { forwardRef } from 'react'
 import React from 'react'
-import { cn, getInitials, getRandomGradient } from '@/lib/utils.js'
+import { cn, getInitials } from '@/lib/utils.js'
 
 const Avatar = forwardRef(
   ({ 

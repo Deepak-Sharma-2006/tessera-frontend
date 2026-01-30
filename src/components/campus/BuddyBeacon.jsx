@@ -85,7 +85,8 @@ export default function BuddyBeacon({ user }) {
 
                 setMyPosts(my);
                 setAppliedPosts(applied);
-            } catch (err) {
+            } catch {
+                // ignore
                 setError('Could not fetch posts.');
                 // Load pending posts from local storage as fallback
                 const pending = loadScoped(user?.email, 'pendingTeamPosts') || [];
@@ -109,7 +110,7 @@ export default function BuddyBeacon({ user }) {
                 setPosts(feedRes.data);
                 const myRes = await getMyBeaconPosts();
                 setMyPosts(myRes.data);
-            } catch (err) {
+            } catch (_err) {
                 setError('Could not fetch posts.');
             } finally {
                 setIsLoading(false);
@@ -220,7 +221,8 @@ export default function BuddyBeacon({ user }) {
             await acceptApplication(applicationId, postId);
             alert('User invited to Collab Pod!');
             // Optionally refresh myPosts
-        } catch (err) {
+        } catch {
+            // ignore
             alert('Error accepting applicant.');
         }
     };
@@ -234,7 +236,8 @@ export default function BuddyBeacon({ user }) {
             setShowRejectionModal(false);
             alert('Applicant rejected.');
             // Optionally refresh myPosts
-        } catch (err) {
+        } catch {
+            // ignore
             alert('Error rejecting applicant.');
         }
     };
@@ -243,7 +246,8 @@ export default function BuddyBeacon({ user }) {
             await deleteMyPost(postId);
             alert('Post deleted.');
             // Optionally refresh myPosts
-        } catch (err) {
+        } catch {
+            // ignore
             alert('Error deleting post.');
         }
     };
@@ -292,8 +296,9 @@ export default function BuddyBeacon({ user }) {
             setSelectedPost(null);
             setApplicationData({ message: '', relevantSkills: [], newSkill: '' });
             alert('Application Submitted Successfully!');
-        } catch (err) {
-            console.error('Error applying to team:', err);
+        } catch {
+            // ignore
+            console.error('Error applying to team:');
             alert('Failed to apply to the team. Please try again later.');
         }
     };

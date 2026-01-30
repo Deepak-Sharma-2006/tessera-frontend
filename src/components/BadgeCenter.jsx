@@ -1,116 +1,70 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from './ui/card.jsx'
 import { Button } from './ui/button.jsx'
 import { Badge } from './ui/badge.jsx'
 import { Avatar } from './ui/avatar.jsx'
+import axios from 'axios'
+
+const powerFiveBadges = [
+  { id: 'founding-dev', name: 'Founding Dev', icon: '💻', tier: 'Legendary', color: 'from-yellow-500 to-orange-600', description: 'System Architect', progress: { current: 0, total: 1 }, isUnlocked: false, isActive: false, perks: ['Developer access'] },
+  { id: 'campus-catalyst', name: 'Campus Catalyst', icon: '📢', tier: 'Epic', color: 'from-blue-500 to-purple-600', description: 'Verified College Head', progress: { current: 1, total: 1 }, isUnlocked: false, isActive: false, perks: ['Event creation access'] },
+  { id: 'pod-pioneer', name: 'Pod Pioneer', icon: '🌱', tier: 'Common', color: 'from-green-500 to-emerald-600', description: 'First Pod Entry', progress: { current: 0, total: 1 }, isUnlocked: false, isActive: false, perks: ['Pod history tracking'] },
+  { id: 'bridge-builder', name: 'Bridge Builder', icon: '🌉', tier: 'Uncommon', color: 'from-cyan-500 to-blue-500', description: 'Inter-college collab', progress: { current: 0, total: 1 }, isUnlocked: false, isActive: false, perks: ['Cross-campus features'] },
+  { id: 'skill-sage', name: 'Skill Sage', icon: '🧠', tier: 'Rare', color: 'from-pink-500 to-rose-600', description: '3+ endorsements', progress: { current: 0, total: 3 }, isUnlocked: false, isActive: false, perks: ['Skill showcase boost'] }
+];
+
+// MVP Power Five badges
+const mvpBadges = [
+  {
+    id: 'founding-dev',
+    name: 'Founding Dev',
+    icon: '💻',
+    tier: 'Legendary',
+    color: 'from-yellow-400 to-orange-500',
+    description: 'System Architect'
+  },
+  {
+    id: 'campus-catalyst',
+    name: 'Campus Catalyst',
+    icon: '📢',
+    tier: 'Epic',
+    color: 'from-blue-400 to-purple-600',
+    description: 'Verified Event Creator'
+  },
+  {
+    id: 'pod-pioneer',
+    name: 'Pod Pioneer',
+    icon: '🌱',
+    tier: 'Common',
+    color: 'from-green-400 to-emerald-500',
+    description: 'First Pod Entry'
+  },
+  {
+    id: 'bridge-builder',
+    name: 'Bridge Builder',
+    icon: '🌉',
+    tier: 'Uncommon',
+    color: 'from-cyan-400 to-blue-500',
+    description: 'Cross-College Link'
+  },
+  {
+    id: 'skill-sage',
+    name: 'Skill Sage',
+    icon: '🧠',
+    tier: 'Rare',
+    color: 'from-pink-400 to-rose-600',
+    description: 'Skill Mastery'
+  }
+];
 
 const badgeCategories = [
   {
-    id: 'community',
-    name: 'Community & Chat',
-    color: 'blue',
-    badges: [
-      {
-        id: 'first-reply',
-        name: 'Reply Rookie',
-        icon: '💬',
-        tier: 'Common',
-        description: 'Made your first reply in a discussion',
-        progress: { current: 1, total: 1 },
-        isUnlocked: true,
-        isActive: true,
-        perks: ['Chat boost: +1 visibility']
-      },
-      {
-        id: 'discussion-starter',
-        name: 'Discussion Dynamo',
-        icon: '🧠',
-        tier: 'Uncommon',
-        description: 'Started 5 meaningful discussions',
-        progress: { current: 3, total: 5 },
-        isUnlocked: false,
-        isActive: false,
-        perks: ['Enhanced post visibility', 'Discussion leader tag']
-      },
-      {
-        id: 'community-helper',
-        name: 'Community Champion',
-        icon: '🤝',
-        tier: 'Rare',
-        description: 'Helped 25+ community members',
-        progress: { current: 12, total: 25 },
-        isUnlocked: false,
-        isActive: false,
-        perks: ['Helper status', 'Priority support']
-      }
-    ]
-  },
-  {
-    id: 'pods',
-    name: 'Pods & Teamwork',
-    color: 'green',
-    badges: [
-      {
-        id: 'pod-rookie',
-        name: 'Pod Rookie',
-        icon: '🌱',
-        tier: 'Common',
-        description: 'Completed your first collaboration pod',
-        progress: { current: 1, total: 1 },
-        isUnlocked: true,
-        isActive: false,
-        perks: ['Pod history tracking']
-      },
-      {
-        id: 'team-player',
-        name: 'Team Spirit',
-        icon: '⚡',
-        tier: 'Uncommon',
-        description: 'Completed 3 successful team projects',
-        progress: { current: 2, total: 3 },
-        isUnlocked: false,
-        isActive: false,
-        perks: ['Team formation priority', 'Leadership opportunities']
-      }
-    ]
-  },
-  {
-    id: 'skills',
-    name: 'Skills & Projects',
+    id: 'power-five',
+    name: 'Power Five Achievements',
     color: 'orange',
-    badges: [
-      {
-        id: 'skill-explorer',
-        name: 'Skill Seedling',
-        icon: '🌿',
-        tier: 'Common',
-        description: 'Added 3+ skills to your profile',
-        progress: { current: 5, total: 3 },
-        isUnlocked: true,
-        isActive: true,
-        perks: ['Enhanced profile visibility']
-      }
-    ]
-  },
-  {
-    id: 'platform',
-    name: 'Platform Milestone',
-    color: 'silver',
-    badges: [
-      {
-        id: 'early-adopter',
-        name: 'Platform Pioneer',
-        icon: '🚀',
-        tier: 'Legendary',
-        description: 'One of the first 100 users on the platform',
-        progress: { current: 1, total: 1 },
-        isUnlocked: true,
-        isActive: true,
-        perks: ['Pioneer status', 'Exclusive features', 'Beta access']
-      }
-    ]
+    badges: powerFiveBadges
   }
-]
+];
 
 // Single moderator-exclusive badge (cannot be earned through activities)
 const moderatorBadge = {
@@ -126,7 +80,7 @@ const moderatorBadge = {
   isModeratorOnly: true,
   cannotBeHidden: true,
   isPermanent: true
-}
+};
 
 // 5 Moderation badges for sub-moderators/community wardens
 const moderationBadges = [
@@ -207,7 +161,7 @@ const moderationBadges = [
     responsibility: 'Community Leadership',
     isModeratorBadge: true
   }
-]
+];
 
 // 5 Penalty badges for rule violations
 const penaltyBadges = [
@@ -305,7 +259,31 @@ const penaltyBadges = [
 export default function BadgeCenter({ user }) {
   const [activeTab, setActiveTab] = useState('all')
   const [selectedCategory, setSelectedCategory] = useState('all')
+
+  // Sync badges on mount to ensure isDev and role flags unlock badges immediately
+  useEffect(() => {
+    if (user?._id) {
+      axios.post(`/api/users/${user._id}/sync-badges`)
+        .catch(err => console.log('Badge sync completed'))
+    }
+  }, [user?._id])
   const [selectedBadge, setSelectedBadge] = useState(null)
+
+  // Update Power Five badges with dynamic unlock status based on user data
+  powerFiveBadges[0].isUnlocked = user?.isDev || false; // Founding Dev
+  powerFiveBadges[1].isUnlocked = user?.role === 'COLLEGE_HEAD' || user?.badges?.includes('Campus Catalyst'); // Campus Catalyst
+  powerFiveBadges[2].isUnlocked = user?.badges?.includes('Pod Pioneer'); // Pod Pioneer
+  powerFiveBadges[2].progress = { current: user?.badges?.includes('Pod Pioneer') ? 1 : 0, total: 1 };
+  
+  powerFiveBadges[3].isUnlocked = user?.badges?.includes('Bridge Builder'); // Bridge Builder
+  powerFiveBadges[3].progress = { current: user?.badges?.includes('Bridge Builder') ? 1 : 0, total: 1 };
+  
+  // Skill Sage: track endorsements
+  powerFiveBadges[4].isUnlocked = user?.badges?.includes('Skill Sage'); // Skill Sage
+  powerFiveBadges[4].progress = { 
+    current: Math.min(user?.endorsementsCount || 0, 3), 
+    total: 3 
+  };
 
   // Check user status
   const isModerator = user?.hasModerationBadge || true // Mock for testing

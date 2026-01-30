@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import api from '@/lib/api.js';
 import { Card } from './ui/card.jsx';
 import { Button } from './ui/button.jsx';
@@ -8,7 +7,6 @@ import { Textarea } from './ui/textarea.jsx';
 
 // Main component
 export default function LoginFlow({ onComplete, initialFlowState, user }) {
-  const navigate = useNavigate();
 
   // ✅ Helper to extract college from email domain
   const deriveCollege = (email) => {
@@ -181,7 +179,7 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
     setError('');
     try {
       // Call /api/auth/register
-      const response = await api.post('/api/auth/register', {
+      await api.post('/api/auth/register', {
         email: formData.email,
         password: password
       });
@@ -238,6 +236,20 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
       };
 
       setFormData(prev => ({ ...prev, ...userData }));
+
+      // 🎖️ SYNC BADGES: Call sync endpoint to ensure badges are properly assigned based on isDev and role flags
+      try {
+        const syncResponse = await api.post(`/api/users/${data.userId}/sync-badges`);
+        console.log("✅ Badges synced:", syncResponse.data.badges);
+        
+        // Update localStorage with synced badges
+        const syncedUser = { ...data, badges: syncResponse.data.badges };
+        localStorage.setItem('user', JSON.stringify(syncedUser));
+        setActiveUser(syncedUser);
+      } catch (syncErr) {
+        console.warn("⚠️ Badge sync failed (non-critical):", syncErr);
+        // Don't fail login if badge sync fails
+      }
 
       // If user already has a username, they're complete - go to app
       if (data.username) {
@@ -405,6 +417,16 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
 
       // Update Local State & Finish
       const finalUser = { ...currentUser, ...updatedUser, profileCompleted: true };
+
+      // 🎖️ SYNC BADGES: Call sync endpoint to ensure badges are properly assigned based on isDev and role flags
+      try {
+        const syncResponse = await api.post(`/api/users/${activeId}/sync-badges`);
+        console.log("✅ Badges synced after profile completion:", syncResponse.data.badges);
+        finalUser.badges = syncResponse.data.badges;
+      } catch (syncErr) {
+        console.warn("⚠️ Badge sync failed (non-critical):", syncErr);
+        // Don't fail profile submission if badge sync fails
+      }
 
       // Update local activeUser
       setActiveUser(finalUser);

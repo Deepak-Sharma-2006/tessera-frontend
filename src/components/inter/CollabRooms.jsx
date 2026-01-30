@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Button } from '@/components/ui/button.jsx'
 import { Card, CardHeader, CardContent } from '@/components/ui/card.jsx'
 import { Avatar } from '@/components/ui/avatar.jsx'
@@ -6,7 +5,7 @@ import { Badge } from '@/components/ui/badge.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import { useTheme } from '@/lib/theme.js'
 
-export default function CollabRooms({ user, onNavigateToRoom, onEnterCollabRoom }) {
+export default function CollabRooms({ onEnterCollabRoom }) {
   const { theme } = useTheme()
 
   // Mock collab rooms data

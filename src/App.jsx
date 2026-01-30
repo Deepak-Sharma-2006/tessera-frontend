@@ -18,7 +18,7 @@ import Logout from '@/pages/Logout.jsx';
 import LoadingSpinner from '@/components/animations/LoadingSpinner.jsx';
 import { saveUser, loadUser } from '@/lib/session.js';
 import ThemeBackground from '@/components/backgrounds/ThemeBackground.jsx';
-import XPDisplay from '@/components/ui/XPDisplay.jsx';
+
 
 // --- 1. MOVED OUTSIDE: Profile Setup Handler ---
 const ProfileSetupHandler = ({ setAppUser, setInitialLoginFlowState }) => {
@@ -69,7 +69,6 @@ const AuthenticatedApp = ({ user, setUser }) => {
   return (
     <>
       <Navigation user={user} setUser={setUser} currentView={currentView} onViewChange={setCurrentView} />
-      <XPDisplay user={user} />
       <main className="pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {currentView === 'campus' && <CampusHub user={user} eventId={viewContext?.eventId} initialView={viewContext?.initialView || 'overview'} />}
@@ -144,6 +143,7 @@ export default function App() {
 
         if (res.ok) {
           const serverUser = await res.json();
+          console.log('[App.jsx] User fetched from /api/auth/me:', serverUser);
           setUser(serverUser);
           saveUser(serverUser);
         } else {
@@ -151,7 +151,8 @@ export default function App() {
           const stored = loadUser();
           if (stored) setUser(stored);
         }
-      } catch (err) {
+      } catch {
+        // ignore
         const stored = loadUser();
         if (stored) setUser(stored);
       } finally {
@@ -203,7 +204,6 @@ export default function App() {
               <ProtectedRoute user={user} loading={authLoading} isProfileComplete={isProfileComplete} loginProps={loginProps}>
                 <>
                   <Navigation user={user} setUser={setUser} currentView={'campus'} onViewChange={() => { }} />
-                  <XPDisplay user={user} />
                   <main className="pb-8">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                       <PostCommentsPage user={user} />

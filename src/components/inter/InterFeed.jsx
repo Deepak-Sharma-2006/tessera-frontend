@@ -63,7 +63,7 @@ export default function InterFeed({ user }) {
   const [pollOptions, setPollOptions] = useState(['', '']);
   const [skillTags, setSkillTags] = useState([]);
   const [newTag, setNewTag] = useState('');
-  const [expandedComments, setExpandedComments] = useState({});
+  const [, setExpandedComments] = useState({});
 
   // Fetch counts for filter badges
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function InterFeed({ user }) {
           COLLAB: data.filter(p => p.type === 'COLLAB').length
         }
         setCounts(countObj)
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
@@ -195,7 +195,7 @@ export default function InterFeed({ user }) {
   };
 
   // Toggle comment visibility for DISCUSSION posts
-  const toggleComments = (postId) => {
+  const _toggleComments = (postId) => {
     setExpandedComments(prev => ({ ...prev, [postId]: !prev[postId] }));
   };
 

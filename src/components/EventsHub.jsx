@@ -43,7 +43,15 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
     organizer: user?.name || 'Moderator',
   });
 
-  const isModerator = user?.isModerator || true;
+  // Logic: Only Campus Catalyst (COLLEGE_HEAD role) sees the button; Devs access via secret mode
+  const isCatalyst = user?.role === 'COLLEGE_HEAD' || user?.badges?.includes('Campus Catalyst');
+  const isDev = user?.isDev === true; // Explicitly check for true
+  const isModerator = user?.role === 'COLLEGE_HEAD' || user?.isDev === true;
+  
+  // Debug: Log user data to verify isDev is being received
+  useEffect(() => {
+    console.log('[EventsHub] User data:', { userId: user?.id, isDev: user?.isDev, role: user?.role, isCatalyst, isDev: isDev, buttonVisible: (isCatalyst || isDev) });
+  }, [user, isCatalyst, isDev]);
   const categoryOptions = [
     { id: 'Hackathon', label: 'Hackathon', icon: '💻' },
     { id: 'Fest', label: 'Fest', icon: '🎉' },
@@ -91,7 +99,8 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
             const res = await createEvent(ev);
             // replace local with server response
             setAllEvents(prev => [res.data, ...prev.filter(p => p.id !== ev.id)]);
-          } catch (err) {
+          } catch {
+            // ignore
             toKeep.push(ev);
           }
         }
@@ -109,7 +118,8 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
           try {
             await createTeamPost({ eventId: p.eventId, description: p.description, extraSkills: p.extraSkills });
             // on success, optionally notify or remove local copy
-          } catch (err) {
+          } catch {
+            // ignore
             keepPosts.push(p);
           }
         }
@@ -148,7 +158,8 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
       if (onNavigateToBeacon) onNavigateToBeacon(selectedEvent.id);
       setShowFindTeamModal(false);
       setTeamPost({ extraSkills: [], newSkill: '', description: '' });
-    } catch (err) {
+    } catch {
+      // ignore
       // Save pending team post locally to sync later
       const pending = loadScoped(user?.email, 'pendingTeamPosts') || [];
       const pendingPost = { id: `local-${Date.now()}`, eventId: selectedEvent.id, description: teamPost.description, extraSkills: teamPost.extraSkills, createdAt: new Date().toISOString(), author: { name: user?.name, id: user?.id } };
@@ -184,7 +195,8 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
         requiredSkills: [], newSkill: '', maxTeamSize: 4, externalLink: '',
         organizer: user?.name || 'Moderator',
       });
-    } catch (err) {
+    } catch {
+      // ignore
       // Save event locally to pending list for this user
       const pending = loadScoped(user?.email, 'pendingEvents') || [];
       const pendingEvent = { id: `local-${Date.now()}`, title: newEvent.title, category: newEvent.category, date: newEvent.date, time: newEvent.time, dateTime: `${newEvent.date}T${newEvent.time}`, description: newEvent.description, requiredSkills: newEvent.requiredSkills, maxTeamSize: newEvent.maxTeamSize, externalLink: newEvent.externalLink, organizer: newEvent.organizer };
@@ -272,9 +284,11 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
           </button>
         ))}
       </div>
-      {isModerator && (
+      {(isCatalyst || isDev) && (
         <div className="flex justify-end">
-          <Button onClick={() => setShowCreateModal(true)} className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105" size="lg">✨ Create Event</Button>
+          <Button onClick={() => setShowCreateModal(true)} className="bg-gradient-to-r from-green-600 to-blue-600 hover:scale-105 transition-all">
+            ✨ Create Event
+          </Button>
         </div>
       )}
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">{renderEvents()}</div>

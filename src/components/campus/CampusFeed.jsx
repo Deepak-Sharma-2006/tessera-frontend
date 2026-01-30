@@ -6,7 +6,6 @@ import { Avatar } from '@/components/ui/avatar.jsx';
 import api from '@/lib/api.js';
 import { Input } from '@/components/ui/input.jsx';
 import { Textarea } from '@/components/ui/textarea.jsx';
-import { useTheme } from '@/lib/theme.js';
 import { useNavigate } from 'react-router-dom';
 
 // Custom hook to fetch and manage posts (supports server-side filtering via ?type=) with refresh
@@ -50,7 +49,6 @@ const RESTRICTED_POST_TYPES = [
 export default function CampusFeed() {
   // Simulate current user ID (replace with real user ID in production)
   const currentUserId = "placeholder-user-id";
-  const { theme } = useTheme();
   const [activeFilter, setActiveFilter] = useState('ASK_HELP');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { posts, setPosts, loading, error } = usePostsWithRefresh(activeFilter, refreshTrigger);
@@ -75,7 +73,7 @@ export default function CampusFeed() {
           LOOKING_FOR: data.filter(p => p.type === 'LOOKING_FOR').length
         }
         setCounts(countObj)
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
@@ -120,7 +118,9 @@ export default function CampusFeed() {
           const userObj = JSON.parse(userStr);
           rawToken = userObj.token || userObj.jwt;
         }
-      } catch (e) { }
+      } catch {
+        // ignore
+      }
     }
 
     if (!selectedPostType || !newPost.title.trim()) {

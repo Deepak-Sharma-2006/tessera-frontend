@@ -25,7 +25,6 @@ export default function TerminalInterface({
     }
   ])
   const [showMemberPanel, setShowMemberPanel] = useState(true)
-  const [showVoiceCall, setShowVoiceCall] = useState(false)
   const [voiceCallMembers, setVoiceCallMembers] = useState([])
   const [isInVoiceCall, setIsInVoiceCall] = useState(false)
   
@@ -103,26 +102,26 @@ export default function TerminalInterface({
 
     // Process commands
     switch (cleanCmd) {
-      case '/help':
+      case '/help': {
         const helpText = Object.entries(commands)
           .map(([cmd, desc]) => `${cmd.padEnd(15)} - ${desc}`)
           .join('\n')
         addToHistory('system', `Available commands:\n${helpText}`, 'system')
         break
-
-      case '/members':
+      }
+      case '/members': {
         const membersList = members
           .map(m => `${m.name.padEnd(20)} [${m.status.toUpperCase()}] ${m.role === 'host' ? '👑' : ''}`)
           .join('\n')
         addToHistory('system', `Active members (${members.length}):\n${membersList}`, 'system')
         break
-
-      case '/voice':
-        setShowVoiceCall(true)
+      }
+      case '/voice': {
         setIsInVoiceCall(true)
         setVoiceCallMembers([user?.fullName || 'You'])
         addToHistory('system', 'Voice call initiated. Other members can join using /voice', 'success')
         break
+      }
 
       case '/leave-voice':
         if (isInVoiceCall) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button.jsx'
 import { Card, CardHeader, CardContent } from '@/components/ui/card.jsx'
 import { Badge } from '@/components/ui/badge.jsx'

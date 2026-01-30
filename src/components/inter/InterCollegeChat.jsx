@@ -45,7 +45,9 @@ export default function InterCollegeChat({ userId }) {
       console.error('STOMP connection error:', err);
     });
     return () => {
-      try { stomp.disconnect(); } catch (e) { /* ignore */ }
+      try { stomp.disconnect(); } catch {
+        // ignore
+      }
     };
   }, []);
 

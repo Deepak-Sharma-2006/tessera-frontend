@@ -32,7 +32,9 @@ export default function usePodWs({ podId, onMessage }) {
         clientRef.current = client
 
         return () => {
-            try { client.deactivate() } catch (e) { /* ignore */ }
+            try { client.deactivate() } catch {
+                // ignore
+            }
         }
     }, [podId, onMessage])
 

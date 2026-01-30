@@ -1,10 +1,9 @@
-import { useState } from 'react'
 import { Card, CardHeader, CardContent } from '@/components/ui/card.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
 import { Button } from '@/components/ui/button.jsx'
 import { useTheme } from '@/lib/theme.js'
 
-export default function CampusOverview({ user }) {
+export default function CampusOverview() {
   const { theme } = useTheme()
 
   const stats = [
@@ -147,58 +146,6 @@ export default function CampusOverview({ user }) {
           </CardContent>
         </Card>
       </div>
-
-      {/* Quick Actions */}
-      <Card className={`${theme === 'windows1992' ? 'card-glass border-2 border-outset' : 'card-glass'}`}>
-        <CardHeader>
-          <h3 className={`font-semibold text-lg ${theme === 'windows1992' ? 'text-xs font-bold' : ''}`}>
-            {theme === 'windows1992' ? 'QUICK ACTIONS' : 'Quick Actions'}
-          </h3>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button 
-              variant="outline" 
-              className={`flex flex-col items-center space-y-2 h-auto py-4 ${theme === 'windows1992' ? 'button-win95' : 'hover:shadow-glass hover:scale-105'}`}
-            >
-              <span className={`text-2xl ${theme === 'windows1992' ? 'text-sm' : ''}`}>📝</span>
-              <span className={`text-sm ${theme === 'windows1992' ? 'text-xs' : ''}`}>
-                {theme === 'windows1992' ? 'NEW POST' : 'New Post'}
-              </span>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className={`flex flex-col items-center space-y-2 h-auto py-4 ${theme === 'windows1992' ? 'button-win95' : 'hover:shadow-glass hover:scale-105'}`}
-            >
-              <span className={`text-2xl ${theme === 'windows1992' ? 'text-sm' : ''}`}>🔍</span>
-              <span className={`text-sm ${theme === 'windows1992' ? 'text-xs' : ''}`}>
-                {theme === 'windows1992' ? 'FIND TEAM' : 'Find Team'}
-              </span>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className={`flex flex-col items-center space-y-2 h-auto py-4 ${theme === 'windows1992' ? 'button-win95' : 'hover:shadow-glass hover:scale-105'}`}
-            >
-              <span className={`text-2xl ${theme === 'windows1992' ? 'text-sm' : ''}`}>📚</span>
-              <span className={`text-sm ${theme === 'windows1992' ? 'text-xs' : ''}`}>
-                {theme === 'windows1992' ? 'STUDY GROUP' : 'Study Group'}
-              </span>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className={`flex flex-col items-center space-y-2 h-auto py-4 ${theme === 'windows1992' ? 'button-win95' : 'hover:shadow-glass hover:scale-105'}`}
-            >
-              <span className={`text-2xl ${theme === 'windows1992' ? 'text-sm' : ''}`}>📅</span>
-              <span className={`text-sm ${theme === 'windows1992' ? 'text-xs' : ''}`}>
-                {theme === 'windows1992' ? 'EVENTS' : 'Events'}
-              </span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
