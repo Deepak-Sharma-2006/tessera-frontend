@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useSearchParams, useNavigate, Navigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, useSearchParams, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { ThemeContext, VALID_THEMES, THEME_STORAGE_KEY } from '@/lib/theme.js';
 
 // --- Main Components ---
@@ -19,6 +19,7 @@ import LoadingSpinner from '@/components/animations/LoadingSpinner.jsx';
 import { saveUser, loadUser } from '@/lib/session.js';
 import ThemeBackground from '@/components/backgrounds/ThemeBackground.jsx';
 import XPDisplay from '@/components/ui/XPDisplay.jsx';
+import PodView from '@/components/PodView.jsx';
 
 // --- 1. MOVED OUTSIDE: Profile Setup Handler ---
 const ProfileSetupHandler = ({ setAppUser, setInitialLoginFlowState }) => {
@@ -60,21 +61,63 @@ const ProfileSetupHandler = ({ setAppUser, setInitialLoginFlowState }) => {
 const AuthenticatedApp = ({ user, setUser }) => {
   const [currentView, setCurrentView] = useState('campus');
   const [viewContext, setViewContext] = useState(null);
+  const location = useLocation();
+  const isFirstMount = useRef(true);
+
+  // Set initial view from navigation state (only from comment pages or pod views)
+  // Fresh page loads should always go to overview
+  useEffect(() => {
+    // Check if this is a navigation with state from our app (not a refresh)
+    const hasIntentionalState = location.state?.from === 'comment' || location.state?.from === 'pod';
+
+    if (isFirstMount.current) {
+      // First mount after page load - always go to campus overview unless explicitly navigated
+      isFirstMount.current = false;
+      if (!hasIntentionalState) {
+        setCurrentView('campus');
+        setViewContext(null);
+      } else {
+        setCurrentView(location.state.view);
+        if (location.state?.viewContext) {
+          setViewContext(location.state.viewContext);
+        }
+      }
+    } else {
+      // Subsequent navigations - use the state if available
+      if (hasIntentionalState) {
+        setCurrentView(location.state.view);
+        if (location.state?.viewContext) {
+          setViewContext(location.state.viewContext);
+        }
+      }
+    }
+  }, [location]);
+
+  const handleViewChange = (newView) => {
+    setCurrentView(newView);
+    // When changing views via tab click, reset context to show default view
+    if (newView === 'inter') {
+      setViewContext({ initialView: 'feed' });
+    } else if (newView === 'campus') {
+      setViewContext(null);
+    }
+  }
 
   const handleNavigateToBeacon = (eventId) => {
-    setViewContext({ eventId: eventId });
-    setCurrentView('buddybeacon');
+    // ✅ FIX: Navigate to campus view with beacon sub-view (maintains layout)
+    setCurrentView('campus');
+    setViewContext({ initialView: 'beacon', eventId: eventId });
   };
 
   return (
     <>
-      <Navigation user={user} setUser={setUser} currentView={currentView} onViewChange={setCurrentView} />
+      <Navigation user={user} setUser={setUser} currentView={currentView} onViewChange={handleViewChange} />
       <XPDisplay user={user} />
       <main className="pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {currentView === 'campus' && <CampusHub user={user} eventId={viewContext?.eventId} initialView={viewContext?.initialView || 'overview'} />}
+          {currentView === 'campus' && <CampusHub user={user} eventId={viewContext?.eventId} initialView={viewContext?.initialView || 'overview'} activeFilter={viewContext?.activeFilter} />}
           {currentView === 'events' && <EventsHub user={user} onNavigateToBeacon={handleNavigateToBeacon} />}
-          {currentView === 'inter' && <InterHub user={user} />}
+          {currentView === 'inter' && <InterHub user={user} initialView={viewContext?.initialView || 'feed'} />}
           {currentView === 'badges' && <BadgeCenter user={user} />}
           {currentView === 'profile' && <ProfilePage user={user} />}
           {currentView === 'buddybeacon' && <BuddyBeacon eventId={viewContext?.eventId} />}
@@ -160,7 +203,7 @@ export default function App() {
     })();
   }, []);
 
-  const isProfileComplete = !!user;
+  const isProfileComplete = user && user.profileCompleted === true;
 
   const loginProps = {
     onComplete: handleLoginComplete,
@@ -186,6 +229,13 @@ export default function App() {
 
             <Route path="/profile-setup" element={<ProfileSetupHandler setAppUser={setUser} setInitialLoginFlowState={setInitialLoginFlowState} />} />
             <Route path="/login-failed" element={<div><h1>Login Failed</h1><p>Please try again.</p></div>} />
+
+            {/* Pod Chat - Accessible from both Campus and Global hubs */}
+            <Route path="/pod/:podId" element={
+              <ProtectedRoute user={user} loading={authLoading} isProfileComplete={isProfileComplete} loginProps={loginProps}>
+                <PodView user={user} setUser={setUser} />
+              </ProtectedRoute>
+            } />
 
             <Route path="/campus" element={
               <ProtectedRoute user={user} loading={authLoading} isProfileComplete={isProfileComplete} loginProps={loginProps}>

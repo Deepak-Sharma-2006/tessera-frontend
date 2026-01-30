@@ -133,6 +133,26 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
     { id: 'fests', label: 'Fests', icon: '🎉', count: allEvents.filter(e => e.category === 'Fest').length }
   ];
 
+  const formatEventDate = (dateTimeString) => {
+    if (!dateTimeString) return 'TBD';
+    try {
+      const date = new Date(dateTimeString);
+      if (isNaN(date.getTime())) return 'Invalid Date';
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      }) + ' ' + date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (err) {
+      return 'Invalid Date';
+    }
+  };
+
   const handleFindTeam = (event) => {
     setSelectedEvent(event);
     setShowFindTeamModal(true);
@@ -141,7 +161,18 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
 
   const handleCreateTeamPost = async () => {
     if (!selectedEvent || !teamPost.description.trim()) return;
-    const postData = { eventId: selectedEvent.id, description: teamPost.description, extraSkills: teamPost.extraSkills };
+    // ✅ FIX #1: Ensure payload includes all required fields: content, requiredSkills, maxTeamSize
+    const postData = {
+      eventId: selectedEvent.id,
+      content: teamPost.description,  // Description becomes content
+      description: teamPost.description,  // Also include description for compatibility
+      requiredSkills: [
+        ...(selectedEvent.requiredSkills || []),
+        ...(teamPost.extraSkills || [])
+      ].filter(s => s),  // Merge event skills + extra skills, remove empty strings
+      maxTeamSize: selectedEvent.maxParticipants || 4,
+      title: `${user?.fullName || user?.name || 'Someone'}'s Team for ${selectedEvent.title}`  // Generate a title
+    };
     try {
       await createTeamPost(postData);
       alert('🎉 Your team post has been created in Buddy Beacon! It will expire in 24 hours and auto-create a Collab Pod if you get applicants.');
@@ -231,21 +262,27 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
             <Badge>{event.category}</Badge>
           </div>
           <div className="space-y-3">
-            <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="date">📅</span><span className="text-sm">{new Date(event.dateTime).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span></div>
-            <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="team size">👥</span><span className="text-sm">Max team size: {event.maxTeamSize}</span></div>
+            <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="date">📅</span><span className="text-sm">{formatEventDate(event.startDate || event.dateTime)}</span></div>
+            <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="team size">👥</span><span className="text-sm">Max team size: {event.maxParticipants || event.maxTeamSize || 'N/A'}</span></div>
             <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="organizer">🏢</span><span className="text-sm">By {event.organizer}</span></div>
           </div>
           <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed">{event.description}</p>
           <div className="space-y-2">
             <div className="text-sm font-medium">Required Skills</div>
             <div className="flex flex-wrap gap-2">
-              {event.requiredSkills?.slice(0, 4).map((skill) => <Badge key={skill} variant="outline" className="text-xs">{skill}</Badge>)}
-              {event.requiredSkills?.length > 4 && <Badge variant="outline" className="text-xs">+{event.requiredSkills.length - 4} more</Badge>}
+              {event.requiredSkills && event.requiredSkills.length > 0 ? (
+                <>
+                  {event.requiredSkills.slice(0, 4).map((skill) => <Badge key={skill} variant="outline" className="text-xs">{skill}</Badge>)}
+                  {event.requiredSkills.length > 4 && <Badge variant="outline" className="text-xs">+{event.requiredSkills.length - 4} more</Badge>}
+                </>
+              ) : (
+                <span className="text-xs text-muted-foreground">No specific skills required</span>
+              )}
             </div>
           </div>
           <div className="flex justify-between text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg">
-            <div className="text-center"><div className="font-semibold text-blue-600">{event.participantsCount}</div><div className="text-xs">Participants</div></div>
-            <div className="text-center"><div className="font-semibold text-green-600">{event.teamsFormedCount}</div><div className="text-xs">Teams</div></div>
+            <div className="text-center"><div className="font-semibold text-blue-600">{event.participantsCount || 0}</div><div className="text-xs">Participants</div></div>
+            <div className="text-center"><div className="font-semibold text-green-600">{event.teamsFormedCount || 0}</div><div className="text-xs">Teams</div></div>
           </div>
           <div className="space-y-2">
             <Button onClick={() => handleFindTeam(event)} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">🔍 Find Team</Button>
@@ -301,8 +338,8 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
             ) : findTeamAction === 'create' ? (
               <div className="space-y-6">
                 <Button variant="outline" size="sm" onClick={() => setFindTeamAction(null)} className="rounded-full">← Back</Button>
-                <div className="bg-blue-50/50 p-4 rounded-xl border"><h4 className="font-semibold mb-2">Auto-filled Event Details:</h4><div className="space-y-2 text-sm"><div><strong>Event:</strong> {selectedEvent.title}</div><div><strong>Max Team Size:</strong> {selectedEvent.maxTeamSize} members</div><div><strong>Required Skills:</strong> {selectedEvent.requiredSkills?.join(', ')}</div></div></div>
-                <div className="bg-green-50/50 p-4 rounded-xl border"><h4 className="font-semibold mb-2">Your Profile Details (will be shown):</h4><div className="space-y-2 text-sm"><div><strong>Name:</strong> {user?.name || 'Your Name'}</div><div><strong>Year:</strong> {user?.year || 'Your Year'}</div><div><strong>Badges:</strong> {user?.badges?.slice(0, 3).join(', ') || 'Your Badges'}</div></div></div>
+                <div className="bg-blue-50/50 p-4 rounded-xl border"><h4 className="font-semibold mb-2">Auto-filled Event Details:</h4><div className="space-y-2 text-sm"><div><strong>Event:</strong> {selectedEvent.title}</div><div><strong>Max Team Size:</strong> {selectedEvent.maxParticipants || selectedEvent.maxTeamSize || 'Not specified'} members</div><div><strong>Required Skills:</strong> {selectedEvent.requiredSkills && selectedEvent.requiredSkills.length > 0 ? selectedEvent.requiredSkills.join(', ') : 'No specific skills required'}</div></div></div>
+                <div className="bg-green-50/50 p-4 rounded-xl border"><h4 className="font-semibold mb-2">Your Profile Details (will be shown):</h4><div className="space-y-2 text-sm"><div><strong>Name:</strong> {user?.fullName || user?.name || 'Your Name'}</div><div><strong>Year:</strong> {user?.yearOfStudy || user?.year || 'Your Year'}</div><div><strong>Badges:</strong></div></div></div>
                 <div><label className="block font-semibold mb-2">Additional Skills (Optional)</label><div className="flex flex-wrap gap-2 mb-2">{teamPost.extraSkills.map((skill) => (<Badge key={skill} variant="outline" className="cursor-pointer" onClick={() => removeTeamSkill(skill)}>{skill} ✕</Badge>))}</div><div className="flex space-x-2"><Input placeholder="Add a skill..." value={teamPost.newSkill} onChange={(e) => setTeamPost(prev => ({ ...prev, newSkill: e.target.value }))} onKeyDown={(e) => e.key === 'Enter' && addTeamSkill()} /><Button variant="outline" onClick={addTeamSkill}>Add</Button></div></div>
                 <div><label className="block font-semibold mb-2">Team Post Description *</label><Textarea placeholder="Describe your project idea..." value={teamPost.description} onChange={(e) => setTeamPost(prev => ({ ...prev, description: e.target.value }))} rows={4} /></div>
                 <div className="bg-yellow-50/50 p-4 rounded-xl border"><p className="text-sm">⏰ <strong>Auto-Expiry:</strong> Your team post will expire in 24 hours and auto-create a Collab Pod if you receive applicants.</p></div>

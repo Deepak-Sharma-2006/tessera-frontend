@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import api from '@/lib/api.js'
 import { Card, CardContent } from '@/components/ui/card.jsx'
 import { Button } from '@/components/ui/button.jsx'
@@ -8,15 +8,28 @@ import HelpChatSection from '@/components/ui/HelpChatSection.jsx'
 export default function PostCommentsPage({ user }) {
     const { postId } = useParams()
     const navigate = useNavigate()
+    const location = useLocation()
     const [post, setPost] = useState(null)
+    const [comments, setComments] = useState([])
     const [loading, setLoading] = useState(true)
+
+    // Get the source view and filter from navigation state
+    const sourceView = location.state?.sourceView || 'campus'
+    const sourceFilter = location.state?.sourceFilter || 'ASK_HELP'
 
     useEffect(() => {
         let mounted = true
         const load = async () => {
             try {
-                const res = await api.get(`/posts/${postId}`)
-                if (mounted) setPost({ ...res.data, type: res.data.postType || res.data.type })
+                const res = await api.get(`/api/posts/${postId}`)
+                if (mounted) {
+                    const postData = { ...res.data, type: res.data.postType || res.data.type }
+                    setPost(postData)
+
+                    // Fetch comments for this post
+                    const commentsRes = await api.get(`/api/comments/post/${postId}`)
+                    setComments(commentsRes.data || [])
+                }
             } catch (err) {
                 console.error('Failed to load post', err)
             } finally {
@@ -30,10 +43,28 @@ export default function PostCommentsPage({ user }) {
     if (loading) return <div className="p-6">Loading post...</div>
     if (!post) return <div className="p-6 text-red-500">Post not found.</div>
 
+    const handleBack = () => {
+        // Navigate back to source with correct view context and filter
+        if (sourceView === 'inter') {
+            navigate('/campus', { state: { view: 'inter', viewContext: { initialView: 'feed' }, from: 'comment' } })
+        } else {
+            // For campus, pass the specific filter so we return to the correct tab
+            navigate('/campus', { state: { view: 'campus', viewContext: { initialView: 'feed', activeFilter: sourceFilter }, from: 'comment' } })
+        }
+    }
+
+    const isGlobalPost = post && post.type === 'DISCUSSION'
+    const hubName = isGlobalPost ? 'Global Hub' : 'Campus Hub'
+
     return (
         <div className="space-y-6">
+            <div className="flex items-center justify-between mb-4">
+                <div className="text-sm text-slate-400">{hubName}</div>
+                <Button variant="ghost" onClick={handleBack}>← Back</Button>
+            </div>
+
             <div className="flex items-center justify-between">
-                <Button variant="ghost" onClick={() => navigate(-1)}>← Back</Button>
+                <Button variant="ghost" onClick={handleBack}>← Back</Button>
                 <div className="text-lg font-semibold">Replies for this post</div>
                 <div />
             </div>
@@ -46,7 +77,7 @@ export default function PostCommentsPage({ user }) {
                 </CardContent>
             </Card>
 
-            <HelpChatSection post={post} currentUserName={user?.fullName || user?.email || 'You'} />
+            <HelpChatSection post={post} comments={comments} currentUserName={user?.fullName || user?.email || 'You'} />
         </div>
     )
 }

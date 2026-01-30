@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card.jsx';
 import { Button } from '@/components/ui/button.jsx';
 import { Badge } from '@/components/ui/badge.jsx';
@@ -8,7 +9,7 @@ import { Input } from '@/components/ui/input.jsx';
 import { Textarea } from '@/components/ui/textarea.jsx';
 
 // Custom hook to fetch and manage InterFeed posts (DISCUSSION, POLL, COLLAB only)
-const usePosts = (activeFilter) => {
+const usePosts = (activeFilter, refreshTrigger) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,6 +24,7 @@ const usePosts = (activeFilter) => {
         const response = await api.get(url)
         if (!mounted) return
         // Filter to ONLY show InterFeed post types: DISCUSSION, POLL, COLLAB
+        // Backend now filters by INTER category, so we just normalize post type field
         const INTER_TYPES = ['DISCUSSION', 'POLL', 'COLLAB'];
         const normalizedPosts = (response.data || [])
           .filter(post => INTER_TYPES.includes(post.type || post.postType))
@@ -40,7 +42,7 @@ const usePosts = (activeFilter) => {
     }
     fetchPosts()
     return () => { mounted = false }
-  }, [activeFilter])
+  }, [activeFilter, refreshTrigger])
 
   return { posts, setPosts, loading, error };
 };
@@ -52,10 +54,12 @@ const POST_TYPES = [
   { id: 'COLLAB', label: '🤝 Collab', icon: '🤝', description: 'Post a collaboration opportunity', color: 'text-green-400' },
 ];
 
-export default function InterFeed({ user }) {
+export default forwardRef(function InterFeed({ user }, ref) {
   const currentUserId = user?.id || "placeholder-user-id";
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('DISCUSSION');
-  const { posts, setPosts, loading, error } = usePosts(activeFilter);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const { posts, setPosts, loading, error } = usePosts(activeFilter, refreshTrigger);
   const [counts, setCounts] = useState(null);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState(null);
@@ -64,19 +68,30 @@ export default function InterFeed({ user }) {
   const [skillTags, setSkillTags] = useState([]);
   const [newTag, setNewTag] = useState('');
   const [expandedComments, setExpandedComments] = useState({});
+  const [joiningRoomId, setJoiningRoomId] = useState(null);
+  const [membershipState, setMembershipState] = useState({});
+
+  // Expose a method to parent components to trigger refresh (when rooms are deleted)
+  useImperativeHandle(ref, () => ({
+    triggerRefresh: () => {
+      console.log('🔄 InterFeed: Refreshing posts after room deletion');
+      setRefreshTrigger(prev => prev + 1);
+    }
+  }), []);
 
   // Fetch counts for filter badges
   useEffect(() => {
     let mounted = true
     const fetchCounts = async () => {
       try {
-        const res = await api.get('/api/posts/inter?type=DISCUSSION,POLL,COLLAB')
+        const res = await api.get('/api/posts/inter/counts')
         if (!mounted) return
-        const data = res.data || []
+        const data = res.data || {}
+        // Backend now filters by INTER category, so we can directly use the counts
         const countObj = {
-          DISCUSSION: data.filter(p => p.type === 'DISCUSSION').length,
-          POLL: data.filter(p => p.type === 'POLL').length,
-          COLLAB: data.filter(p => p.type === 'COLLAB').length
+          DISCUSSION: data.DISCUSSION || 0,
+          POLL: data.POLL || 0,
+          COLLAB: data.COLLAB || 0
         }
         setCounts(countObj)
       } catch (e) {
@@ -85,7 +100,7 @@ export default function InterFeed({ user }) {
     }
     fetchCounts()
     return () => { mounted = false }
-  }, [])
+  }, [refreshTrigger])
 
   // Poll helpers
   const handlePollOptionChange = (index, value) => {
@@ -165,11 +180,27 @@ export default function InterFeed({ user }) {
       console.log('Sending payload:', payload);
       const response = await api.post('/api/posts/social', payload);
       console.log('Post created:', response.data);
-      setPosts(currentPosts => [response.data, ...currentPosts]);
-      alert('Post created successfully!');
+
+      try {
+        // Ensure we have valid response data before updating state
+        if (response.data && response.data.id) {
+          setPosts(currentPosts => [response.data, ...currentPosts]);
+
+          // Refresh counts immediately to reflect the new post
+          setRefreshTrigger(prev => prev + 1);
+
+          alert('Post created successfully!');
+        } else {
+          throw new Error('Invalid response from server');
+        }
+      } catch (stateErr) {
+        console.error('Error updating state after post creation:', stateErr);
+        // Even if state update fails, don't show error since post was created
+      }
     } catch (err) {
       console.error('Error creating post:', err);
-      alert('Failed to create post. Please try again. ' + (err.response?.data?.message || ''));
+      // Only show error alert if we're certain the post creation actually failed
+      alert('Failed to create post. Please try again.');
     } finally {
       setShowCreatePost(false);
       setSelectedPostType(null);
@@ -187,10 +218,51 @@ export default function InterFeed({ user }) {
       const response = await api.put(`/api/posts/${postId}/vote/${optionId}`);
       console.log('Vote response:', response.data);
       const updatedPost = response.data;
-      setPosts(currentPosts => currentPosts.map(p => p.id === postId ? updatedPost : p));
+      // Carefully merge the response with existing post data to preserve pollOptions structure
+      setPosts(currentPosts => currentPosts.map(p =>
+        p.id === postId ? {
+          ...p,
+          ...updatedPost,
+          pollOptions: updatedPost.pollOptions || p.pollOptions
+        } : p
+      ));
     } catch (err) {
       console.error('Vote error:', err);
       alert('Failed to cast vote. ' + (err.response?.data?.message || ''));
+    }
+  };
+
+  // Join Collab Room handler
+  const handleJoinRoom = async (post) => {
+    if (!post.linkedPodId) {
+      alert('This collaboration room is not properly linked. Please contact support.');
+      return;
+    }
+
+    try {
+      setJoiningRoomId(post.linkedPodId);
+      console.log('Joining room:', post.linkedPodId);
+
+      const response = await api.post(`/pods/${post.linkedPodId}/join`, {
+        userId: currentUserId
+      });
+      console.log('Join response:', response.data);
+
+      // Update membership state
+      setMembershipState(prev => ({
+        ...prev,
+        [post.linkedPodId]: true
+      }));
+
+      // Navigate to the room
+      setTimeout(() => {
+        navigate(`/pod/${post.linkedPodId}`);
+      }, 300);
+    } catch (err) {
+      console.error('Join error:', err);
+      alert('Failed to join room. ' + (err.response?.data?.message || err.response?.data?.error || 'Please try again.'));
+    } finally {
+      setJoiningRoomId(null);
     }
   };
 
@@ -336,17 +408,78 @@ export default function InterFeed({ user }) {
         {getFilteredPosts().map((post) => {
           // Handle both pollOptions and options field names
           const pollOptions = post.pollOptions || post.options || [];
-          const totalVotes = post.type === 'POLL'
-            ? pollOptions.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0)
+          const totalVotes = post.type === 'POLL' && post.pollOptions && Array.isArray(post.pollOptions)
+            ? post.pollOptions.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0)
             : 0;
 
           let userHasVoted = false;
-          if (post.type === 'POLL' && pollOptions.length > 0) {
-            userHasVoted = pollOptions.some(opt => Array.isArray(opt.votes) && opt.votes.includes(currentUserId));
+          if (post.type === 'POLL' && post.pollOptions && Array.isArray(post.pollOptions) && post.pollOptions.length > 0) {
+            userHasVoted = post.pollOptions.some(opt => Array.isArray(opt.votes) && opt.votes.includes(currentUserId));
           }
 
           const typeInfo = POST_TYPES.find(t => t.id === post.type) || {};
+          const isCollabPost = post.type === 'COLLAB';
+          const isUserMember = membershipState[post.linkedPodId] || false;
 
+          // For COLLAB posts, render like Looking For pods
+          if (isCollabPost && post.linkedPodId) {
+            return (
+              <Card key={post.id} className="bg-slate-800/20 border-slate-700 text-white backdrop-blur-sm hover:border-slate-600 transition-colors">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-4">
+                      <Avatar className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500">🤝</Avatar>
+                      <div>
+                        <div className="font-semibold">{post.title}</div>
+                        <div className="text-sm text-slate-400">
+                          {new Date(post.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className={`border-green-600/50 bg-green-500/20 font-semibold text-green-400`}>🤝 Collaboration</Badge>
+                  </div>
+                  <div className="space-y-4">
+                    {post.content && <p className="text-slate-300">{post.content}</p>}
+
+                    {/* Display Tags/Skills */}
+                    {(post.requiredSkills?.length > 0 || post.skillTags?.length > 0) && (
+                      <div className="flex flex-wrap gap-2">
+                        {(post.requiredSkills || post.skillTags || []).map(tag => (
+                          <Badge key={tag} variant="outline" className="border-slate-600 bg-slate-700/30 text-slate-200">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-700">
+                    <div className="flex items-center space-x-6 text-slate-400">
+                      <span className="flex items-center gap-2">👥 {post.memberIds?.length || 0} members</span>
+                      <span className="flex items-center gap-2">💬 {post.comments?.length || 0} updates</span>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        if (isUserMember) {
+                          navigate(`/pod/${post.linkedPodId}`);
+                        } else {
+                          handleJoinRoom(post);
+                        }
+                      }}
+                      disabled={joiningRoomId === post.linkedPodId}
+                      className={`${isUserMember
+                        ? 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                        : 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white'
+                        }`}
+                    >
+                      {joiningRoomId === post.linkedPodId ? '⏳ Joining...' : isUserMember ? '→ Enter Room' : '✓ Join Room'}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          }
+
+          // Regular posts (DISCUSSION, POLL)
           return (
             <Card key={post.id} className="bg-slate-800/20 border-slate-700 text-white backdrop-blur-sm">
               <CardContent className="p-6">
@@ -354,8 +487,9 @@ export default function InterFeed({ user }) {
                   <div className="flex items-center space-x-4">
                     <Avatar className="w-12 h-12 bg-slate-600">U</Avatar>
                     <div>
-                      <div className="font-semibold">Anonymous User</div>
+                      <div className="font-semibold">{post.authorName || 'Anonymous User'}</div>
                       <div className="text-sm text-slate-400">
+                        {post.authorCollege && `${post.authorCollege} • `}
                         {new Date(post.createdAt).toLocaleString()}
                       </div>
                     </div>
@@ -378,9 +512,9 @@ export default function InterFeed({ user }) {
                   )}
 
                   {/* Poll Rendering Logic */}
-                  {post.type === 'POLL' && pollOptions.length > 0 && (
+                  {post.type === 'POLL' && post.pollOptions && Array.isArray(post.pollOptions) && post.pollOptions.length > 0 && (
                     <div className="space-y-3 pt-2">
-                      {pollOptions.map((option, index) => {
+                      {post.pollOptions.map((option, index) => {
                         const voteCount = option.votes?.length || 0;
                         const percentage = totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
                         return (
@@ -389,7 +523,7 @@ export default function InterFeed({ user }) {
                             onClick={() => {
                               if (!userHasVoted) handleVote(post.id, option.id || index);
                             }}
-                            className={`w-full relative p-3 rounded-lg border border-slate-700 text-left bg-slate-900/30 transition-colors ${userHasVoted ? 'opacity-70 cursor-not-allowed' : 'hover:bg-slate-800/50'}`}
+                            className={`w-full relative p-3 rounded-lg border border-slate-700 text-left bg-slate-900/30 transition-colors ${userHasVoted ? 'opacity-70 cursor-not-allowed pointer-events-none' : 'hover:bg-slate-800/50'}`}
                             disabled={userHasVoted}
                           >
                             <div
@@ -413,12 +547,16 @@ export default function InterFeed({ user }) {
                   ) : (
                     <div className="flex items-center space-x-6 text-slate-400">
                       <button className="flex items-center gap-2 hover:text-white"><span>👍</span>{post.likes?.length || 0}</button>
-                      <button className="flex items-center gap-2 hover:text-white"><span>💬</span>{post.comments?.length || 0}</button>
+                      <button onClick={() => navigate(`/post/${post.id}/comments`, { state: { from: '/campus', sourceView: 'inter', sourceContext: 'inter-feed' } })} className="flex items-center gap-2 hover:text-white"><span>💬</span>{post.commentIds?.length || 0}</button>
                       <button className="flex items-center gap-2 hover:text-white"><span>🔗</span>Share</button>
                     </div>
                   )}
 
-                  <Button variant="outline" size="sm" className="bg-slate-700/50 border-slate-600 hover:bg-slate-700">Reply</Button>
+                  {post.type === 'POLL' ? (
+                    <div />
+                  ) : (
+                    <Button variant="outline" size="sm" className="bg-slate-700/50 border-slate-600 hover:bg-slate-700">Reply</Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -427,4 +565,4 @@ export default function InterFeed({ user }) {
       </div>
     </div>
   );
-}
+})

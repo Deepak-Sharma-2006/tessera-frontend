@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card.jsx'
 import { Button } from '@/components/ui/button.jsx'
 import { useNavigate } from 'react-router-dom'
 
-export default function CollabPodsPage({ user, onEnterCollabPod }) {
+export default function CollabPodsPage({ user, onEnterCollabPod, onRefreshPosts }) {
     const [lookingForPods, setLookingForPods] = useState([])
     const [myTeamPods, setMyTeamPods] = useState([])
     const [loading, setLoading] = useState(true)
@@ -23,14 +23,14 @@ export default function CollabPodsPage({ user, onEnterCollabPod }) {
                 setLoading(true)
                 setError(null)
 
-                // Fetch Looking For pods (public)
-                const lookingForRes = await api.get('/pods/looking-for')
+                // Fetch CAMPUS scope pods only (strict scope isolation)
+                const lookingForRes = await api.get('/pods/campus')
                 if (mounted) {
                     setLookingForPods(lookingForRes.data || [])
                 }
 
-                // Fetch My Teams pods (user's pods)
-                const myPodsRes = await api.get('/pods/my-teams', {
+                // Fetch My Teams pods (user's pods) - explicitly with CAMPUS scope
+                const myPodsRes = await api.get('/pods/my-teams?scope=CAMPUS', {
                     headers: { 'X-User-Id': currentUserId }
                 })
                 if (mounted) {
@@ -60,12 +60,24 @@ export default function CollabPodsPage({ user, onEnterCollabPod }) {
 
         try {
             // Backend now uses @AuthenticationPrincipal, so no need to pass X-User-Id header
-            await api.delete(`/pods/${podId}`)
+            const response = await api.delete(`/pods/${podId}`)
 
             // Remove deleted pod from state
             setMyTeamPods(prev => prev.filter(p => p.id !== podId))
             setLookingForPods(prev => prev.filter(p => p.id !== podId))
             setSettingsModalPod(null)
+
+            // Trigger post tabs refresh to prevent ghost posts
+            // This is especially important for LOOKING_FOR posts which are linked to pods
+            if (onRefreshPosts) {
+                onRefreshPosts()
+                console.log('✅ Post tabs refreshed after pod deletion')
+            }
+
+            // Log the cascade delete flow for debugging
+            if (response.data) {
+                console.log('Pod deletion metadata:', response.data)
+            }
         } catch (err) {
             console.error('Failed to delete pod:', err)
             alert('Failed to delete pod. You may not have permission.')

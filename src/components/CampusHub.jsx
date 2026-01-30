@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent } from './ui/card.jsx';
 import { Badge } from './ui/badge.jsx';
@@ -12,6 +12,7 @@ import { useTheme } from '../lib/theme.js';
 export default function CampusHub({
   user,
   initialView = 'overview',
+  activeFilter = null,
   eventId = null,
   onCreateCollabPod,
   onEnterCollabPod
@@ -20,11 +21,20 @@ export default function CampusHub({
   const { podId: urlPodId } = useParams();
   const [activeView, setActiveView] = useState(initialView);
   const [selectedPodId, setSelectedPodId] = useState(null);
+  const [campusFeedFilter, setCampusFeedFilter] = useState(activeFilter || 'ASK_HELP');
+  const campusFeedRef = useRef(null); // Ref to trigger feed refresh from pod deletion
 
   // Update view when initialView prop changes
   useEffect(() => {
     setActiveView(initialView);
   }, [initialView]);
+
+  // Update feed filter when activeFilter prop changes
+  useEffect(() => {
+    if (activeFilter) {
+      setCampusFeedFilter(activeFilter);
+    }
+  }, [activeFilter]);
 
   // ✅ Handle URL-based pod selection (e.g., /campus/collab-pods/:podId)
   useEffect(() => {
@@ -156,7 +166,7 @@ export default function CampusHub({
       {/* Content Area */}
       <div className="animate-in slide-up">
         {activeView === 'overview' && <CampusOverview user={user} />}
-        {activeView === 'feed' && <CampusFeed user={user} />}
+        {activeView === 'feed' && <CampusFeed user={user} ref={campusFeedRef} initialFilter={campusFeedFilter} />}
         {/* Pass the eventId down to the BuddyBeacon component */}
         {activeView === 'beacon' && <BuddyBeacon user={user} eventId={eventId} />}
         {activeView === 'pods' && !selectedPodId && (
@@ -166,6 +176,12 @@ export default function CampusHub({
             onEnterCollabPod={(podId) => {
               setSelectedPodId(podId);
               if (onEnterCollabPod) onEnterCollabPod(podId);
+            }}
+            onRefreshPosts={() => {
+              // Trigger refresh in CampusFeed when a pod is deleted
+              if (campusFeedRef.current?.triggerRefresh) {
+                campusFeedRef.current.triggerRefresh();
+              }
             }}
           />
         )}

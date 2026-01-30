@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card.jsx';
 import { Button } from '@/components/ui/button.jsx';
 import { Badge } from '@/components/ui/badge.jsx';
@@ -24,7 +24,9 @@ const usePostsWithRefresh = (activeFilter, refreshTrigger) => {
         if (activeFilter && activeFilter !== 'all') url += `?type=${activeFilter}`
         const response = await api.get(url)
         if (!mounted) return
-        setPosts((response.data || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)))
+        // Ensure only CAMPUS category posts are shown (prevent leakage from INTER)
+        const filteredPosts = (response.data || []).filter(post => post.category === 'CAMPUS' || !post.category);
+        setPosts(filteredPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)))
       } catch (err) {
         if (!mounted) return
         setError(err)
@@ -47,14 +49,27 @@ const RESTRICTED_POST_TYPES = [
   { id: 'LOOKING_FOR', label: '🟣 Looking For...', icon: '👀', color: 'text-violet-400' },
 ];
 
-export default function CampusFeed() {
+export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP' }, ref) {
   // Simulate current user ID (replace with real user ID in production)
   const currentUserId = "placeholder-user-id";
   const { theme } = useTheme();
-  const [activeFilter, setActiveFilter] = useState('ASK_HELP');
+  const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { posts, setPosts, loading, error } = usePostsWithRefresh(activeFilter, refreshTrigger);
   const [counts, setCounts] = useState(null);
+
+  // Update filter when initialFilter prop changes
+  useEffect(() => {
+    setActiveFilter(initialFilter);
+  }, [initialFilter]);
+
+  // Expose a method to parent components to trigger refresh (when pods are deleted)
+  useImperativeHandle(ref, () => ({
+    triggerRefresh: () => {
+      console.log('🔄 CampusFeed: Refreshing posts after pod deletion');
+      setRefreshTrigger(prev => prev + 1);
+    }
+  }), []);
 
   // Handler for silently removing stale posts from feed
   const handlePostGone = (postId) => {
@@ -64,19 +79,41 @@ export default function CampusFeed() {
     let mounted = true
     const fetchCounts = async () => {
       try {
-        const res = await api.get('/api/posts/campus')
+        // Get both counts and pods to calculate correct LOOKING_FOR count
+        const countsRes = await api.get('/api/posts/campus/counts')
+        const podsRes = await api.get('/pods?scope=CAMPUS')
+
         if (!mounted) return
-        // Count posts by type
-        const data = res.data || []
+
+        const countData = countsRes.data || {}
+        const podData = podsRes.data || []
+
+        // Count ACTIVE pods instead of posts to avoid mismatch from deleted pods
+        const activeLookingForPods = podData.filter(p => p.status === 'ACTIVE').length
+
         const countObj = {
-          ASK_HELP: data.filter(p => p.type === 'ASK_HELP').length,
-          OFFER_HELP: data.filter(p => p.type === 'OFFER_HELP').length,
-          POLL: data.filter(p => p.type === 'POLL').length,
-          LOOKING_FOR: data.filter(p => p.type === 'LOOKING_FOR').length
+          ASK_HELP: countData.ASK_HELP || 0,
+          OFFER_HELP: countData.OFFER_HELP || 0,
+          POLL: countData.POLL || 0,
+          LOOKING_FOR: activeLookingForPods  // Use active pod count instead of post count
         }
         setCounts(countObj)
       } catch (e) {
-        // ignore
+        // ignore - fall back to post counts if fetch fails
+        try {
+          const res = await api.get('/api/posts/campus')
+          if (!mounted) return
+          const data = res.data || []
+          const countObj = {
+            ASK_HELP: data.filter(p => p.type === 'ASK_HELP').length,
+            OFFER_HELP: data.filter(p => p.type === 'OFFER_HELP').length,
+            POLL: data.filter(p => p.type === 'POLL').length,
+            LOOKING_FOR: data.filter(p => p.type === 'LOOKING_FOR').length
+          }
+          setCounts(countObj)
+        } catch (e2) {
+          // ignore
+        }
       }
     }
     fetchCounts()
@@ -86,6 +123,42 @@ export default function CampusFeed() {
   const navigate = useNavigate();
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState(null);
+
+  // Handler to join a LOOKING_FOR pod
+  const handleJoinPod = async (post) => {
+    if (!post.linkedPodId) {
+      alert('This pod is being prepared. Please try again shortly.');
+      return;
+    }
+
+    try {
+      // First, verify the pod still exists
+      const podResponse = await api.get(`/pods/${post.linkedPodId}`);
+      const pod = podResponse.data;
+
+      // Check if user is the creator
+      const isCreator = pod.creatorId === currentUserId;
+
+      // Call join endpoint to add user to pod members
+      await api.post(`/pods/${post.linkedPodId}/join`, {
+        userId: currentUserId
+      });
+
+      // Navigate to the pod
+      navigate(`/campus/collab-pods/${post.linkedPodId}`);
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        // Pod was deleted; silently remove the stale post from feed
+        handlePostGone(post.id);
+        alert('This pod has been deleted.');
+      } else if (error.response && error.response.status === 400 && error.response.data.message?.includes('full')) {
+        alert('This pod is full. Cannot join.');
+      } else {
+        console.error('Error joining pod:', error);
+        alert('Failed to join pod. Please try again.');
+      }
+    }
+  };
 
   const [newPost, setNewPost] = useState({ title: '', content: '' });
   const [pollOptions, setPollOptions] = useState(['', '']);
@@ -183,6 +256,26 @@ export default function CampusFeed() {
       setSelectedPostType(null);
       setNewPost({ title: '', content: '' });
       setPollOptions(['', '']);
+
+      // Auto-switch to the tab matching the newly created post type
+      const createdPostType = typeMapping[selectedPostType] || selectedPostType.toUpperCase().replace(/ /g, '_');
+      switch (createdPostType) {
+        case 'ASK_HELP':
+          setActiveFilter('ASK_HELP');
+          break;
+        case 'OFFER_HELP':
+          setActiveFilter('OFFER_HELP');
+          break;
+        case 'POLL':
+          setActiveFilter('POLL');
+          break;
+        case 'LOOKING_FOR':
+          setActiveFilter('LOOKING_FOR');
+          break;
+        default:
+          break;
+      }
+
       setRefreshTrigger(prev => prev + 1); // Trigger refresh
 
       alert('Post created successfully!');
@@ -207,7 +300,14 @@ export default function CampusFeed() {
     try {
       const response = await api.put(`/api/posts/${postId}/vote/${optionId}`);
       const updatedPost = response.data;
-      setPosts(currentPosts => currentPosts.map(p => p.id === postId ? updatedPost : p));
+      // Carefully merge the response with existing post data to preserve pollOptions structure
+      setPosts(currentPosts => currentPosts.map(p =>
+        p.id === postId ? {
+          ...p,
+          ...updatedPost,
+          pollOptions: updatedPost.pollOptions || p.pollOptions
+        } : p
+      ));
     } catch (err) {
       console.error('Failed to vote:', err);
       alert('Failed to cast vote.');
@@ -277,7 +377,7 @@ export default function CampusFeed() {
                   <div className="flex items-center space-x-4">
                     <Avatar className="w-12 h-12 bg-slate-600">U</Avatar>
                     <div>
-                      <div className="font-semibold">Anonymous User</div>
+                      <div className="font-semibold">{post.authorName || 'Anonymous User'}</div>
                       <div className="text-sm text-slate-400">
                         {new Date(post.createdAt).toLocaleString()}
                       </div>
@@ -290,9 +390,9 @@ export default function CampusFeed() {
                   {post.content && <p className="text-slate-300">{post.content}</p>}
 
                   {/* Poll Rendering Logic */}
-                  {post.postType === 'POLL' && pollOptions.length > 0 && (
+                  {post.postType === 'POLL' && post.pollOptions && Array.isArray(post.pollOptions) && post.pollOptions.length > 0 && (
                     <div className="space-y-3 pt-2">
-                      {pollOptions.map((option, index) => {
+                      {post.pollOptions.map((option, index) => {
                         const voteCount = option.votes?.length || 0;
                         const percentage = totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
                         return (
@@ -301,7 +401,7 @@ export default function CampusFeed() {
                             onClick={() => {
                               if (!userHasVoted) handleVote(post.id, option.id || index);
                             }}
-                            className={`w-full relative p-3 rounded-lg border border-slate-700 text-left bg-slate-900/30 transition-colors ${userHasVoted ? 'opacity-70 cursor-not-allowed' : 'hover:bg-slate-800/50'}`}
+                            className={`w-full relative p-3 rounded-lg border border-slate-700 text-left bg-slate-900/30 transition-colors ${userHasVoted ? 'opacity-70 cursor-not-allowed pointer-events-none' : 'hover:bg-slate-800/50'}`}
                             disabled={userHasVoted}
                           >
                             <div
@@ -328,30 +428,15 @@ export default function CampusFeed() {
                   ) : (
                     <div className="flex items-center space-x-6 text-slate-400">
                       <button className="flex items-center gap-2 hover:text-white"><span>👍</span>{post.likes?.length || 0}</button>
-                      <button onClick={() => navigate(`/post/${post.id}/comments`)} className="flex items-center gap-2 hover:text-white"><span>💬</span>{post.comments?.length || 0}</button>
+                      <button onClick={() => navigate(`/post/${post.id}/comments`, { state: { from: '/campus', sourceView: 'campus', sourceContext: 'campus-feed', sourceFilter: activeFilter } })} className="flex items-center gap-2 hover:text-white"><span>💬</span>{post.commentIds?.length || 0}</button>
                       <button className="flex items-center gap-2 hover:text-white"><span>🔗</span>Share</button>
                     </div>
                   )}
 
                   {post.postType === 'LOOKING_FOR' ? (
-                    <Button onClick={async () => {
-                      if (post.linkedPodId) {
-                        try {
-                          // Quick check if pod still exists
-                          await api.get(`/pods/${post.linkedPodId}`);
-                          navigate(`/campus/collab-pods/${post.linkedPodId}`);
-                        } catch (error) {
-                          if (error.response && error.response.status === 404) {
-                            // Pod was deleted; silently remove the stale post from feed
-                            handlePostGone(post.id);
-                          } else {
-                            console.error('Error checking pod:', error);
-                          }
-                        }
-                      } else {
-                        alert('Pod is being prepared. Please try again shortly.')
-                      }
-                    }} className="bg-gradient-to-r from-green-600 to-teal-600 text-white">Join</Button>
+                    <Button onClick={() => handleJoinPod(post)} className="bg-gradient-to-r from-green-600 to-teal-600 text-white">Join</Button>
+                  ) : post.postType === 'POLL' ? (
+                    <div />
                   ) : (
                     <Button variant="outline" size="sm" className="bg-slate-700/50 border-slate-600 hover:bg-slate-700">Reply</Button>
                   )}
@@ -420,4 +505,4 @@ export default function CampusFeed() {
       )}
     </div>
   );
-}
+})

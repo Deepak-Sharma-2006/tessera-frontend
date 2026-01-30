@@ -44,7 +44,16 @@ api.interceptors.request.use(
             // Ignore
         }
 
-        config.headers['Content-Type'] = 'application/json';
+        // Don't override Content-Type if FormData is being sent
+        // (let browser/axios auto-generate multipart/form-data with boundary)
+        if (config.data instanceof FormData) {
+            // CRITICAL: Delete Content-Type header for FormData
+            // Axios will then auto-detect FormData and set correct multipart/form-data with boundary
+            delete config.headers['Content-Type'];
+            console.log('🔧 FormData detected - Content-Type header deleted for auto-detection');
+        } else {
+            config.headers['Content-Type'] = 'application/json';
+        }
 
         return config;
     },

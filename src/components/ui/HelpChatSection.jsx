@@ -3,13 +3,14 @@ import useCommentWs from '@/hooks/useCommentWs'
 import usePodWs from '@/hooks/usePodWs'
 import ChatBubble from './ChatBubble'
 
-export default function HelpChatSection({ post, currentUserName, topicType, topicId }) {
+export default function HelpChatSection({ post, comments: initialComments, currentUserName, topicType, topicId }) {
     // Determine topic source: if explicit topicType/topicId provided, use those;
     // otherwise fall back to post object (legacy behavior).
     const sourceType = topicType || (post ? 'POST' : null)
     const sourceId = topicId || (post ? post.id : null)
 
-    const [comments, setComments] = useState((post && post.comments) || [])
+    // Use initialComments prop if provided, otherwise use post.comments (legacy)
+    const [comments, setComments] = useState(initialComments || (post && post.comments) || [])
 
     const handleIncoming = useCallback((payload) => {
         const saved = payload.comment || payload.message || payload

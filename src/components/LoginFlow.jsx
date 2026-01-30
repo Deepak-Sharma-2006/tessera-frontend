@@ -239,13 +239,15 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
 
       setFormData(prev => ({ ...prev, ...userData }));
 
-      // If user already has a username, they're complete - go to app
-      if (data.username) {
-        // User has completed onboarding
-        setCurrentStep('success');
-        // Could also navigate to /campus directly if desired
+      // ✅ CRITICAL FIX: Check profileCompleted flag, not username
+      if (data.profileCompleted === true) {
+        // Existing user - go directly to campus
+        console.log("✅ Profile already completed. Redirecting to /campus");
+        onComplete(data);
+        navigate('/campus');
       } else {
         // New user - go to onboarding (step1)
+        console.log("📝 Profile incomplete. Starting setup wizard");
         setCurrentStep('step1');
       }
     } catch (err) {
@@ -434,10 +436,15 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
 
       // 3. Save it back to storage
       localStorage.setItem('user', JSON.stringify(userObj));
+
+      // 4. Call onComplete to update parent state
+      if (onComplete) {
+        onComplete(userObj);
+      }
     }
 
-    // 4. Force Hard Jump to Campus (Bypasses the "Bouncer")
-    window.location.href = '/campus';
+    // 5. Navigate to Campus using React Router
+    navigate('/campus');
   };
 
   const validateCollegeEmail = (email) => {

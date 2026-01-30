@@ -41,6 +41,7 @@ export default function BuddyBeacon({ user }) {
     });
     const [showRejectionModal, setShowRejectionModal] = useState(false);
     const [rejectionData, setRejectionData] = useState({ applicationId: '', postId: '', reason: '', note: '' });
+    const [refreshTrigger, setRefreshTrigger] = useState(0); // Trigger for refreshing data
 
     // Tabs: All, My Posts, Applied Posts (rightmost)
     const filters = [
@@ -116,7 +117,7 @@ export default function BuddyBeacon({ user }) {
             }
         };
         fetchFeed();
-    }, []);
+    }, [refreshTrigger]);
 
     const filteredPosts = useMemo(() => {
         // NOTE: Your full filtering logic should be here
@@ -149,20 +150,24 @@ export default function BuddyBeacon({ user }) {
         const status = postMap.status;
         const hostId = postMap.hostId;
         const isOwnPost = hostId === user?.id;
-        const currentTeamSize = post.currentMembers?.length || 1;
+        const currentTeamSize = post.currentTeamMembers?.length || post.currentMembers?.length || 1;
+        const applicants = post.applicants || post.applicantObjects || [];
 
-        // Button logic
+        // ✅ FIX #3: Button logic - show Apply button only for non-creators
+        // TESTING: Allow self-application for testing
         let buttonLabel = 'Apply';
         let buttonDisabled = false;
-        if (hasApplied) {
+        let showButton = true; // Default to show button
+
+        if (isOwnPost) {
+            // Creator of the post - don't show Apply button
+            showButton = false;
+        } else if (hasApplied) {
             buttonLabel = 'Applied';
             buttonDisabled = true;
         } else if (hoursElapsed >= 20 && hoursElapsed < 24) {
             buttonLabel = 'Reviewing';
             buttonDisabled = true;
-        } else if (isOwnPost) {
-            buttonLabel = 'Manage';
-            buttonDisabled = false;
         }
 
         return (
@@ -178,16 +183,20 @@ export default function BuddyBeacon({ user }) {
                         </div>
                         <Badge variant="info">Team Request</Badge>
                     </div>
-                    <h2 className="mt-4 text-xl font-bold">{post.title}</h2>
+                    <h2 className="mt-4 text-xl font-bold">{post.title || post.eventName || 'Team Request'}</h2>
                     <p className="mt-2 text-gray-700">{post.description}</p>
                     <div className="mt-4">
                         <h4 className="text-sm font-bold">Required Skills:</h4>
                         <div className="flex flex-wrap mt-2">
-                            {post.requiredSkills?.map((skill, index) => (
-                                <Badge key={index} variant="secondary" className="mr-2 mb-2">
-                                    {skill}
-                                </Badge>
-                            ))}
+                            {post.requiredSkills && post.requiredSkills.length > 0 ? (
+                                post.requiredSkills.map((skill, index) => (
+                                    <Badge key={index} variant="secondary" className="mr-2 mb-2">
+                                        {skill}
+                                    </Badge>
+                                ))
+                            ) : (
+                                <p className="text-sm text-gray-400">No specific skills required</p>
+                            )}
                         </div>
                     </div>
                     <div className="mt-4 flex justify-between items-center">
@@ -195,20 +204,90 @@ export default function BuddyBeacon({ user }) {
                             {hoursElapsed < 24 ? `${24 - hoursElapsed} hours remaining` : 'Expired'}
                         </p>
                         <p className="text-sm text-gray-500">
-                            {currentTeamSize}/{post.teamSize} spots filled
+                            {currentTeamSize}/{post.maxTeamSize || post.teamSize || 4} spots filled
                         </p>
                     </div>
-                    <Button
-                        onClick={() => {
-                            if (!buttonDisabled) {
-                                handleApplyToTeam(post);
-                            }
-                        }}
-                        disabled={buttonDisabled}
-                        className="mt-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white"
-                    >
-                        {buttonLabel}
-                    </Button>
+
+                    {/* Applicants Section - Show only for post creator */}
+                    {isOwnPost && applicants.length > 0 && (
+                        <div className="mt-6 border-t pt-4">
+                            <h4 className="text-lg font-bold mb-4">Received Applications ({applicants.length})</h4>
+                            <div className="space-y-3">
+                                {applicants.map((applicant) => {
+                                    const appStatus = applicant.status || 'PENDING';
+                                    const statusColor = {
+                                        'PENDING': 'bg-yellow-100 text-yellow-800',
+                                        'ACCEPTED': 'bg-green-100 text-green-800',
+                                        'REJECTED': 'bg-red-100 text-red-800'
+                                    }[appStatus] || 'bg-gray-100 text-gray-800';
+
+                                    return (
+                                        <div key={applicant.applicantId || applicant._id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                                            <div className="flex items-center flex-1">
+                                                <Avatar src={applicant.profile?.profilePic} alt={applicant.profile?.name} className="w-10 h-10" />
+                                                <div className="ml-3 flex-1">
+                                                    <p className="font-semibold text-sm">{applicant.profile?.name || 'Unknown'}</p>
+                                                    <p className="text-xs text-gray-500">
+                                                        Year: {applicant.profile?.yearOfStudy || applicant.profile?.year || 'N/A'}
+                                                    </p>
+                                                    {applicant.profile?.skills && applicant.profile.skills.length > 0 && (
+                                                        <div className="flex flex-wrap gap-1 mt-1">
+                                                            {applicant.profile.skills.slice(0, 2).map((skill, idx) => (
+                                                                <Badge key={idx} variant="secondary" className="text-xs">
+                                                                    {skill}
+                                                                </Badge>
+                                                            ))}
+                                                            {applicant.profile.skills.length > 2 && (
+                                                                <span className="text-xs text-gray-500">+{applicant.profile.skills.length - 2}</span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2 ml-3">
+                                                <Badge className={`${statusColor} px-2 py-1`}>
+                                                    {appStatus}
+                                                </Badge>
+                                                {appStatus === 'PENDING' && (
+                                                    <>
+                                                        <Button
+                                                            onClick={() => handleAccept(applicant._id || applicant.applicantId, post.id)}
+                                                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 text-sm"
+                                                        >
+                                                            ✓ Accept
+                                                        </Button>
+                                                        <Button
+                                                            onClick={() => openRejectionModal(applicant._id || applicant.applicantId, post.id)}
+                                                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm"
+                                                        >
+                                                            ✕ Reject
+                                                        </Button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {showButton && !isOwnPost && (
+                        <Button
+                            onClick={() => {
+                                if (!buttonDisabled) {
+                                    handleApplyToTeam(post);
+                                }
+                            }}
+                            disabled={buttonDisabled}
+                            className="mt-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+                        >
+                            {buttonLabel}
+                        </Button>
+                    )}
+                    {/* {isOwnPost && (
+                        <p className="mt-4 text-sm text-gray-400 text-center italic">This is your post</p>
+                    )} */}
                 </CardContent>
             </Card>
         );
@@ -219,7 +298,8 @@ export default function BuddyBeacon({ user }) {
         try {
             await acceptApplication(applicationId, postId);
             alert('User invited to Collab Pod!');
-            // Optionally refresh myPosts
+            // Refresh myPosts after accepting
+            setRefreshTrigger(prev => prev + 1);
         } catch (err) {
             alert('Error accepting applicant.');
         }
@@ -233,7 +313,8 @@ export default function BuddyBeacon({ user }) {
             await rejectApplication(rejectionData.applicationId, rejectionData.postId, rejectionData.reason, rejectionData.note);
             setShowRejectionModal(false);
             alert('Applicant rejected.');
-            // Optionally refresh myPosts
+            // Refresh myPosts after rejecting
+            setRefreshTrigger(prev => prev + 1);
         } catch (err) {
             alert('Error rejecting applicant.');
         }
@@ -273,16 +354,24 @@ export default function BuddyBeacon({ user }) {
 
     const handleSubmitApplication = async () => {
         if (!selectedPost) return;
+
+        // ✅ FIX #3: Prevent creator from applying
+        // TESTING: BYPASSED - Allow self-application for testing
+        // if (selectedPost.hostId === user?.id || selectedPost.authorId === user?.id) {
+        //     alert('❌ You cannot apply to your own post');
+        //     return;
+        // }
+
         const msg = (applicationData.message || '').trim();
         if (!msg || msg.length > MAX_MESSAGE_LENGTH) return;
         try {
             const token = localStorage.getItem('token');
-            const res = await api.post(`/api/beacon/apply/${selectedPost.id}`, 
+            const res = await api.post(`/api/beacon/apply/${selectedPost.id}`,
                 { message: msg },
-                { 
-                    headers: { 
-                        Authorization: `Bearer ${token}` 
-                    } 
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
                 }
             );
             // Update UI
@@ -294,7 +383,8 @@ export default function BuddyBeacon({ user }) {
             alert('Application Submitted Successfully!');
         } catch (err) {
             console.error('Error applying to team:', err);
-            alert('Failed to apply to the team. Please try again later.');
+            const errorMsg = err.response?.data?.message || err.message || 'Failed to apply to the team. Please try again later.';
+            alert(`❌ ${errorMsg}`);
         }
     };
 
@@ -379,7 +469,17 @@ export default function BuddyBeacon({ user }) {
                     }
                     if (activeFilter === 'my-posts') {
                         if (!myPosts.length) return <div>No posts found.</div>;
-                        return myPosts.map((p) => renderPostCard(p.post, true));
+                        return myPosts.map((p) => {
+                            // Merge applicants into post for display
+                            const postWithApplicants = {
+                                post: { ...p.post, applicants: p.applicants || [] },
+                                hasApplied: false,
+                                hostId: p.post?.authorId || user?.id,
+                                hoursElapsed: 0,
+                                status: 'ACTIVE'
+                            };
+                            return renderPostCard(postWithApplicants, true);
+                        });
                     }
                     if (filteredPosts.length === 0) {
                         return (
@@ -411,9 +511,16 @@ export default function BuddyBeacon({ user }) {
                             <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
                                 <h4 className="font-semibold text-blue-800 mb-2">Team Details:</h4>
                                 <div className="space-y-1 text-sm text-blue-700">
+                                    {/* ✅ FIX #2: Show complete post data */}
+                                    <div><strong>Team:</strong> {selectedPost?.title || selectedPost?.eventName || 'Team Request'}</div>
                                     <div><strong>Leader:</strong> {selectedPost?.author?.name || selectedPost?.authorName || 'Unknown'}</div>
-                                    <div><strong>Current Size:</strong> {(selectedPost?.applicants?.length || selectedPost?.currentMembers?.length || 0) + 1}/{selectedPost?.maxTeamSize || selectedPost?.teamSize || 'N/A'} members</div>
-                                    <div><strong>Skills Needed:</strong> {Array.isArray(selectedPost?.requiredSkills) ? selectedPost.requiredSkills.join(', ') : (selectedPost?.requiredSkills || 'None')}</div>
+                                    <div><strong>Description:</strong> {selectedPost?.description || 'No description'}</div>
+                                    <div><strong>Current Size:</strong> {(selectedPost?.applicants?.length || selectedPost?.currentTeamMembers?.length || 0) + 1}/{selectedPost?.maxTeamSize || selectedPost?.teamSize || 4} members</div>
+                                    <div><strong>Skills Needed:</strong> {
+                                        Array.isArray(selectedPost?.requiredSkills) && selectedPost.requiredSkills.length > 0
+                                            ? selectedPost.requiredSkills.join(', ')
+                                            : 'No specific skills required'
+                                    }</div>
                                 </div>
                             </div>
                             <div>

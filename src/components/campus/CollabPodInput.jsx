@@ -31,6 +31,9 @@ export default function CollabPodInput({
             type,
             name: file.name
         });
+        // Clear file input to prevent double-trigger
+        if (imageInputRef.current) imageInputRef.current.value = '';
+        if (fileInputRef.current) fileInputRef.current.value = '';
         document.getElementById('attachmentMenu')?.classList.add('hidden');
         document.querySelector('input[placeholder="Type a message..."]')?.focus();
     };

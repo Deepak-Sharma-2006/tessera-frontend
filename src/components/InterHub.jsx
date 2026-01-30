@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button.jsx'
 import { Card, CardHeader, CardContent } from '@/components/ui/card.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
@@ -8,56 +8,57 @@ import Discovery from './inter/Discovery.jsx'
 import InterChat from './inter/InterChat.jsx'
 import { useTheme } from '@/lib/theme.js'
 
-export default function InterHub({ 
-  user, 
-  initialView = 'feed', 
-  onNavigateToRoom, 
+export default function InterHub({
+  user,
+  initialView = 'feed',
+  onNavigateToRoom,
   onCreateCollabRoom,
-  onEnterCollabRoom 
+  onEnterCollabRoom
 }) {
   const { theme } = useTheme()
   const [activeView, setActiveView] = useState(initialView)
+  const interFeedRef = useRef(null) // Ref to trigger feed refresh from room deletion
 
   // Update view when initialView changes
-  useState(() => {
+  useEffect(() => {
     setActiveView(initialView)
-  })
+  }, [initialView])
 
   const navItems = [
-    { 
-      id: 'feed', 
-      label: 'Global Feed', 
-      icon: '🌐', 
+    {
+      id: 'feed',
+      label: 'Global Feed',
+      icon: '🌐',
       description: 'Cross-college discussions'
     },
-    { 
-      id: 'rooms', 
-      label: 'Collab Rooms', 
-      icon: '🚀', 
+    {
+      id: 'rooms',
+      label: 'Collab Rooms',
+      icon: '🚀',
       description: 'Project collaboration spaces'
     },
-    { 
-      id: 'discovery', 
-      label: 'Discovery', 
-      icon: '🔍', 
+    {
+      id: 'discovery',
+      label: 'Discovery',
+      icon: '🔍',
       description: 'Find peers across colleges'
     },
-    { 
-      id: 'chat', 
-      label: 'Messages', 
-      icon: '💬', 
+    {
+      id: 'chat',
+      label: 'Messages',
+      icon: '💬',
       description: 'Direct conversations'
     }
   ]
 
   const getNavItemStyles = (itemId) => {
     const isActive = activeView === itemId
-    
+
     return `
       group relative flex items-center space-x-3 px-4 py-3 ${theme === 'windows1992' ? 'rounded-none border-2' : 'rounded-xl'} transition-all duration-300 cursor-pointer overflow-hidden backdrop-blur-sm
-      ${isActive 
-        ? theme === 'windows1992' 
-          ? 'bg-primary text-primary-foreground border-inset shadow-inset' 
+      ${isActive
+        ? theme === 'windows1992'
+          ? 'bg-primary text-primary-foreground border-inset shadow-inset'
           : 'bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105'
         : theme === 'windows1992'
           ? 'text-muted-foreground hover:text-foreground glass hover:border-primary border-outset hover:bg-muted button-win95'
@@ -135,10 +136,10 @@ export default function InterHub({
             {theme !== 'windows1992' && (
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
             )}
-            
+
             <span className={`text-2xl transition-all duration-300 ${theme === 'windows1992' ? 'text-sm' : 'group-hover:scale-125 group-hover:rotate-12'} relative z-10`}>
-              {theme === 'windows1992' ? 
-                ({ feed: '💬', rooms: '🚀', discovery: '🔍', chat: '📧' }[item.id] || item.icon) : 
+              {theme === 'windows1992' ?
+                ({ feed: '💬', rooms: '🚀', discovery: '🔍', chat: '📧' }[item.id] || item.icon) :
                 item.icon
               }
             </span>
@@ -156,12 +157,18 @@ export default function InterHub({
 
       {/* Content Area */}
       <div className="animate-in slide-up">
-        {activeView === 'feed' && <InterFeed user={user} onCreateCollabRoom={onCreateCollabRoom} />}
+        {activeView === 'feed' && <InterFeed user={user} onCreateCollabRoom={onCreateCollabRoom} ref={interFeedRef} />}
         {activeView === 'rooms' && (
-          <CollabRooms 
-            user={user} 
+          <CollabRooms
+            user={user}
             onNavigateToRoom={onNavigateToRoom}
             onEnterCollabRoom={onEnterCollabRoom}
+            onRefreshPosts={() => {
+              // Trigger refresh in InterFeed when a room is deleted
+              if (interFeedRef.current?.triggerRefresh) {
+                interFeedRef.current.triggerRefresh();
+              }
+            }}
           />
         )}
         {activeView === 'discovery' && <Discovery user={user} />}

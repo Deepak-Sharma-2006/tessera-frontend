@@ -19,8 +19,11 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
 
     const messagesEndRef = useRef(null);
 
-    const userId = user?.id;
+    // Get current user ID - try both 'id' and '_id' for compatibility
+    const userId = user?.id || user?._id;
     const currentUserName = user?.fullName || "You";
+
+    console.log("🔐 CollabPodPage User ID:", userId, "from user:", user);
 
     // ArrowLeft Icon Component
     const ArrowLeft = () => (
@@ -45,7 +48,9 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                     ...msg,
                     content: msg.content || msg.text, // Use content if available, fall back to text
                     timestamp: msg.timestamp || msg.sentAt, // Use timestamp if available, fall back to sentAt
-                    id: msg.id || msg._id // Ensure id field exists
+                    id: msg.id || msg._id, // Ensure id field exists
+                    senderId: String(msg.senderId || msg.authorId || ''), // CRITICAL: Normalize senderId to string
+                    senderName: msg.senderName || msg.authorName || 'Unknown' // Normalize senderName
                 }));
                 setMessages(normalizedMessages);
             } catch (err) {
@@ -62,7 +67,27 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
     // WebSocket for live chat
     const handleIncoming = useCallback((payload) => {
         const saved = payload.comment || payload.message || payload;
-        setMessages(prev => [...prev, saved]);
+
+        // Normalize incoming message to ensure consistent field names
+        const normalizedMsg = {
+            ...saved,
+            id: saved.id || saved._id,
+            content: saved.content || saved.text,
+            timestamp: saved.timestamp || saved.sentAt,
+            senderId: String(saved.senderId || saved.authorId || ''), // CRITICAL: Ensure string
+            senderName: saved.senderName || saved.authorName || 'Unknown'
+        };
+
+        // Deduplicate: only add if message ID doesn't already exist
+        // This prevents duplicate messages when optimistic update + WebSocket echo occur
+        setMessages(prev => {
+            if (normalizedMsg.id && prev.some(m => m.id === normalizedMsg.id)) {
+                // Message already exists, just update it if needed
+                return prev.map(m => m.id === normalizedMsg.id ? { ...m, ...normalizedMsg } : m);
+            }
+            // New message, add it
+            return [...prev, normalizedMsg];
+        });
     }, []);
     const podWs = usePodWs({ podId, onMessage: handleIncoming });
 
@@ -100,21 +125,58 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
         try {
             // Upload file if attachment exists
             if (inputAttachment) {
+                console.log('📤 Starting file upload:', {
+                    fileName: inputAttachment.file.name,
+                    fileSize: inputAttachment.file.size,
+                    fileType: inputAttachment.file.type
+                });
+
                 const formData = new FormData();
                 formData.append('file', inputAttachment.file);
-                const res = await api.post('/uploads/pod-files', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                attachmentUrl = res.data.url;
-                attachmentType = res.data.type;
+
+                // Debug: inspect FormData 'file' entry
+                const fdFile = formData.get('file');
+                console.log('📤 FormData prepared, sending to /api/uploads/pod-files');
+                console.log('🔍 formData.get("file") =>', fdFile);
+                console.log('🔍 file instanceof File =>', fdFile instanceof File);
+                if (fdFile) {
+                    console.log('🔍 file props:', { name: fdFile.name, size: fdFile.size, type: fdFile.type });
+                }
+
+                try {
+                    const res = await api.post('/api/uploads/pod-files', formData);
+
+                    console.log('✅ Upload successful:', {
+                        url: res.data.url,
+                        type: res.data.type,
+                        fileName: res.data.fileName
+                    });
+
+                    attachmentUrl = res.data.url;
+                    attachmentType = res.data.type;
+                } catch (uploadError) {
+                    console.error('❌ Upload error details:', {
+                        message: uploadError.message,
+                        status: uploadError.response?.status,
+                        statusText: uploadError.response?.statusText,
+                        error: uploadError.response?.data?.error,
+                        errorType: uploadError.response?.data?.errorType,
+                        uploadDir: uploadError.response?.data?.uploadDir,
+                        path: uploadError.response?.data?.path
+                    });
+
+                    throw uploadError;
+                }
             }
 
-            // Create message object
+            // Create message object with a temporary ID for deduplication
+            const tempId = `temp-${Date.now()}-${Math.random()}`;
             const messagePayload = {
+                id: tempId,
                 content: inputText || (inputAttachment ? `Shared ${attachmentType === 'IMAGE' ? 'an image' : 'a file'}` : ''),
                 parentId: null,
                 authorName: currentUserName,
-                senderId: userId,
+                senderId: String(userId), // CRITICAL: Ensure senderId is a string
                 senderName: currentUserName,
                 replyToId: replyingTo?.id || null,
                 replyToName: replyingTo?.senderName || null,
@@ -125,6 +187,7 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
             };
 
             // IMPORTANT: Add message to local state immediately so user sees it
+            // Use temporary ID that will be replaced by real ID when WebSocket returns
             setMessages(prev => [...prev, messagePayload]);
 
             // Send WebSocket message
@@ -134,7 +197,24 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
             setAttachment(null);
             setReplyingTo(null);
         } catch (err) {
-            console.error('Send failed:', err);
+            console.error('❌ Send failed - Error details:', {
+                errorMessage: err.message,
+                errorStatus: err.response?.status,
+                errorData: err.response?.data,
+                errorType: err.response?.data?.errorType,
+                uploadDir: err.response?.data?.uploadDir,
+                path: err.response?.data?.path,
+                fullError: err
+            });
+
+            // Show user-friendly error message
+            if (err.response?.data?.error) {
+                alert(`Upload failed: ${err.response.data.error}`);
+            } else if (err.message === 'Network Error') {
+                alert('Network error: Could not connect to server. Ensure backend is running on port 8080.');
+            } else {
+                alert(`Error sending message: ${err.message}`);
+            }
         } finally {
             setUploading(false);
         }
@@ -142,9 +222,20 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
 
     // Message bubble component
     function MessageBubble({ msg }) {
-        const isMe = msg.senderId === userId;
+        const isMe = String(msg.senderId) === String(userId);
         const isSystemText = msg.content === "Shared an image";
         const hasAttachment = !!msg.attachmentUrl;
+
+        // Debug: Log message alignment
+        if (msg.senderName !== currentUserName) {
+            console.log(`📨 Message from ${msg.senderName}:`, {
+                senderId: msg.senderId,
+                currentUserId: userId,
+                isMe: isMe,
+                senderIdType: typeof msg.senderId,
+                userIdType: typeof userId
+            });
+        }
 
         return (
             <div className={`flex w-full mb-3 ${isMe ? "justify-end" : "justify-start"} group`}>
@@ -169,7 +260,11 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                         {/* Image attachment - Show first */}
                         {hasAttachment && msg.attachmentType === "IMAGE" && (
                             <div className={`${isSystemText ? "mb-0" : "mb-2"}`}>
-                                <img src={getImageUrl(msg.attachmentUrl)} alt="attachment" className="max-w-[250px] max-h-64 rounded-lg object-cover" />
+                                {msg.attachmentUrl ? (
+                                    <img src={getImageUrl(msg.attachmentUrl)} alt="attachment" className="max-w-[250px] max-h-64 rounded-lg object-cover" />
+                                ) : (
+                                    <div className="text-xs text-red-400">Image URL missing</div>
+                                )}
                             </div>
                         )}
 
@@ -185,7 +280,7 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                                     <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" stroke="currentColor" strokeWidth="2" fill="none" />
                                     <polyline points="13 2 13 9 20 9" stroke="currentColor" strokeWidth="2" fill="none" />
                                 </svg>
-                                <a href={msg.attachmentUrl} download className="text-xs underline truncate">{msg.attachmentUrl.split('/').pop()}</a>
+                                <a href={msg.attachmentUrl} download className="text-xs underline truncate">{msg.fileName || msg.attachmentUrl.split('/').pop() || "Download File"}</a>
                             </div>
                         )}
 
@@ -215,18 +310,31 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
     return (
         <div className="fixed inset-0 top-[64px] z-40 bg-slate-950 flex flex-col">
             {/* fixed inset-0 top-[64px] = Forces full screen below navbar */}
-            {/* Header */}
+            {/* Header - Only show breadcrumb context, main navigation is handled by parent */}
             <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 bg-slate-900/95 border-b border-slate-800 flex-shrink-0">
                 <Button variant="ghost" size="icon" className="mr-2" onClick={() => {
                     if (onBack) {
                         onBack();
                     } else {
-                        navigate('/collab-pods');
+                        // Dynamic navigation based on pod scope
+                        if (pod?.scope === 'GLOBAL') {
+                            navigate('/campus', { state: { view: 'inter', viewContext: { initialView: 'rooms' }, from: 'pod' } });
+                        } else {
+                            navigate('/campus/pods');
+                        }
                     }
                 }}>
                     <ArrowLeft />
                 </Button>
                 <div className="flex flex-col">
+                    {/* Show context badge */}
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${pod?.scope === 'GLOBAL'
+                            ? 'bg-purple-500/30 text-purple-300 border border-purple-500/50'
+                            : 'bg-blue-500/30 text-blue-300 border border-blue-500/50'}`}>
+                            {pod?.scope === 'GLOBAL' ? '🌍 Global Room' : '🏛️ Campus Pod'}
+                        </span>
+                    </div>
                     <span className="font-bold text-lg text-white leading-tight">{pod.title}</span>
                     <span className="text-xs text-slate-400 font-medium">{memberNames}</span>
                 </div>
@@ -258,30 +366,7 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                     </div>
                 )}
 
-                {/* Attachment Preview Card */}
-                {attachment && (
-                    <div className="px-3 py-2 bg-slate-800/40 border-b border-slate-700 flex items-center gap-3">
-                        <div className="relative flex-shrink-0">
-                            {attachment.type === "IMAGE" ? (
-                                <img src={attachment.previewUrl} alt="preview" className="w-16 h-16 rounded object-cover" />
-                            ) : (
-                                <div className="w-16 h-16 bg-slate-700 rounded flex items-center justify-center">
-                                    <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className="text-slate-400">
-                                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
-                                        <polyline points="13 2 13 9 20 9" />
-                                    </svg>
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm text-white truncate font-medium">{attachment.name}</p>
-                            <p className="text-xs text-slate-400">{attachment.type === "IMAGE" ? "Image" : "File"} ready to send</p>
-                        </div>
-                        <button onClick={() => setAttachment(null)} className="flex-shrink-0 text-slate-400 hover:text-white">
-                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                        </button>
-                    </div>
-                )}
+
 
                 {/* Input Component - Separate to prevent flickering */}
                 <CollabPodInput
