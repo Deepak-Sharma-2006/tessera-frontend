@@ -61,16 +61,27 @@ api.interceptors.request.use(
 );
 
 // RESPONSE INTERCEPTOR
+// ✅ CRITICAL: Handle 401 Unauthorized responses globally
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
-            console.warn("Unauthorized - Token may be missing or expired");
-            // Only clear auth on explicit logout, not on initial load
-            if (error.config.url !== '/api/auth/me') {
+            // IMPORTANT: Don't redirect on /api/auth/me itself
+            // That's the session verification endpoint - let App.jsx handle the response
+            const isSessionCheckEndpoint = error.config?.url?.includes('/api/auth/me');
+
+            if (!isSessionCheckEndpoint) {
+                console.warn('❌ Unauthorized (401) - Clearing authentication and redirecting to login');
+
+                // Clear all auth-related localStorage
                 localStorage.removeItem('jwt_token');
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
+                localStorage.removeItem('studcollab_user');
+
+                // Force redirect to login page
+                // Use window.location to ensure a full page reload
+                window.location.href = '/login';
             }
         }
         return Promise.reject(error);

@@ -128,24 +128,26 @@ const AuthenticatedApp = ({ user, setUser }) => {
 };
 
 // --- 3. Protected Route Wrapper ---
-const ProtectedRoute = ({ user, loading, isProfileComplete, children, loginProps }) => {
-  if (loading) return <LoadingSpinner />;
+const ProtectedRoute = ({ user, isVerifying, isProfileComplete, children, loginProps }) => {
+  // CRITICAL: While verifying the token with the backend, show loading spinner
+  // This prevents rendering protected content with an invalid token
+  if (isVerifying) {
+    return <LoadingSpinner />;
+  }
 
+  // Once verified, check if user is authenticated and profile is complete
   if (user && isProfileComplete) {
     return children;
   }
 
+  // Not authenticated - redirect to login
   return <LoginFlow {...loginProps} />;
 };
 
 // --- Main App Component ---
 export default function App() {
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
-
-  const [authLoading, setAuthLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(true); // CRITICAL: Start in verifying state
   const [theme, setThemeState] = useState('light');
   const [initialLoginFlowState, setInitialLoginFlowState] = useState({ step: 'login', data: null });
 
@@ -166,39 +168,56 @@ export default function App() {
     saveUser(finalUserData);
   };
 
-  // ✅ FIXED: Session Restoration with Bearer Token
+  // ✅ CRITICAL FIX: Session Verification on App Mount
+  // This endpoint validates the token with the backend BEFORE rendering protected routes
   useEffect(() => {
     (async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('jwt_token');
 
-        // If no token, don't bother hitting the server, just stop loading
+        // If no token, skip backend verification and go straight to login
         if (!token) {
-          setAuthLoading(false);
+          setUser(null);
+          setIsVerifying(false);
           return;
         }
 
+        // Attempt to verify the token with the backend
         const res = await fetch('http://localhost:8080/api/auth/me', {
           headers: {
-            'Authorization': `Bearer ${token}`, // <--- CRITICAL FIX HERE
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
 
         if (res.ok) {
+          // ✅ Token is valid
           const serverUser = await res.json();
           setUser(serverUser);
           saveUser(serverUser);
+          console.log('✅ Session verified - Token is valid');
+        } else if (res.status === 401 || res.status === 403) {
+          // ❌ Token is invalid or expired (401/403)
+          console.warn('❌ Session verification failed - Invalid or expired token');
+          localStorage.removeItem('token');
+          localStorage.removeItem('jwt_token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('studcollab_user');
+          setUser(null);
         } else {
-          // Token invalid or expired
+          // Other error - try to use cached user
+          console.warn(`Session verification failed with status ${res.status}`);
           const stored = loadUser();
-          if (stored) setUser(stored);
+          setUser(stored || null);
         }
       } catch (err) {
+        console.error('Session verification error:', err);
+        // Network error or parsing error - fall back to cached user
         const stored = loadUser();
-        if (stored) setUser(stored);
+        setUser(stored || null);
       } finally {
-        setAuthLoading(false);
+        // Done verifying - now safe to render protected routes
+        setIsVerifying(false);
       }
     })();
   }, []);
@@ -218,11 +237,11 @@ export default function App() {
         <Router>
           <Routes>
             <Route path="/" element={
-              authLoading ? <LoadingSpinner /> : (user && isProfileComplete ? <Navigate to="/campus" /> : <Navigate to="/login" />)
+              isVerifying ? <LoadingSpinner /> : (user && isProfileComplete ? <Navigate to="/campus" /> : <Navigate to="/login" />)
             } />
 
             <Route path="/login" element={
-              authLoading ? <LoadingSpinner /> : (!user ? <LoginFlow {...loginProps} /> : <Navigate to="/campus" />)
+              isVerifying ? <LoadingSpinner /> : (!user ? <LoginFlow {...loginProps} /> : <Navigate to="/campus" />)
             } />
 
             <Route path="/logout" element={<Logout />} />
@@ -232,25 +251,25 @@ export default function App() {
 
             {/* Pod Chat - Accessible from both Campus and Global hubs */}
             <Route path="/pod/:podId" element={
-              <ProtectedRoute user={user} loading={authLoading} isProfileComplete={isProfileComplete} loginProps={loginProps}>
+              <ProtectedRoute user={user} isVerifying={isVerifying} isProfileComplete={isProfileComplete} loginProps={loginProps}>
                 <PodView user={user} setUser={setUser} />
               </ProtectedRoute>
             } />
 
             <Route path="/campus" element={
-              <ProtectedRoute user={user} loading={authLoading} isProfileComplete={isProfileComplete} loginProps={loginProps}>
+              <ProtectedRoute user={user} isVerifying={isVerifying} isProfileComplete={isProfileComplete} loginProps={loginProps}>
                 <AuthenticatedApp user={user} setUser={setUser} />
               </ProtectedRoute>
             } />
 
             <Route path="/campus/collab-pods/:podId" element={
-              <ProtectedRoute user={user} loading={authLoading} isProfileComplete={isProfileComplete} loginProps={loginProps}>
+              <ProtectedRoute user={user} isVerifying={isVerifying} isProfileComplete={isProfileComplete} loginProps={loginProps}>
                 <AuthenticatedApp user={user} setUser={setUser} />
               </ProtectedRoute>
             } />
 
             <Route path="/post/:postId/comments" element={
-              <ProtectedRoute user={user} loading={authLoading} isProfileComplete={isProfileComplete} loginProps={loginProps}>
+              <ProtectedRoute user={user} isVerifying={isVerifying} isProfileComplete={isProfileComplete} loginProps={loginProps}>
                 <>
                   <Navigation user={user} setUser={setUser} currentView={'campus'} onViewChange={() => { }} />
                   <XPDisplay user={user} />

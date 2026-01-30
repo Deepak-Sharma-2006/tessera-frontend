@@ -20,10 +20,11 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
     const messagesEndRef = useRef(null);
 
     // Get current user ID - try both 'id' and '_id' for compatibility
-    const userId = user?.id || user?._id;
+    // CRITICAL: Normalize to string to match backend senderId format
+    const userId = String(user?.id || user?._id || '');
     const currentUserName = user?.fullName || "You";
 
-    console.log("🔐 CollabPodPage User ID:", userId, "from user:", user);
+    console.log("🔐 CollabPodPage User ID (normalized):", userId, "Type:", typeof userId, "from user:", user);
 
     // ArrowLeft Icon Component
     const ArrowLeft = () => (
@@ -226,14 +227,16 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
         const isSystemText = msg.content === "Shared an image";
         const hasAttachment = !!msg.attachmentUrl;
 
-        // Debug: Log message alignment
+        // Debug: Log message alignment - ONLY for other users' messages
         if (msg.senderName !== currentUserName) {
             console.log(`📨 Message from ${msg.senderName}:`, {
                 senderId: msg.senderId,
-                currentUserId: userId,
-                isMe: isMe,
                 senderIdType: typeof msg.senderId,
-                userIdType: typeof userId
+                currentUserId: userId,
+                userIdType: typeof userId,
+                comparison: `"${String(msg.senderId)}" === "${String(userId)}"`,
+                isMe: isMe,
+                match: String(msg.senderId) === String(userId)
             });
         }
 
