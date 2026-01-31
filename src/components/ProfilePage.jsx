@@ -8,6 +8,8 @@ import { Textarea } from './ui/textarea.jsx'
 import api from '@/lib/api.js'
 import { formatDate, formatJoinedDate } from '@/utils/dateFormatter.js'
 import LoadingSpinner from './animations/LoadingSpinner.jsx'
+import XPProgressBar from './ui/XPProgressBar.jsx'
+import useXpWs from '@/hooks/useXpWs.js'
 
 export default function ProfilePage({ user, onBackToCampus, profileOwner: initialProfileOwner }) {
   const [isEditing, setIsEditing] = useState(false)
@@ -66,6 +68,21 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
     setFormData({ ...profileOwner })
     setSelectedBadges(profileOwner?.displayedBadges || [])
   }, [profileOwner])
+
+  // 📡 Real-time XP updates via WebSocket
+  useXpWs({
+    userId: profileOwner?.id,
+    onXpUpdate: (updatedUser) => {
+      console.log('📊 XP Update received:', updatedUser)
+      setProfileOwner(prev => ({
+        ...prev,
+        level: updatedUser.level,
+        xp: updatedUser.xp,
+        totalXp: updatedUser.totalXp,
+        xpMultiplier: updatedUser.xpMultiplier
+      }))
+    }
+  })
 
   // Handle save displayed badges
   const handleSaveBadges = async () => {
@@ -291,38 +308,9 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
       </div>
 
       <div className="relative max-w-7xl mx-auto py-8 px-4 space-y-8 animate-in fade-in duration-700">
-        {/* Floating XP Bar - Always Visible */}
+        {/* Immersive XP Progress Bar - Always Visible */}
         <div className="sticky top-24 z-40 mb-8">
-          <Card className="border-amber-500/50 bg-gradient-to-r from-amber-900/60 to-orange-900/60 backdrop-blur-xl p-6 shadow-2xl">
-            <div className="flex items-center justify-between gap-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl">⭐</span>
-                  <div>
-                    <p className="text-xs font-bold text-amber-200 uppercase tracking-widest">Experience Progress</p>
-                    <p className="text-sm text-amber-100 font-semibold">Level {profileOwner?.level || 1}</p>
-                  </div>
-                </div>
-                <div className="w-full bg-slate-800/80 rounded-full h-8 border-2 border-amber-400/70 overflow-hidden shadow-lg">
-                  <div 
-                    className="bg-gradient-to-r from-amber-300 via-yellow-300 to-orange-300 h-full rounded-full transition-all duration-700 shadow-lg shadow-amber-400/50 flex items-center justify-center relative"
-                    style={{width: `${Math.min((profileOwner?.xp || 0) / ((profileOwner?.totalXP || 100) / 100), 100)}%`}}
-                  >
-                    {Math.min((profileOwner?.xp || 0) / ((profileOwner?.totalXP || 100) / 100), 100) > 15 && (
-                      <span className="text-sm font-bold text-amber-900">
-                        {Math.round(Math.min((profileOwner?.xp || 0) / ((profileOwner?.totalXP || 100) / 100), 100))}%
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex justify-between items-center mt-2 text-xs text-amber-100">
-                  <span>{profileOwner?.xp || 0} XP</span>
-                  <span className="font-bold">{Math.round((profileOwner?.xp || 0) / (profileOwner?.totalXP || 100) * 100)}% Complete</span>
-                  <span>{profileOwner?.totalXP || 0} Total XP</span>
-                </div>
-              </div>
-            </div>
-          </Card>
+          <XPProgressBar user={profileOwner} />
         </div>
 
         {error && (
