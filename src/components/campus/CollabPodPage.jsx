@@ -4,6 +4,9 @@ import api from '@/lib/api.js';
 import { Button } from '@/components/ui/button.jsx';
 import usePodWs from '@/hooks/usePodWs.js';
 import CollabPodInput from './CollabPodInput.jsx';
+import PodMemberList from '@/components/pods/PodMemberList.jsx';
+import TransferOwnershipDialog from '@/components/pods/TransferOwnershipDialog.jsx';
+import { leavePod } from '@/lib/api.js';
 
 export default function CollabPodPage({ user, podId: propPodId, onBack }) {
     const routeParams = useParams();
@@ -16,6 +19,9 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
     const [replyingTo, setReplyingTo] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [attachment, setAttachment] = useState(null);
+    const [showMembers, setShowMembers] = useState(false);
+    const [leavingPod, setLeavingPod] = useState(false);
+    const [showTransferDialog, setShowTransferDialog] = useState(false);
 
     const messagesEndRef = useRef(null);
 
@@ -221,11 +227,60 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
         }
     };
 
+    // ✅ STAGE 3: Handle leaving the pod
+    const handleLeavePod = async () => {
+        // Check if user is the owner
+        const isOwner = pod?.ownerId === userId;
+
+        if (isOwner) {
+            // Owner must transfer ownership first
+            setShowTransferDialog(true);
+            return;
+        }
+
+        // Non-owner can leave normally
+        if (!window.confirm('Are you sure you want to leave this pod? You can rejoin after 15 minutes.')) {
+            return;
+        }
+
+        setLeavingPod(true);
+        try {
+            await leavePod(podId, userId);
+
+            // Navigate back after leaving
+            if (onBack) {
+                onBack();
+            } else {
+                navigate('/campus/pods');
+            }
+        } catch (err) {
+            console.error('Failed to leave pod:', err);
+            alert('Failed to leave pod. Please try again.');
+        } finally {
+            setLeavingPod(false);
+        }
+    };
+
+    // Handle successful ownership transfer
+    const handleTransferSuccess = async () => {
+        // Refresh pod data
+        try {
+            const res = await api.get(`/pods/${podId}`);
+            setPod(res.data);
+            alert('Ownership transferred successfully!');
+        } catch (err) {
+            console.error('Failed to refresh pod:', err);
+        }
+    };
+
     // Message bubble component
     function MessageBubble({ msg }) {
         const isMe = String(msg.senderId) === String(userId);
         const isSystemText = msg.content === "Shared an image";
         const hasAttachment = !!msg.attachmentUrl;
+
+        // ✅ STAGE 3: Check if message is a system message
+        const isSystemMessage = msg.messageType === 'SYSTEM';
 
         // Debug: Log message alignment - ONLY for other users' messages
         if (msg.senderName !== currentUserName) {
@@ -240,6 +295,18 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
             });
         }
 
+        // ✅ STAGE 3: Render system messages as centered gray pills
+        if (isSystemMessage) {
+            return (
+                <div className="flex w-full mb-4 justify-center">
+                    <div className="px-4 py-2 bg-slate-700/50 text-slate-300 rounded-full text-sm text-center max-w-md">
+                        {msg.content}
+                    </div>
+                </div>
+            );
+        }
+
+        // Regular chat message rendering
         return (
             <div className={`flex w-full mb-3 ${isMe ? "justify-end" : "justify-start"} group`}>
                 <div className="flex items-end gap-2">
@@ -314,34 +381,103 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
         <div className="fixed inset-0 top-[64px] z-40 bg-slate-950 flex flex-col">
             {/* fixed inset-0 top-[64px] = Forces full screen below navbar */}
             {/* Header - Only show breadcrumb context, main navigation is handled by parent */}
-            <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 bg-slate-900/95 border-b border-slate-800 flex-shrink-0">
-                <Button variant="ghost" size="icon" className="mr-2" onClick={() => {
-                    if (onBack) {
-                        onBack();
-                    } else {
-                        // Dynamic navigation based on pod scope
-                        if (pod?.scope === 'GLOBAL') {
-                            navigate('/campus', { state: { view: 'inter', viewContext: { initialView: 'rooms' }, from: 'pod' } });
+            <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 bg-slate-900/95 border-b border-slate-800 flex-shrink-0 justify-between">
+                {/* Left section: Back button and pod info */}
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <Button variant="ghost" size="icon" className="mr-2" onClick={() => {
+                        if (onBack) {
+                            onBack();
                         } else {
-                            navigate('/campus/pods');
+                            // Dynamic navigation based on pod scope
+                            if (pod?.scope === 'GLOBAL') {
+                                navigate('/campus', { state: { view: 'inter', viewContext: { initialView: 'rooms' }, from: 'pod' } });
+                            } else {
+                                navigate('/campus/pods');
+                            }
                         }
-                    }
-                }}>
-                    <ArrowLeft />
-                </Button>
-                <div className="flex flex-col">
-                    {/* Show context badge */}
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${pod?.scope === 'GLOBAL'
-                            ? 'bg-purple-500/30 text-purple-300 border border-purple-500/50'
-                            : 'bg-blue-500/30 text-blue-300 border border-blue-500/50'}`}>
-                            {pod?.scope === 'GLOBAL' ? '🌍 Global Room' : '🏛️ Campus Pod'}
-                        </span>
+                    }}>
+                        <ArrowLeft />
+                    </Button>
+                    <div className="flex flex-col flex-1 min-w-0">
+                        {/* Show context badge */}
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${pod?.scope === 'GLOBAL'
+                                ? 'bg-purple-500/30 text-purple-300 border border-purple-500/50'
+                                : 'bg-blue-500/30 text-blue-300 border border-blue-500/50'}`}>
+                                {pod?.scope === 'GLOBAL' ? '🌍 Global Room' : '🏛️ Campus Pod'}
+                            </span>
+                        </div>
+                        <span className="font-bold text-lg text-white leading-tight truncate">{pod.title}</span>
+                        <span className="text-xs text-slate-400 font-medium">{memberNames}</span>
                     </div>
-                    <span className="font-bold text-lg text-white leading-tight">{pod.title}</span>
-                    <span className="text-xs text-slate-400 font-medium">{memberNames}</span>
+                </div>
+
+                {/* Right section: Members and Leave buttons */}
+                <div className="flex items-center gap-2">
+                    {/* Members button */}
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowMembers(!showMembers)}
+                        className="text-xs gap-1"
+                        title="View members"
+                    >
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                        Members
+                    </Button>
+
+                    {/* Leave button */}
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleLeavePod}
+                        disabled={leavingPod}
+                        className="text-xs text-red-400 hover:text-red-300"
+                        title="Leave this pod"
+                    >
+                        {leavingPod ? 'Leaving...' : 'Leave'}
+                    </Button>
                 </div>
             </div>
+
+            {/* ✅ STAGE 3: Members Drawer */}
+            {showMembers && (
+                <div className="absolute right-0 top-[60px] w-80 bg-slate-900 border-l border-slate-800 h-full overflow-y-auto z-30 shadow-2xl">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 sticky top-0 bg-slate-900">
+                        <h3 className="font-semibold text-white">Pod Members</h3>
+                        <button
+                            onClick={() => setShowMembers(false)}
+                            className="text-slate-400 hover:text-white"
+                        >
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" />
+                                <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2" />
+                            </svg>
+                        </button>
+                    </div>
+                    <PodMemberList
+                        pod={pod}
+                        currentUserId={userId}
+                        onPodUpdate={() => {
+                            // Refresh pod data
+                            const fetchPod = async () => {
+                                try {
+                                    const res = await api.get(`/pods/${podId}`);
+                                    setPod(res.data);
+                                } catch (err) {
+                                    console.error('Failed to refresh pod:', err);
+                                }
+                            };
+                            fetchPod();
+                        }}
+                    />
+                </div>
+            )}
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-3 py-4 bg-slate-900" style={{ backgroundImage: 'linear-gradient(135deg,rgba(0,255,255,0.03) 25%,transparent 25%,transparent 50%,rgba(0,255,255,0.03) 50%,rgba(0,255,255,0.03) 75%,transparent 75%,transparent)', backgroundSize: '40px 40px' }}>
@@ -380,6 +516,17 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                     onAttachmentRemove={() => setAttachment(null)}
                 />
             </div>
+
+            {/* Transfer Ownership Dialog */}
+            <TransferOwnershipDialog
+                isOpen={showTransferDialog}
+                podId={podId}
+                currentOwnerId={userId}
+                members={pod?.memberIds?.map(id => ({ id, fullName: id, name: id, email: '' })) || []}
+                admins={pod?.adminIds?.map(id => ({ id, fullName: id, name: id, email: '' })) || []}
+                onClose={() => setShowTransferDialog(false)}
+                onSuccess={handleTransferSuccess}
+            />
         </div>
     );
 }

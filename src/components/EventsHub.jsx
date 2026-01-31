@@ -4,7 +4,7 @@ import { Button } from './ui/button.jsx';
 import { Badge } from './ui/badge.jsx';
 import { Input } from './ui/input.jsx';
 import { Textarea } from './ui/textarea.jsx';
-import { getEvents, createTeamPost, createEvent } from "@/lib/api.js";
+import { getEvents, createTeamPost, createEvent, trackEventRegistration } from "@/lib/api.js";
 import { saveScoped, loadScoped, clearScoped } from '@/lib/session.js';
 import LoadingSpinner from '@/components/animations/LoadingSpinner.jsx';
 
@@ -17,6 +17,7 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
   // State for UI interactions
   const [activeFilter, setActiveFilter] = useState('all');
   const [showFindTeamModal, setShowFindTeamModal] = useState(false);
+  const [showEventDetailsModal, setShowEventDetailsModal] = useState(false); // ✅ NEW: Track event details modal
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [findTeamAction, setFindTeamAction] = useState(null);
 
@@ -30,16 +31,21 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
   // State for the "Create Event" modal
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [teamSizeError, setTeamSizeError] = useState(''); // ✅ NEW: Track team size validation error
+  const [registeredEvents, setRegisteredEvents] = useState(new Set()); // ✅ NEW: Track registered event IDs
   const [newEvent, setNewEvent] = useState({
     title: '',
     category: 'Hackathon',
     date: '',
     time: '',
+    dateTime: '', // ✅ NEW: Single datetime-local field
     description: '',
     requiredSkills: [],
     newSkill: '',
-    maxTeamSize: 4,
-    externalLink: '',
+    maxTeamSize: '', // ✅ CHANGED: From 4 to empty string
+    maxTeams: '', // ✅ NEW: Maximum teams limit (for team events)
+    registrationLink: '', // ✅ CHANGED: From externalLink to registrationLink
+    linkEndDate: '', // ✅ NEW: Registration deadline
     organizer: user?.name || 'Moderator',
   });
 
@@ -47,10 +53,10 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
   const isCatalyst = user?.role === 'COLLEGE_HEAD' || user?.badges?.includes('Campus Catalyst');
   const isDev = user?.isDev === true; // Explicitly check for true
   const isModerator = user?.role === 'COLLEGE_HEAD' || user?.isDev === true;
-  
+
   // Debug: Log user data to verify isDev is being received
   useEffect(() => {
-    console.log('[EventsHub] User data:', { userId: user?.id, isDev: user?.isDev, role: user?.role, isCatalyst, isDev: isDev, buttonVisible: (isCatalyst || isDev) });
+    console.log('[EventsHub] User data:', { userId: user?.id, isDev: user?.isDev, role: user?.role, isCatalyst, localIsDev: isDev, buttonVisible: (isCatalyst || isDev) });
   }, [user, isCatalyst, isDev]);
   const categoryOptions = [
     { id: 'Hackathon', label: 'Hackathon', icon: '💻' },
@@ -73,6 +79,15 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
         // Avoid duplicate by title+date heuristic
         const merged = [...pending, ...serverEvents.filter(se => !pending.some(pe => pe.title === se.title && pe.date === se.date))];
         setAllEvents(merged);
+
+        // ✅ NEW: Initialize registeredEvents from backend hasRegistered field
+        const registered = new Set();
+        merged.forEach(event => {
+          if (event.hasRegistered) {
+            registered.add(event.id);
+          }
+        });
+        setRegisteredEvents(registered);
       } catch (err) {
         setError('Could not fetch events. The server might be down.');
         console.error("Fetch Events Error:", err);
@@ -163,6 +178,25 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
     }
   };
 
+  // ✅ NEW: Helper function to check if deadline is close (within 7 days)
+  const isDeadlineClose = (linkEndDate) => {
+    if (!linkEndDate) return false;
+    try {
+      const deadline = new Date(linkEndDate);
+      const now = new Date();
+      const daysUntilDeadline = (deadline - now) / (1000 * 60 * 60 * 24);
+      return daysUntilDeadline <= 7 && daysUntilDeadline > 0;
+    } catch (err) {
+      return false;
+    }
+  };
+
+  // ✅ FIX 5: Helper function to ensure URLs have proper protocol
+  const ensureProtocol = (url) => {
+    if (!url) return '';
+    return url.startsWith('http') ? url : `https://${url}`;
+  };
+
   const handleFindTeam = (event) => {
     setSelectedEvent(event);
     setShowFindTeamModal(true);
@@ -211,7 +245,20 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
   };
 
   const handleCreateEventSubmit = async () => {
-    if (!newEvent.title || !newEvent.category || !newEvent.date || !newEvent.time || !newEvent.description) {
+    // ✅ FIX 3: Validate maxTeamSize - now required and must be >= 1
+    if (!newEvent.maxTeamSize || newEvent.maxTeamSize < 1 || !Number.isInteger(Number(newEvent.maxTeamSize))) {
+      setTeamSizeError('Max Team Size is required and must be at least 1');
+      return;
+    }
+    setTeamSizeError('');
+
+    // ✅ NEW: Validate that if registrationLink exists, linkEndDate must also be provided
+    if (newEvent.registrationLink && newEvent.registrationLink.trim() && !newEvent.linkEndDate) {
+      alert('Please set a registration deadline when providing an external registration link.');
+      return;
+    }
+
+    if (!newEvent.title || !newEvent.category || !newEvent.dateTime || !newEvent.description) {
       alert('Please fill in all required fields.');
       return;
     }
@@ -222,15 +269,15 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
       setShowCreateModal(false);
       // Reset the form
       setNewEvent({
-        title: '', category: 'Hackathon', date: '', time: '', description: '',
-        requiredSkills: [], newSkill: '', maxTeamSize: 4, externalLink: '',
+        title: '', category: 'Hackathon', date: '', time: '', dateTime: '', description: '',
+        requiredSkills: [], newSkill: '', maxTeamSize: '', registrationLink: '', linkEndDate: '',
         organizer: user?.name || 'Moderator',
       });
     } catch {
       // ignore
       // Save event locally to pending list for this user
       const pending = loadScoped(user?.email, 'pendingEvents') || [];
-      const pendingEvent = { id: `local-${Date.now()}`, title: newEvent.title, category: newEvent.category, date: newEvent.date, time: newEvent.time, dateTime: `${newEvent.date}T${newEvent.time}`, description: newEvent.description, requiredSkills: newEvent.requiredSkills, maxTeamSize: newEvent.maxTeamSize, externalLink: newEvent.externalLink, organizer: newEvent.organizer };
+      const pendingEvent = { id: `local-${Date.now()}`, title: newEvent.title, category: newEvent.category, dateTime: newEvent.dateTime, description: newEvent.description, requiredSkills: newEvent.requiredSkills, maxTeamSize: newEvent.maxTeamSize, registrationLink: newEvent.registrationLink, linkEndDate: newEvent.linkEndDate, organizer: newEvent.organizer };
       pending.unshift(pendingEvent);
       saveScoped(user?.email, 'pendingEvents', pending);
       setAllEvents(prev => [pendingEvent, ...prev]);
@@ -266,46 +313,140 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
     if (error) return <div className="col-span-full text-center text-red-400 p-8">{error}</div>;
     if (filteredEvents.length === 0) return <div className="col-span-full text-center text-muted-foreground p-8">No events found.</div>;
 
-    return filteredEvents.map((event) => (
-      <Card key={event.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] rounded-2xl">
-        <div className="p-6 space-y-4">
-          <div className="flex-1">
-            <h3 className="font-semibold text-xl mb-2 line-clamp-2">{event.title}</h3>
-            <Badge>{event.category}</Badge>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="date">📅</span><span className="text-sm">{formatEventDate(event.startDate || event.dateTime)}</span></div>
-            <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="team size">👥</span><span className="text-sm">Max team size: {event.maxParticipants || event.maxTeamSize || 'N/A'}</span></div>
-            <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="organizer">🏢</span><span className="text-sm">By {event.organizer}</span></div>
-          </div>
-          <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed">{event.description}</p>
-          <div className="space-y-2">
-            <div className="text-sm font-medium">Required Skills</div>
-            <div className="flex flex-wrap gap-2">
-              {event.requiredSkills && event.requiredSkills.length > 0 ? (
+    return filteredEvents.map((event) => {
+      // ✅ UPDATED: Determine if this is a solo event and if has registration link
+      const isSolo = Number(event.maxTeamSize) === 1;
+      const hasLink = event.registrationLink && event.registrationLink.trim().length > 0;
+
+      // ✅ FIX 2 & 5: Handle details button click - open registration link (with protocol) OR show event details modal
+      const handleDetailsClick = () => {
+        if (hasLink) {
+          // If link exists, open in new tab with proper protocol
+          window.open(ensureProtocol(event.registrationLink), '_blank');
+        } else {
+          // If NO link, show event details modal
+          setSelectedEvent(event);
+          setShowEventDetailsModal(true);
+        }
+      };
+
+      // ✅ NEW: Handle registration for solo events with external links
+      const handleRegisterClick = async () => {
+        try {
+          // Track participation on backend
+          const response = await trackEventRegistration(event.id);
+
+          // Update local state to mark as registered
+          setRegisteredEvents(prev => new Set([...prev, event.id]));
+
+          // Update the event's participant count in local state
+          if (response.data) {
+            setAllEvents(prevEvents =>
+              prevEvents.map(e => e.id === event.id ? response.data : e)
+            );
+          }
+
+          // Open registration link in new tab
+          window.open(ensureProtocol(event.registrationLink), '_blank');
+        } catch (error) {
+          console.error('Error tracking registration:', error);
+          // Still open the link even if tracking fails
+          window.open(ensureProtocol(event.registrationLink), '_blank');
+        }
+      };
+
+      return (
+        <Card key={event.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] rounded-2xl">
+          <div className="p-6 space-y-4">
+            <div className="flex-1">
+              <h3 className="font-semibold text-xl mb-2 line-clamp-2">{event.title}</h3>
+              <div className="flex gap-2 flex-wrap">
+                <Badge>{event.category}</Badge>
+                {/* ✅ FIX 2: Add Solo/Team badge */}
+                {isSolo ? (
+                  <Badge variant="outline" className="border-blue-500 text-blue-600">Solo</Badge>
+                ) : (
+                  <Badge variant="outline" className="border-purple-500 text-purple-600">Team</Badge>
+                )}
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="date">📅</span><span className="text-sm">{formatEventDate(event.startDate || event.dateTime)}</span></div>
+              <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="team size">👥</span><span className="text-sm">Max team size: {event.maxParticipants || event.maxTeamSize || 'N/A'}</span></div>
+              <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="organizer">🏢</span><span className="text-sm">By {event.organizer}</span></div>
+              {/* ✅ FIX 3: Deadline relocated to metadata section */}
+              {event.linkEndDate && (
+                <div className="flex items-center space-x-2 text-muted-foreground">
+                  <span role="img" aria-label="deadline">⏰</span>
+                  <span className="text-sm">Registration closes: {formatEventDate(event.linkEndDate)}</span>
+                </div>
+              )}
+            </div>
+            <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed">{event.description}</p>
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Required Skills</div>
+              <div className="flex flex-wrap gap-2">
+                {event.requiredSkills && event.requiredSkills.length > 0 ? (
+                  <>
+                    {event.requiredSkills.slice(0, 4).map((skill) => <Badge key={skill} variant="outline" className="text-xs">{skill}</Badge>)}
+                    {event.requiredSkills.length > 4 && <Badge variant="outline" className="text-xs">+{event.requiredSkills.length - 4} more</Badge>}
+                  </>
+                ) : (
+                  <span className="text-xs text-muted-foreground">No specific skills required</span>
+                )}
+              </div>
+            </div>
+            {/* ✅ FIX 4: Participant/Team counts adapt to event type */}
+            <div className="flex justify-between text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg">
+              <div className="text-center"><div className="font-semibold text-blue-600">{event.participantsCount || 0}</div><div className="text-xs">Participants</div></div>
+              {!isSolo && (
+                <div className="text-center"><div className="font-semibold text-green-600">{event.teamsFormedCount || 0}</div><div className="text-xs">Teams</div></div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              {/* ✅ Solo + Link: Show "Register" button (or "Registered" if already registered). Hide "Find Team". */}
+              {isSolo && hasLink && (
+                <Button
+                  onClick={handleRegisterClick}
+                  disabled={registeredEvents.has(event.id)}
+                  className={`w-full text-white ${registeredEvents.has(event.id)
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
+                    }`}
+                >
+                  {registeredEvents.has(event.id) ? '✅ Registered' : '📝 Register Solo'}
+                </Button>
+              )}
+
+              {/* ✅ Solo + No Link: Show "Details". Hide "Find Team". */}
+              {isSolo && !hasLink && (
+                <Button
+                  onClick={handleDetailsClick}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                >
+                  📋 Details
+                </Button>
+              )}
+
+              {/* ✅ Team: Show "Find Team" AND "Details". */}
+              {!isSolo && (
                 <>
-                  {event.requiredSkills.slice(0, 4).map((skill) => <Badge key={skill} variant="outline" className="text-xs">{skill}</Badge>)}
-                  {event.requiredSkills.length > 4 && <Badge variant="outline" className="text-xs">+{event.requiredSkills.length - 4} more</Badge>}
+                  <Button onClick={() => handleFindTeam(event)} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">🔍 Find Team</Button>
+                  <Button
+                    onClick={handleDetailsClick}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {hasLink ? '🔗 Registration Link' : '📋 Details'}
+                  </Button>
                 </>
-              ) : (
-                <span className="text-xs text-muted-foreground">No specific skills required</span>
               )}
             </div>
           </div>
-          <div className="flex justify-between text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg">
-            <div className="text-center"><div className="font-semibold text-blue-600">{event.participantsCount || 0}</div><div className="text-xs">Participants</div></div>
-            <div className="text-center"><div className="font-semibold text-green-600">{event.teamsFormedCount || 0}</div><div className="text-xs">Teams</div></div>
-          </div>
-          <div className="space-y-2">
-            <Button onClick={() => handleFindTeam(event)} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">🔍 Find Team</Button>
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm" className="flex-1">📋 Details</Button>
-              {event.externalLink && <Button asChild variant="outline" size="sm" className="flex-1"><a href={event.externalLink} target="_blank" rel="noopener noreferrer">🔗 Register</a></Button>}
-            </div>
-          </div>
-        </div>
-      </Card>
-    ));
+        </Card>
+      );
+    });
   };
 
   return (
@@ -372,6 +513,58 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
         </div>
       )}
 
+      {/* ✅ NEW: Event Details Modal */}
+      {showEventDetailsModal && selectedEvent && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 rounded-2xl shadow-2xl">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl font-bold">{selectedEvent.title}</h3>
+              <Button variant="ghost" size="icon" onClick={() => setShowEventDetailsModal(false)} className="rounded-full">✕</Button>
+            </div>
+            <div className="space-y-6">
+              <div>
+                <h4 className="font-semibold mb-2">Description</h4>
+                <p className="text-muted-foreground">{selectedEvent.description}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Category</h4>
+                  <p className="text-muted-foreground">{selectedEvent.category}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Organizer</h4>
+                  <p className="text-muted-foreground">{selectedEvent.organizer || 'Not specified'}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Date</h4>
+                  <p className="text-muted-foreground">{formatEventDate(selectedEvent.startDate || selectedEvent.dateTime)}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Max Team Size</h4>
+                  <p className="text-muted-foreground">{selectedEvent.maxParticipants || selectedEvent.maxTeamSize || 'N/A'} members</p>
+                </div>
+              </div>
+              {selectedEvent.requiredSkills && selectedEvent.requiredSkills.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-2">Required Skills</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedEvent.requiredSkills.map((skill) => <Badge key={skill} variant="outline">{skill}</Badge>)}
+                  </div>
+                </div>
+              )}
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button variant="outline" onClick={() => setShowEventDetailsModal(false)}>Close</Button>
+                {(selectedEvent.maxParticipants > 1 || selectedEvent.maxTeamSize > 1) && (
+                  <Button onClick={() => { setShowEventDetailsModal(false); handleFindTeam(selectedEvent); }} className="bg-gradient-to-r from-blue-600 to-purple-600">🔍 Find Team</Button>
+                )}
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {/* Create Event Modal */}
       {showCreateModal && isModerator && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -383,9 +576,13 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
             <div className="space-y-6">
               <div><label className="block text-sm font-medium mb-1">Event Title *</label><Input value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} /></div>
               <div><label className="block text-sm font-medium mb-2">Event Category *</label><div className="grid grid-cols-5 gap-2">{categoryOptions.map(cat => (<button key={cat.id} onClick={() => setNewEvent({ ...newEvent, category: cat.id })} className={`p-2 border rounded-lg flex flex-col items-center justify-center transition-colors ${newEvent.category === cat.id ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-muted'}`}><span className="text-2xl mb-1">{cat.icon}</span><span className="text-xs font-medium">{cat.label}</span></button>))}</div></div>
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1">Date *</label><Input type="date" value={newEvent.date} onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })} /></div>
-                <div><label className="block text-sm font-medium mb-1">Time *</label><Input type="time" value={newEvent.time} onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })} /></div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Event Start Date & Time *</label>
+                <Input
+                  type="datetime-local"
+                  value={newEvent.dateTime}
+                  onChange={(e) => setNewEvent({ ...newEvent, dateTime: e.target.value })}
+                />
               </div>
               <div><label className="block text-sm font-medium mb-1">Description *</label><Textarea value={newEvent.description} onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })} /></div>
               <div>
@@ -393,9 +590,61 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
                 <div className="flex flex-wrap gap-2 my-2">{newEvent.requiredSkills.map(skill => <Badge key={skill} variant="outline" className="cursor-pointer" onClick={() => removeEventSkill(skill)}>{skill} ✕</Badge>)}</div>
                 <div className="flex space-x-2"><Input placeholder="Add a skill..." value={newEvent.newSkill} onChange={(e) => setNewEvent({ ...newEvent, newSkill: e.target.value })} onKeyDown={e => e.key === 'Enter' && addEventSkill()} /><Button variant="outline" onClick={addEventSkill}>Add</Button></div>
               </div>
-              <div><label className="block text-sm font-medium mb-1">Max Team Size</label><Input type="number" value={newEvent.maxTeamSize} onChange={(e) => setNewEvent({ ...newEvent, maxTeamSize: parseInt(e.target.value) || 0 })} /></div>
-              <div><label className="block text-sm font-medium mb-1">External Registration Link (Optional)</label><Input placeholder="https://example.com/register" value={newEvent.externalLink} onChange={(e) => setNewEvent({ ...newEvent, externalLink: e.target.value })} /></div>
-              <div className="flex justify-end space-x-2 pt-4"><Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button><Button onClick={handleCreateEventSubmit} disabled={isSubmitting}>{isSubmitting ? 'Creating...' : '🚀 Create Event'}</Button></div>
+              <div><label className="block text-sm font-medium mb-1">Max Team Size *</label>
+                <style>{`
+                  input[type=number]::-webkit-inner-spin-button,
+                  input[type=number]::-webkit-outer-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                  }
+                  input[type=number] {
+                    -moz-appearance: textfield;
+                  }
+                `}</style>
+                <Input
+                  type="number"
+                  placeholder="e.g., 4"
+                  value={newEvent.maxTeamSize}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setNewEvent({ ...newEvent, maxTeamSize: value });
+                    // ✅ FIX 4: Clear error when user corrects the value
+                    if (value && Number(value) >= 1) {
+                      setTeamSizeError('');
+                    }
+                  }}
+                  className={teamSizeError ? 'border-red-500' : ''}
+                />
+                {teamSizeError && <p className="text-red-500 text-sm mt-1">{teamSizeError}</p>}
+              </div>
+
+              {/* ✅ NEW: Max Teams Limit - Only show for team events (maxTeamSize > 1) */}
+              {newEvent.maxTeamSize && Number(newEvent.maxTeamSize) > 1 && (
+                <div><label className="block text-sm font-medium mb-1">Max Teams Limit (Optional)</label>
+                  <Input
+                    type="number"
+                    placeholder="e.g., 10 (leave empty for unlimited)"
+                    value={newEvent.maxTeams}
+                    onChange={(e) => setNewEvent({ ...newEvent, maxTeams: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Maximum number of teams allowed for this event</p>
+                </div>
+              )}
+
+              <div><label className="block text-sm font-medium mb-1">External Registration Link (Optional)</label><Input placeholder="https://example.com/register" value={newEvent.registrationLink} onChange={(e) => setNewEvent({ ...newEvent, registrationLink: e.target.value })} /></div>
+              {/* ✅ NEW: Conditional Registration Deadline field - shows only when link exists */}
+              {newEvent.registrationLink && newEvent.registrationLink.trim() && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Registration Deadline *</label>
+                  <Input
+                    type="datetime-local"
+                    value={newEvent.linkEndDate}
+                    onChange={(e) => setNewEvent({ ...newEvent, linkEndDate: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">⏰ Users must register by this date to participate</p>
+                </div>
+              )}
+              <div className="flex justify-end space-x-2 pt-4"><Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button><Button onClick={handleCreateEventSubmit} disabled={isSubmitting || !!teamSizeError}>{isSubmitting ? 'Creating...' : '🚀 Create Event'}</Button></div>
             </div>
           </Card>
         </div>

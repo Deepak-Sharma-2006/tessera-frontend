@@ -7,6 +7,7 @@ import CampusFeed from './campus/CampusFeed.jsx';
 import BuddyBeacon from './campus/BuddyBeacon.jsx';
 import CollabPodsPage from './campus/CollabPodsPage.jsx';
 import CollabPodPage from './campus/CollabPodPage.jsx';
+import LoadingSpinner from './animations/LoadingSpinner.jsx';
 import { useTheme } from '../lib/theme.js';
 
 export default function CampusHub({
@@ -23,6 +24,13 @@ export default function CampusHub({
   const [selectedPodId, setSelectedPodId] = useState(null);
   const [campusFeedFilter, setCampusFeedFilter] = useState(activeFilter || 'ASK_HELP');
   const campusFeedRef = useRef(null); // Ref to trigger feed refresh from pod deletion
+
+  // ✅ FIX FOR RACE CONDITION: Check if user profile data is fully loaded
+  // If user exists but collegeName is missing, show loading spinner
+  if (user && !user.collegeName) {
+    console.warn('⏳ User profile incomplete - waiting for collegeName to be populated');
+    return <LoadingSpinner />;
+  }
 
   // Update view when initialView prop changes
   useEffect(() => {
