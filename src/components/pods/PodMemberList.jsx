@@ -82,43 +82,101 @@ export default function PodMemberList({ pod, currentUserId, currentUserRole, onP
         setContextMenu({ open: false, member: null, x: 0, y: 0 });
     };
 
-    // Get all members (combining different role lists)
+    // Get all members (combining different role lists and getting names from pod.memberNames if available)
     const allMembers = [];
     const memberIds = new Set();
 
-    // Add owner
+    // DEBUG: Log pod structure
+    console.log('🔍 PodMemberList Debug:', {
+        ownerId: pod?.ownerId,
+        ownerName: pod?.ownerName,
+        adminIds: pod?.adminIds,
+        adminNames: pod?.adminNames,
+        memberIds: pod?.memberIds,
+        memberNames: pod?.memberNames,
+        totalAdmins: pod?.adminIds?.length || 0,
+        totalMembers: pod?.memberIds?.length || 0
+    });
+
+    // Create a map of member ID to name from pod.memberNames and adminNames if available
+    const memberNameMap = {};
+
+    // Map member names (parallel list with memberIds)
+    if (pod?.memberNames && Array.isArray(pod.memberNames) && pod.memberNames.length > 0) {
+        pod.memberNames.forEach((name, index) => {
+            if (pod.memberIds && pod.memberIds[index] && name) {
+                memberNameMap[pod.memberIds[index]] = name;
+            }
+        });
+    }
+
+    // Map admin names (parallel list with adminIds)
+    if (pod?.adminNames && Array.isArray(pod.adminNames) && pod.adminNames.length > 0) {
+        pod.adminNames.forEach((name, index) => {
+            if (pod.adminIds && pod.adminIds[index] && name) {
+                memberNameMap[pod.adminIds[index]] = name;
+            }
+        });
+    }
+
+    // Add owner with their stored name
     if (pod?.ownerId && !memberIds.has(pod.ownerId)) {
+        const ownerDisplay = pod?.ownerName && pod.ownerName.trim() ? pod.ownerName : 'Pod Owner';
         allMembers.push({
             id: pod.ownerId,
-            fullName: 'Pod Owner',
+            fullName: ownerDisplay,
             role: 'Owner'
         });
         memberIds.add(pod.ownerId);
     }
 
     // Add admins
-    (pod?.adminIds || []).forEach(id => {
-        if (!memberIds.has(id)) {
-            allMembers.push({
-                id,
-                fullName: `Admin`,
-                role: 'Admin'
-            });
-            memberIds.add(id);
-        }
-    });
+    if (Array.isArray(pod?.adminIds)) {
+        pod.adminIds.forEach((id, index) => {
+            if (!memberIds.has(id)) {
+                // Try to get name from memberNameMap first, then from adminNames array
+                let displayName = memberNameMap[id];
+                if (!displayName && pod?.adminNames && pod.adminNames[index]) {
+                    displayName = pod.adminNames[index];
+                }
+                if (!displayName) {
+                    displayName = `Admin (${id.substring(0, 6)})`;
+                }
+
+                allMembers.push({
+                    id,
+                    fullName: displayName,
+                    role: 'Admin'
+                });
+                memberIds.add(id);
+            }
+        });
+    }
 
     // Add regular members
-    (pod?.memberIds || []).forEach(id => {
-        if (!memberIds.has(id)) {
-            allMembers.push({
-                id,
-                fullName: `Member`,
-                role: 'Member'
-            });
-            memberIds.add(id);
-        }
-    });
+    if (Array.isArray(pod?.memberIds)) {
+        pod.memberIds.forEach((id, index) => {
+            if (!memberIds.has(id)) {
+                // Try to get name from memberNameMap first, then from memberNames array
+                let displayName = memberNameMap[id];
+                if (!displayName && pod?.memberNames && pod.memberNames[index]) {
+                    displayName = pod.memberNames[index];
+                }
+                if (!displayName) {
+                    displayName = id.substring(0, 8);
+                }
+
+                allMembers.push({
+                    id,
+                    fullName: displayName,
+                    role: 'Member'
+                });
+                memberIds.add(id);
+            }
+        });
+    }
+
+    console.log('✅ All Members:', allMembers);
 
     return (
         <div onClick={handleClickOutside} className="p-4">

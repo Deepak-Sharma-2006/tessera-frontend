@@ -74,7 +74,10 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
         setError(null);
         const response = await getEvents();
         // Merge server events with any locally saved pending events for the user
-        const serverEvents = response.data || [];
+        const serverEvents = (response.data || []).map(event => ({
+          ...event,
+          maxTeamSize: event.maxParticipants // Normalize: ensure maxTeamSize is available
+        }));
         const pending = loadScoped(user?.email, 'pendingEvents') || [];
         // Avoid duplicate by title+date heuristic
         const merged = [...pending, ...serverEvents.filter(se => !pending.some(pe => pe.title === se.title && pe.date === se.date))];
@@ -159,10 +162,12 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
   ];
 
   const formatEventDate = (dateTimeString) => {
-    if (!dateTimeString) return 'TBD';
+    // FIX 1: Only show 'TBD' if date is strictly null, undefined, or empty string
+    if (!dateTimeString || dateTimeString.trim() === '') return 'TBD';
     try {
       const date = new Date(dateTimeString);
-      if (isNaN(date.getTime())) return 'Invalid Date';
+      // Check if the date is valid
+      if (isNaN(date.getTime())) return 'TBD';
       return date.toLocaleDateString('en-US', {
         weekday: 'short',
         year: 'numeric',
@@ -174,7 +179,7 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
         hour12: true
       });
     } catch (err) {
-      return 'Invalid Date';
+      return 'TBD';
     }
   };
 
@@ -264,8 +269,33 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
     }
     setIsSubmitting(true);
     try {
-      const response = await createEvent(newEvent);
-      setAllEvents(prevEvents => [response.data, ...prevEvents]);
+      // Transform form data to match backend schema
+      // Backend expects: date, time, maxTeamSize (not startDate and maxParticipants)
+      const dateTimeObj = new Date(newEvent.dateTime);
+      const dateStr = dateTimeObj.toISOString().split('T')[0]; // YYYY-MM-DD
+      const timeStr = dateTimeObj.toTimeString().split(' ')[0].substring(0, 5); // HH:mm
+
+      const eventPayload = {
+        title: newEvent.title,
+        category: newEvent.category,
+        date: dateStr,
+        time: timeStr,
+        description: newEvent.description,
+        requiredSkills: newEvent.requiredSkills,
+        maxTeamSize: Number(newEvent.maxTeamSize),
+        maxTeams: newEvent.maxTeams ? Number(newEvent.maxTeams) : null,
+        registrationLink: newEvent.registrationLink,
+        linkEndDate: newEvent.linkEndDate,
+        organizer: newEvent.organizer
+      };
+      const response = await createEvent(eventPayload);
+      // Normalize response data to ensure consistent field names for frontend display
+      const normalizedEvent = {
+        ...response.data,
+        maxTeamSize: response.data.maxParticipants, // Ensure maxTeamSize is available for rendering
+        dateTime: response.data.startDate // Ensure dateTime field available for fallback
+      };
+      setAllEvents(prevEvents => [normalizedEvent, ...prevEvents]);
       setShowCreateModal(false);
       // Reset the form
       setNewEvent({
@@ -277,7 +307,27 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
       // ignore
       // Save event locally to pending list for this user
       const pending = loadScoped(user?.email, 'pendingEvents') || [];
-      const pendingEvent = { id: `local-${Date.now()}`, title: newEvent.title, category: newEvent.category, dateTime: newEvent.dateTime, description: newEvent.description, requiredSkills: newEvent.requiredSkills, maxTeamSize: newEvent.maxTeamSize, registrationLink: newEvent.registrationLink, linkEndDate: newEvent.linkEndDate, organizer: newEvent.organizer };
+
+      const dateTimeObj = new Date(newEvent.dateTime);
+      const dateStr = dateTimeObj.toISOString().split('T')[0];
+      const timeStr = dateTimeObj.toTimeString().split(' ')[0].substring(0, 5);
+
+      const pendingEvent = {
+        id: `local-${Date.now()}`,
+        title: newEvent.title,
+        category: newEvent.category,
+        date: dateStr,
+        time: timeStr,
+        dateTime: newEvent.dateTime, // Keep for display
+        startDate: newEvent.dateTime, // Normalize for display
+        description: newEvent.description,
+        requiredSkills: newEvent.requiredSkills,
+        maxTeamSize: Number(newEvent.maxTeamSize),
+        maxParticipants: Number(newEvent.maxTeamSize), // Normalize
+        registrationLink: newEvent.registrationLink,
+        linkEndDate: newEvent.linkEndDate,
+        organizer: newEvent.organizer
+      };
       pending.unshift(pendingEvent);
       saveScoped(user?.email, 'pendingEvents', pending);
       setAllEvents(prev => [pendingEvent, ...prev]);
@@ -315,8 +365,15 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
 
     return filteredEvents.map((event) => {
       // ✅ UPDATED: Determine if this is a solo event and if has registration link
-      const isSolo = Number(event.maxTeamSize) === 1;
+      // Check maxParticipants (from server) OR maxTeamSize (from local state)
+      const maxSize = Number(event.maxParticipants || event.maxTeamSize);
+      const isSolo = maxSize === 1;
       const hasLink = event.registrationLink && event.registrationLink.trim().length > 0;
+
+      // Debug log to verify event data
+      if (maxSize !== undefined && maxSize !== null) {
+        console.log(`[EventCard] ${event.title}: maxParticipants=${event.maxParticipants}, maxTeamSize=${event.maxTeamSize}, isSolo=${isSolo}`);
+      }
 
       // ✅ FIX 2 & 5: Handle details button click - open registration link (with protocol) OR show event details modal
       const handleDetailsClick = () => {
@@ -362,17 +419,21 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
               <h3 className="font-semibold text-xl mb-2 line-clamp-2">{event.title}</h3>
               <div className="flex gap-2 flex-wrap">
                 <Badge>{event.category}</Badge>
-                {/* ✅ FIX 2: Add Solo/Team badge */}
+                {/* FIX 2: Show Solo tag with green color for maxTeamSize === 1, Team tag for > 1 */}
                 {isSolo ? (
-                  <Badge variant="outline" className="border-blue-500 text-blue-600">Solo</Badge>
+                  <Badge variant="outline" className="border-green-500 text-green-600 bg-green-50">Solo</Badge>
                 ) : (
-                  <Badge variant="outline" className="border-purple-500 text-purple-600">Team</Badge>
+                  <Badge variant="outline" className="border-blue-500 text-blue-600">Team</Badge>
                 )}
               </div>
             </div>
             <div className="space-y-3">
               <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="date">📅</span><span className="text-sm">{formatEventDate(event.startDate || event.dateTime)}</span></div>
               <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="team size">👥</span><span className="text-sm">Max team size: {event.maxParticipants || event.maxTeamSize || 'N/A'}</span></div>
+              {/* ✅ NEW: Show max teams limit if specified */}
+              {event.maxTeams && (
+                <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="teams allowed">📊</span><span className="text-sm">Teams allowed: {event.maxTeams}</span></div>
+              )}
               <div className="flex items-center space-x-2 text-muted-foreground"><span role="img" aria-label="organizer">🏢</span><span className="text-sm">By {event.organizer}</span></div>
               {/* ✅ FIX 3: Deadline relocated to metadata section */}
               {event.linkEndDate && (
@@ -606,11 +667,17 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
                   placeholder="e.g., 4"
                   value={newEvent.maxTeamSize}
                   onChange={(e) => {
+                    // FIX 4: Allow free typing while focused - no auto-correction
                     const value = e.target.value;
                     setNewEvent({ ...newEvent, maxTeamSize: value });
-                    // ✅ FIX 4: Clear error when user corrects the value
+                  }}
+                  onBlur={(e) => {
+                    // FIX 4: Validate only when user leaves the field (onBlur)
+                    const value = e.target.value;
                     if (value && Number(value) >= 1) {
                       setTeamSizeError('');
+                    } else if (value && Number(value) < 1) {
+                      setTeamSizeError('Max Team Size must be at least 1');
                     }
                   }}
                   className={teamSizeError ? 'border-red-500' : ''}
@@ -625,7 +692,18 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
                     type="number"
                     placeholder="e.g., 10 (leave empty for unlimited)"
                     value={newEvent.maxTeams}
-                    onChange={(e) => setNewEvent({ ...newEvent, maxTeams: e.target.value })}
+                    onChange={(e) => {
+                      // Allow free typing while focused - no validation
+                      setNewEvent({ ...newEvent, maxTeams: e.target.value });
+                    }}
+                    onBlur={(e) => {
+                      // Validate only when user leaves the field (onBlur)
+                      const value = e.target.value;
+                      if (value && Number(value) < 1) {
+                        // Auto-correct invalid values
+                        setNewEvent({ ...newEvent, maxTeams: '' });
+                      }
+                    }}
                   />
                   <p className="text-xs text-muted-foreground mt-1">Maximum number of teams allowed for this event</p>
                 </div>

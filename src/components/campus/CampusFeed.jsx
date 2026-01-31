@@ -139,14 +139,20 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
       // Check if user is the creator
       const isCreator = pod.creatorId === currentUserId;
 
-      // Call join endpoint to add user to pod members
-      await api.post(`/pods/${post.linkedPodId}/join`, {
+      // Call enhanced join endpoint with cooldown checking
+      await api.post(`/pods/${post.linkedPodId}/join-enhanced`, {
         userId: currentUserId
       });
 
       // Navigate to the pod
       navigate(`/campus/collab-pods/${post.linkedPodId}`);
     } catch (error) {
+      // Check for cooldown error
+      if (error.response?.status === 429) {
+        const minutesRemaining = error.response.data?.minutesRemaining || 15;
+        alert(`You are on cooldown. Please wait ${minutesRemaining} more minute(s) before rejoin this pod.`);
+        return;
+      }
       if (error.response && error.response.status === 404) {
         // Pod was deleted; silently remove the stale post from feed
         handlePostGone(post.id);

@@ -243,7 +243,7 @@ export default forwardRef(function InterFeed({ user }, ref) {
       setJoiningRoomId(post.linkedPodId);
       console.log('Joining room:', post.linkedPodId);
 
-      const response = await api.post(`/pods/${post.linkedPodId}/join`, {
+      const response = await api.post(`/pods/${post.linkedPodId}/join-enhanced`, {
         userId: currentUserId
       });
       console.log('Join response:', response.data);
@@ -260,6 +260,21 @@ export default forwardRef(function InterFeed({ user }, ref) {
       }, 300);
     } catch (err) {
       console.error('Join error:', err);
+
+      // Check for cooldown error (429 Too Many Requests)
+      if (err.response?.status === 429) {
+        const minutesRemaining = err.response.data?.minutesRemaining || 15;
+        alert(`⏱️ You are on cooldown. Please wait ${minutesRemaining} more minute(s) before rejoining this pod.`);
+        return;
+      }
+
+      // Check for banned error
+      if (err.response?.status === 403) {
+        alert('❌ You are banned from this pod and cannot rejoin.');
+        return;
+      }
+
+      // Generic error
       alert('Failed to join room. ' + (err.response?.data?.message || err.response?.data?.error || 'Please try again.'));
     } finally {
       setJoiningRoomId(null);
