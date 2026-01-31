@@ -120,7 +120,7 @@ const AuthenticatedApp = ({ user, setUser }) => {
           {currentView === 'events' && <EventsHub user={user} onNavigateToBeacon={handleNavigateToBeacon} />}
           {currentView === 'inter' && <InterHub user={user} initialView={viewContext?.initialView || 'feed'} />}
           {currentView === 'inbox' && <InboxPage user={user} />}
-          {currentView === 'badges' && <BadgeCenter user={user} />}
+          {currentView === 'badges' && <BadgeCenter user={user} setUser={setUser} />}
           {currentView === 'profile' && <ProfilePage user={user} />}
           {currentView === 'buddybeacon' && <BuddyBeacon eventId={viewContext?.eventId} />}
         </div>

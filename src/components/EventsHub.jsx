@@ -49,15 +49,28 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
     organizer: user?.name || 'Moderator',
   });
 
-  // Logic: Only Campus Catalyst (COLLEGE_HEAD role) sees the button; Devs access via secret mode
-  const isCatalyst = user?.role === 'COLLEGE_HEAD' || user?.badges?.includes('Campus Catalyst');
-  const isDev = user?.isDev === true; // Explicitly check for true
-  const isModerator = user?.role === 'COLLEGE_HEAD' || user?.isDev === true;
+  // ✅ STRICT SEPARATION: Founding Dev and Campus Catalyst are INDEPENDENT
+  // Campus Catalyst: ONLY if role === 'COLLEGE_HEAD' (NOT dependent on isDev or Founding Dev badge)
+  const isCatalyst = user?.role === 'COLLEGE_HEAD';
+  
+  // Founding Dev: ONLY if isDev === true (NOT dependent on role or Campus Catalyst badge)
+  const isDev = user?.isDev === true;
+  
+  // Event creation access: CATALYST ONLY (role-based) or DEV for testing
+  const canCreateEvent = isCatalyst || isDev;
 
-  // Debug: Log user data to verify isDev is being received
+  // Debug: Log user data to verify flags are being received correctly
   useEffect(() => {
-    console.log('[EventsHub] User data:', { userId: user?.id, isDev: user?.isDev, role: user?.role, isCatalyst, localIsDev: isDev, buttonVisible: (isCatalyst || isDev) });
-  }, [user, isCatalyst, isDev]);
+    console.log('[EventsHub] User flags:', { 
+      userId: user?.id, 
+      isDev: user?.isDev, 
+      role: user?.role,
+      isCatalyst: isCatalyst,
+      isDev_local: isDev,
+      canCreateEvent: canCreateEvent,
+      badges: user?.badges 
+    });
+  }, [user, isCatalyst, isDev, canCreateEvent]);
   const categoryOptions = [
     { id: 'Hackathon', label: 'Hackathon', icon: '💻' },
     { id: 'Fest', label: 'Fest', icon: '🎉' },

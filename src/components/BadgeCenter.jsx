@@ -74,8 +74,8 @@ const moderatorBadge = {
   tier: 'Legendary',
   description: 'Platform enforcer. Community mentor.',
   progress: { current: 1, total: 1 },
-  isUnlocked: true,
-  isActive: true,
+  isUnlocked: false, // ✅ Will be set dynamically based on user.badges
+  isActive: false, // ✅ Will be set dynamically
   perks: ['Moderation tools', 'Community leadership', 'Special recognition'],
   isModeratorOnly: true,
   cannotBeHidden: true,
@@ -256,38 +256,61 @@ const penaltyBadges = [
   }
 ]
 
-export default function BadgeCenter({ user }) {
+export default function BadgeCenter({ user, setUser }) {
   const [activeTab, setActiveTab] = useState('all')
   const [selectedCategory, setSelectedCategory] = useState('all')
 
-  // Sync badges on mount to ensure isDev and role flags unlock badges immediately
+  // ✅ Sync badges on mount to ensure isDev and role flags unlock badges immediately
   useEffect(() => {
     if (user?._id) {
       axios.post(`/api/users/${user._id}/sync-badges`)
-        .catch(err => console.log('Badge sync completed'))
+        .then(res => {
+          // Update parent component's user state with synced badges
+          if (res.data && setUser) {
+            setUser(res.data);
+            console.log('✓ Badges synced and user state updated');
+          }
+        })
+        .catch(err => console.log('Badge sync completed or error:', err.message))
     }
-  }, [user?._id])
+  }, [user?._id, setUser])
   const [selectedBadge, setSelectedBadge] = useState(null)
 
-  // Update Power Five badges with dynamic unlock status based on user data
-  powerFiveBadges[0].isUnlocked = user?.isDev || false; // Founding Dev
-  powerFiveBadges[1].isUnlocked = user?.role === 'COLLEGE_HEAD' || user?.badges?.includes('Campus Catalyst'); // Campus Catalyst
-  powerFiveBadges[2].isUnlocked = user?.badges?.includes('Pod Pioneer'); // Pod Pioneer
+  // ✅ STRICT DATA-DRIVEN BADGE UNLOCK LOGIC (100% from MongoDB Atlas)
+  // Update Power Five badges with dynamic unlock status based on REAL user.badges array only
+  
+  // 1. FOUNDING DEV: Unlock ONLY if in user.badges array
+  powerFiveBadges[0].isUnlocked = user?.badges?.includes('Founding Dev') || false;
+  powerFiveBadges[0].progress = { current: user?.badges?.includes('Founding Dev') ? 1 : 0, total: 1 };
+  
+  // 2. CAMPUS CATALYST: Unlock ONLY if in user.badges array
+  powerFiveBadges[1].isUnlocked = user?.badges?.includes('Campus Catalyst') || false;
+  powerFiveBadges[1].progress = { current: user?.badges?.includes('Campus Catalyst') ? 1 : 0, total: 1 };
+  
+  // 3. POD PIONEER: Unlock ONLY if in user.badges array
+  powerFiveBadges[2].isUnlocked = user?.badges?.includes('Pod Pioneer') || false;
   powerFiveBadges[2].progress = { current: user?.badges?.includes('Pod Pioneer') ? 1 : 0, total: 1 };
   
-  powerFiveBadges[3].isUnlocked = user?.badges?.includes('Bridge Builder'); // Bridge Builder
+  // 4. BRIDGE BUILDER: Unlock ONLY if in user.badges array
+  powerFiveBadges[3].isUnlocked = user?.badges?.includes('Bridge Builder') || false;
   powerFiveBadges[3].progress = { current: user?.badges?.includes('Bridge Builder') ? 1 : 0, total: 1 };
   
-  // Skill Sage: track endorsements
-  powerFiveBadges[4].isUnlocked = user?.badges?.includes('Skill Sage'); // Skill Sage
+  // 5. SKILL SAGE: Unlock ONLY if in user.badges array
+  powerFiveBadges[4].isUnlocked = user?.badges?.includes('Skill Sage') || false;
   powerFiveBadges[4].progress = { 
     current: Math.min(user?.endorsementsCount || 0, 3), 
     total: 3 
   };
 
-  // Check user status
-  const isModerator = user?.hasModerationBadge || true // Mock for testing
-  const hasModerationBadges = user?.hasModerationBadges || false // Mock - would be assigned by system
+  // ✅ SIGNAL GUARDIAN: ONLY if in user.badges array (no hardcoded checks)
+  moderatorBadge.isUnlocked = user?.badges?.includes('Signal Guardian') || false;
+  moderatorBadge.isActive = user?.badges?.includes('Signal Guardian') || false;
+
+  // ✅ Check user status - 100% based on REAL badges from MongoDB
+  const isModerator = user?.badges?.includes('Signal Guardian') || false;
+  const hasModerationBadges = user?.badges?.some(b => 
+    ['Chat Warden', 'Content Guardian', 'Event Coordinator', 'Collab Supervisor', 'Community Leader'].includes(b)
+  ) || false;
   const hasPenaltyBadges = penaltyBadges.some(badge => badge.isUnlocked)
 
   const allBadges = badgeCategories.flatMap(cat => cat.badges.map(badge => ({ ...badge, category: cat.name, categoryColor: cat.color })))
