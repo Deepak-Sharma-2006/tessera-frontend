@@ -96,11 +96,10 @@ export default function TransferOwnershipDialog({ isOpen, podId, currentOwnerId,
                         uniqueCandidates.map((user) => (
                             <label
                                 key={user.id}
-                                className={`flex items-center gap-3 p-3 rounded cursor-pointer transition-colors ${
-                                    selectedUserId === user.id
+                                className={`flex items-center gap-3 p-3 rounded cursor-pointer transition-colors ${selectedUserId === user.id
                                         ? 'bg-cyan-600/30 border border-cyan-500'
                                         : 'bg-slate-700/50 border border-slate-600 hover:border-cyan-500'
-                                }`}
+                                    }`}
                             >
                                 <input
                                     type="radio"
