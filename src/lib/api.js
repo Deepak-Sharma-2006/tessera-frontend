@@ -199,5 +199,49 @@ export const trackEventRegistration = (eventId) => {
     return api.post(`/api/events/${eventId}/register-click`);
 };
 
+// ============================================
+// ✅ STAGE 3: Pod Management API Functions
+// ============================================
+
+/**
+ * Kick a member from a pod (admin/owner only)
+ * @param {string} podId - Pod ID
+ * @param {string} actorId - User performing the kick
+ * @param {string} targetId - User being kicked
+ * @param {string} reason - Reason (Spam, Harassment, Other)
+ * @returns {Promise} Updated pod
+ */
+export const kickMemberFromPod = (podId, actorId, targetId, reason) => {
+    return api.post(`/pods/${podId}/kick`, {
+        actorId,
+        targetId,
+        reason
+    });
+};
+
+/**
+ * Leave a pod (creates 15-minute cooldown)
+ * @param {string} podId - Pod ID
+ * @param {string} userId - User leaving
+ * @returns {Promise} Success message
+ */
+export const leavePod = (podId, userId) => {
+    return api.post(`/pods/${podId}/leave`, {
+        userId
+    });
+};
+
+/**
+ * Join a pod (checks cooldown, ban, and capacity)
+ * @param {string} podId - Pod ID
+ * @param {string} userId - User joining
+ * @returns {Promise} Updated pod or error with minutesRemaining
+ */
+export const joinPodEnhanced = (podId, userId) => {
+    return api.post(`/pods/${podId}/join-enhanced`, {
+        userId
+    });
+};
+
 // Default export of the configured axios instance
 export default api;
