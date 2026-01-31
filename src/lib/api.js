@@ -291,7 +291,7 @@ export const demoteToMember = (podId, actorId, targetId) => {
  * @returns {Promise<Array>} List of inbox items sorted by newest first
  */
 export const fetchMyInbox = (userId) => {
-    return api.get('/inbox/my', {
+    return api.get('/api/inbox/my', {
         params: { userId }
     }).then(res => res.data);
 };
@@ -302,7 +302,7 @@ export const fetchMyInbox = (userId) => {
  * @returns {Promise<Array>} List of unread inbox items
  */
 export const fetchUnreadInbox = (userId) => {
-    return api.get('/inbox/my/unread', {
+    return api.get('/api/inbox/my/unread', {
         params: { userId }
     }).then(res => res.data);
 };
@@ -313,7 +313,7 @@ export const fetchUnreadInbox = (userId) => {
  * @returns {Promise} Updated inbox item
  */
 export const markInboxAsRead = (itemId) => {
-    return api.patch(`/inbox/${itemId}/read`).then(res => res.data);
+    return api.patch(`/api/inbox/${itemId}/read`).then(res => res.data);
 };
 
 /**
@@ -322,7 +322,7 @@ export const markInboxAsRead = (itemId) => {
  * @returns {Promise} 204 No Content
  */
 export const deleteInboxItem = (itemId) => {
-    return api.delete(`/inbox/${itemId}`);
+    return api.delete(`/api/inbox/${itemId}`);
 };
 
 /**
@@ -331,7 +331,7 @@ export const deleteInboxItem = (itemId) => {
  * @returns {Promise} { deleted: number }
  */
 export const deleteInboxItemsBulk = (itemIds) => {
-    return api.delete('/inbox/bulk', {
+    return api.delete('/api/inbox/bulk', {
         data: { ids: itemIds }
     }).then(res => res.data);
 };
@@ -343,7 +343,7 @@ export const deleteInboxItemsBulk = (itemIds) => {
  * @returns {Promise} { deleted: number, type: string }
  */
 export const clearInboxByType = (userId, type) => {
-    return api.delete('/inbox/clear-type', {
+    return api.delete('/api/inbox/clear-type', {
         params: { userId, type }
     }).then(res => res.data);
 };
@@ -354,7 +354,7 @@ export const clearInboxByType = (userId, type) => {
  * @returns {Promise} { deleted: number }
  */
 export const clearAllInbox = (userId) => {
-    return api.delete('/inbox/clear-all', {
+    return api.delete('/api/inbox/clear-all', {
         params: { userId }
     }).then(res => res.data);
 };
