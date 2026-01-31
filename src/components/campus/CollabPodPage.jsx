@@ -58,16 +58,27 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                 if (!isAlreadyMember) {
                     console.log('🔀 User not a member, auto-joining pod...');
                     try {
-                        await api.post(`/pods/${podId}/join-enhanced`, { userId });
+                        const joinRes = await api.post(`/pods/${podId}/join-enhanced`, { userId });
                         console.log('✅ Auto-joined pod successfully');
-                        // Refresh pod data after joining to get updated member list
-                        const refreshRes = await api.get(`/pods/${podId}`);
-                        if (mounted) {
-                            setPod(refreshRes.data);
+                        // Use the response pod data which already has the user added
+                        if (mounted && joinRes.data) {
+                            setPod(joinRes.data);
+                            console.log('🔄 Updated pod with join response:', {
+                                memberIds: joinRes.data.memberIds,
+                                memberNames: joinRes.data.memberNames
+                            });
                         }
                     } catch (joinErr) {
                         console.error('⚠️ Auto-join failed:', joinErr.response?.data?.error || joinErr.message);
-                        // Continue with pod viewing even if join fails (cooldown, banned, etc)
+                        // If join fails, still fetch latest pod data (might be already member)
+                        try {
+                            const refreshRes = await api.get(`/pods/${podId}`);
+                            if (mounted) {
+                                setPod(refreshRes.data);
+                            }
+                        } catch (refreshErr) {
+                            console.error('⚠️ Failed to refresh pod after join error:', refreshErr.message);
+                        }
                     }
                 }
 
@@ -127,6 +138,40 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
             messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
+
+    // ✅ PERIODIC REFRESH: Fetch pod data every 3 seconds to sync member list updates
+    useEffect(() => {
+        let mounted = true;
+        const interval = setInterval(async () => {
+            try {
+                const res = await api.get(`/pods/${podId}`);
+                if (mounted) {
+                    // Only update if member counts changed (avoid unnecessary re-renders)
+                    const oldMemberCount = pod?.memberIds?.length || 0;
+                    const newMemberCount = res.data?.memberIds?.length || 0;
+                    const oldAdminCount = pod?.adminIds?.length || 0;
+                    const newAdminCount = res.data?.adminIds?.length || 0;
+                    
+                    if (oldMemberCount !== newMemberCount || oldAdminCount !== newAdminCount) {
+                        console.log('🔄 Member list updated via periodic refresh:', {
+                            oldMembers: oldMemberCount,
+                            newMembers: newMemberCount,
+                            oldAdmins: oldAdminCount,
+                            newAdmins: newAdminCount
+                        });
+                        setPod(res.data);
+                    }
+                }
+            } catch (err) {
+                // Silently fail for periodic refresh - don't spam console
+            }
+        }, 3000);
+
+        return () => {
+            mounted = false;
+            clearInterval(interval);
+        };
+    }, [podId]);
 
     if (loading) return <div className="p-4">Loading pod...</div>;
     if (error) return <div className="p-4 text-red-500">{error}</div>;
