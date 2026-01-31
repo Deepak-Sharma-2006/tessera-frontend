@@ -98,14 +98,31 @@ export default function PodMemberList({ pod, currentUserId, currentUserRole, onP
         totalMembers: pod?.memberIds?.length || 0
     });
 
+    // ✅ DEFENSIVE: Remove duplicates from memberIds and memberNames in case backend has issues
+    const cleanedMemberIds = [];
+    const cleanedMemberNames = [];
+    const seenIds = new Set();
+    
+    if (Array.isArray(pod?.memberIds)) {
+        pod.memberIds.forEach((id, idx) => {
+            if (id && !seenIds.has(id)) {
+                cleanedMemberIds.push(id);
+                if (pod?.memberNames?.[idx]) {
+                    cleanedMemberNames.push(pod.memberNames[idx]);
+                }
+                seenIds.add(id);
+            }
+        });
+    }
+
     // Create a map of member ID to name from pod.memberNames and adminNames if available
     const memberNameMap = {};
 
     // Map member names (parallel list with memberIds)
-    if (pod?.memberNames && Array.isArray(pod.memberNames) && pod.memberNames.length > 0) {
-        pod.memberNames.forEach((name, index) => {
-            if (pod.memberIds && pod.memberIds[index] && name) {
-                memberNameMap[pod.memberIds[index]] = name;
+    if (cleanedMemberNames && Array.isArray(cleanedMemberNames) && cleanedMemberNames.length > 0) {
+        cleanedMemberNames.forEach((name, index) => {
+            if (cleanedMemberIds && cleanedMemberIds[index] && name) {
+                memberNameMap[cleanedMemberIds[index]] = name;
             }
         });
     }
@@ -153,14 +170,14 @@ export default function PodMemberList({ pod, currentUserId, currentUserRole, onP
         });
     }
 
-    // Add regular members
-    if (Array.isArray(pod?.memberIds)) {
-        pod.memberIds.forEach((id, index) => {
+    // Add regular members (using cleaned IDs)
+    if (Array.isArray(cleanedMemberIds)) {
+        cleanedMemberIds.forEach((id, index) => {
             if (!memberIds.has(id)) {
-                // Try to get name from memberNameMap first, then from memberNames array
+                // Try to get name from memberNameMap first, then from cleaned memberNames array
                 let displayName = memberNameMap[id];
-                if (!displayName && pod?.memberNames && pod.memberNames[index]) {
-                    displayName = pod.memberNames[index];
+                if (!displayName && cleanedMemberNames && cleanedMemberNames[index]) {
+                    displayName = cleanedMemberNames[index];
                 }
                 if (!displayName) {
                     displayName = id.substring(0, 8);
