@@ -102,7 +102,7 @@ export default function PodMemberList({ pod, currentUserId, currentUserRole, onP
     const cleanedMemberIds = [];
     const cleanedMemberNames = [];
     const seenIds = new Set();
-    
+
     if (Array.isArray(pod?.memberIds)) {
         pod.memberIds.forEach((id, idx) => {
             if (id && !seenIds.has(id)) {
