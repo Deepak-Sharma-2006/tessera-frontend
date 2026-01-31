@@ -58,12 +58,13 @@ export default function BuddyBeacon({ user }) {
                 console.log("API Response:", feedRes.data); // Debugging API response
                 console.log("Post Map Debug:", feedRes.data.map(postMap => postMap.post)); // Debugging post structure
                 setPosts(feedRes.data.map(postMap => ({
-                    id: postMap.post.id || postMap.post.postId, // Ensure ID mapping
+                    id: postMap.post.id || postMap.post.postId,
                     title: postMap.post.title || postMap.post.eventName,
                     description: postMap.post.description,
                     requiredSkills: postMap.post.requiredSkills,
                     createdAt: postMap.post.createdAt,
                     author: postMap.post.author,
+                    authorId: postMap.post.authorId, // ✅ Add authorId for creator check
                     teamSize: postMap.post.teamSize,
                     currentMembers: postMap.post.currentTeamMembers,
                     hasApplied: postMap.hasApplied,
@@ -148,8 +149,8 @@ export default function BuddyBeacon({ user }) {
         const hasApplied = postMap.hasApplied;
         const hoursElapsed = postMap.hoursElapsed;
         const status = postMap.status;
-        const hostId = postMap.hostId;
-        const isOwnPost = hostId === user?.id;
+        const authorId = post.authorId; // ✅ Use authorId from post
+        const isOwnPost = authorId === user?.id; // ✅ Compare with authorId
         const currentTeamSize = post.currentTeamMembers?.length || post.currentMembers?.length || 1;
         const applicants = post.applicants || post.applicantObjects || [];
 
@@ -231,10 +232,14 @@ export default function BuddyBeacon({ user }) {
                                             <div className="flex items-center flex-1">
                                                 <Avatar src={applicant.profile?.profilePic} alt={applicant.profile?.name} className="w-10 h-10" />
                                                 <div className="ml-3 flex-1">
-                                                    <p className="font-semibold text-sm">{applicant.profile?.name || 'Unknown'}</p>
+                                                    <p className="font-semibold text-sm">{applicant.profile?.name || applicant.name || 'Unknown'}</p>
                                                     <p className="text-xs text-gray-500">
                                                         Year: {applicant.profile?.yearOfStudy || applicant.profile?.year || 'N/A'}
                                                     </p>
+                                                    {/* ✅ Display application message/description */}
+                                                    {applicant.message && (
+                                                        <p className="text-xs text-gray-600 mt-1 italic">\"Why I'm applying: {applicant.message}\"</p>
+                                                    )}
                                                     {applicant.profile?.skills && applicant.profile.skills.length > 0 && (
                                                         <div className="flex flex-wrap gap-1 mt-1">
                                                             {applicant.profile.skills.slice(0, 2).map((skill, idx) => (

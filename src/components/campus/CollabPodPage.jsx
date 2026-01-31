@@ -109,10 +109,11 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
     if (error) return <div className="p-4 text-red-500">{error}</div>;
     if (!pod) return <div className="p-4">Pod not found</div>;
 
-    // Members display ("Alice, Bob, You")
-    const memberNames = (pod.members || pod.memberNames || []).length
-        ? (pod.members || pod.memberNames).map(m => m === currentUserName ? "You" : m).join(", ")
-        : (pod.memberIds?.length ? `${pod.memberIds.length} members` : "");
+    // Members display with proper names
+    // Try to get member names from pod.memberNames, pod.members, or use memberIds as fallback
+    const memberNames = (pod.memberNames || pod.members || []).length > 0
+        ? (pod.memberNames || pod.members).map(m => m === currentUserName ? "You" : m).join(", ")
+        : (pod.memberIds?.length ? `${pod.memberIds.length} member${pod.memberIds.length !== 1 ? 's' : ''}` : "");
 
     // Helper function to fix image URLs
     const getImageUrl = (url) => {
@@ -247,11 +248,12 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
         try {
             await leavePod(podId, userId);
 
-            // Navigate back after leaving
+            // Navigate to Global Hub collab room tab (or back if available)
             if (onBack) {
                 onBack();
             } else {
-                navigate('/campus/pods');
+                // Navigate to Global Hub with collab room view
+                navigate('/', { state: { view: 'inter', viewContext: { initialView: 'collab' } } });
             }
         } catch (err) {
             console.error('Failed to leave pod:', err);
