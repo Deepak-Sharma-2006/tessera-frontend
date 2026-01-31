@@ -622,6 +622,7 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                 onClose={() => setShowTransferDialog(false)}
                 onSuccess={handleTransferSuccess}
             />
+            {/* ✅ Transfer Ownership Dialog - Also renders for COLLAB pods (same component) */}
         </div>
     );
 }
