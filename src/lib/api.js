@@ -190,5 +190,14 @@ export const deleteMyPost = (postId) => {
     return api.delete(`/api/beacon/my-posts/${postId}`);
 };
 
+/**
+ * Track user registration click for solo events with external links.
+ * @param {string} eventId
+ * @returns {Promise} Updated event with participantsCount
+ */
+export const trackEventRegistration = (eventId) => {
+    return api.post(`/api/events/${eventId}/register-click`);
+};
+
 // Default export of the configured axios instance
 export default api;

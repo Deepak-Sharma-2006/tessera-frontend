@@ -215,6 +215,7 @@ export default function BuddyBeacon({ user }) {
                             <div className="space-y-3">
                                 {applicants.map((applicant) => {
                                     const appStatus = applicant.status || 'PENDING';
+                                    const isAvailable = applicant.isAvailable !== false; // Default to available if not specified
                                     const statusColor = {
                                         'PENDING': 'bg-yellow-100 text-yellow-800',
                                         'ACCEPTED': 'bg-green-100 text-green-800',
@@ -222,7 +223,11 @@ export default function BuddyBeacon({ user }) {
                                     }[appStatus] || 'bg-gray-100 text-gray-800';
 
                                     return (
-                                        <div key={applicant.applicantId || applicant._id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                                        <div
+                                            key={applicant.applicantId || applicant._id}
+                                            className={`flex items-center justify-between bg-gray-50 p-3 rounded-lg transition-opacity ${!isAvailable ? 'opacity-50 cursor-not-allowed' : ''
+                                                }`}
+                                        >
                                             <div className="flex items-center flex-1">
                                                 <Avatar src={applicant.profile?.profilePic} alt={applicant.profile?.name} className="w-10 h-10" />
                                                 <div className="ml-3 flex-1">
@@ -248,7 +253,12 @@ export default function BuddyBeacon({ user }) {
                                                 <Badge className={`${statusColor} px-2 py-1`}>
                                                     {appStatus}
                                                 </Badge>
-                                                {appStatus === 'PENDING' && (
+                                                {appStatus === 'PENDING' && !isAvailable && (
+                                                    <Badge className="bg-gray-300 text-gray-700 px-2 py-1 cursor-not-allowed">
+                                                        Unavailable
+                                                    </Badge>
+                                                )}
+                                                {appStatus === 'PENDING' && isAvailable && (
                                                     <>
                                                         <Button
                                                             onClick={() => handleAccept(applicant._id || applicant.applicantId, post.id)}
@@ -433,7 +443,13 @@ export default function BuddyBeacon({ user }) {
                 {filters.map((filter) => (
                     <button
                         key={filter.id}
-                        onClick={() => setActiveFilter(filter.id)}
+                        onClick={() => {
+                            setActiveFilter(filter.id);
+                            // ✅ NEW: Refresh data when opening "my-posts" tab (for latest availability status)
+                            if (filter.id === 'my-posts') {
+                                setRefreshTrigger(prev => prev + 1);
+                            }
+                        }}
                         className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border ${activeFilter === filter.id
                             ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-transparent shadow-lg shadow-cyan-500/20'
                             : 'bg-slate-900/50 text-slate-400 border-slate-700 hover:border-slate-500 hover:text-white'

@@ -290,9 +290,29 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
       // ✅ CRITICAL FIX: Check profileCompleted flag, not username
       if (data.profileCompleted === true) {
         // Existing user - go directly to campus
-        console.log("✅ Profile already completed. Redirecting to /campus");
-        onComplete(data);
-        navigate('/campus');
+        console.log("✅ Profile already completed. Fetching full profile...");
+
+        // ✅ FIX FOR RACE CONDITION: Fetch full user profile before navigation
+        // This ensures collegeName, yearOfStudy, and other fields are populated
+        try {
+          const fullProfileResponse = await api.get('/api/auth/me');
+          const fullUserData = fullProfileResponse.data;
+          console.log("✅ Full profile fetched:", fullUserData);
+
+          // Save the complete profile to storage
+          localStorage.setItem('user', JSON.stringify(fullUserData));
+
+          // Update parent component with complete user data
+          onComplete(fullUserData);
+
+          // NOW navigate to campus with complete user data
+          navigate('/campus');
+        } catch (profileError) {
+          console.warn("⚠️ Could not fetch full profile, using login response:", profileError);
+          // Fallback: use the login response if profile fetch fails
+          onComplete(data);
+          navigate('/campus');
+        }
       } else {
         // New user - go to onboarding (step1)
         console.log("📝 Profile incomplete. Starting setup wizard");
