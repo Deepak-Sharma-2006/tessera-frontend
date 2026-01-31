@@ -52,11 +52,11 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                 setPod(res.data);
 
                 // ✅ AUTO-JOIN: Check if user is not already a member, then join
-                const isAlreadyMember = 
+                const isAlreadyMember =
                     res.data.ownerId === userId ||
                     (res.data.memberIds && res.data.memberIds.includes(userId)) ||
                     (res.data.adminIds && res.data.adminIds.includes(userId));
-                
+
                 if (isAlreadyMember) {
                     setIsUserMember(true);
                     setJoinErrorMessage(null);
@@ -176,7 +176,7 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                     const newMemberCount = res.data?.memberIds?.length || 0;
                     const oldAdminCount = pod?.adminIds?.length || 0;
                     const newAdminCount = res.data?.adminIds?.length || 0;
-                    
+
                     if (oldMemberCount !== newMemberCount || oldAdminCount !== newAdminCount) {
                         console.log('🔄 Member list updated via periodic refresh:', {
                             oldMembers: oldMemberCount,
