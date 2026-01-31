@@ -282,11 +282,10 @@ export default function InboxPage({ user }) {
                         <Button
                             key={filter.id}
                             onClick={() => setSelectedFilter(filter.id)}
-                            className={`text-sm h-9 px-4 ${
-                                selectedFilter === filter.id
+                            className={`text-sm h-9 px-4 ${selectedFilter === filter.id
                                     ? 'bg-blue-600 text-white'
                                     : 'bg-slate-700/50 hover:bg-slate-700 text-slate-300'
-                            }`}
+                                }`}
                         >
                             {filter.icon} {filter.label}
                         </Button>
