@@ -272,26 +272,24 @@ export default function InboxPage({ user }) {
             </div>
 
             {/* Filter Tabs */}
-            {inboxItems.length > 0 && (
-                <div className="mb-6 flex gap-2">
-                    {[
-                        { id: 'all', label: 'All', icon: '📋' },
-                        { id: 'rejections', label: 'Rejections', icon: '❌' },
-                        { id: 'bans', label: 'Bans/Alerts', icon: '🚫' }
-                    ].map(filter => (
-                        <Button
-                            key={filter.id}
-                            onClick={() => setSelectedFilter(filter.id)}
-                            className={`text-sm h-9 px-4 ${selectedFilter === filter.id
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-slate-700/50 hover:bg-slate-700 text-slate-300'
-                                }`}
-                        >
-                            {filter.icon} {filter.label}
-                        </Button>
-                    ))}
-                </div>
-            )}
+            <div className="mb-6 flex gap-2">
+                {[
+                    { id: 'all', label: 'All', icon: '📋' },
+                    { id: 'rejections', label: 'Rejections', icon: '❌' },
+                    { id: 'bans', label: 'Bans/Alerts', icon: '🚫' }
+                ].map(filter => (
+                    <Button
+                        key={filter.id}
+                        onClick={() => setSelectedFilter(filter.id)}
+                        className={`text-sm h-9 px-4 ${selectedFilter === filter.id
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-slate-700/50 hover:bg-slate-700 text-slate-300'
+                            }`}
+                    >
+                        {filter.icon} {filter.label}
+                    </Button>
+                ))}
+            </div>
 
             {/* Selection Mode Toggle (only show if there are items) */}
             {inboxItems.length > 0 && (
