@@ -7,6 +7,7 @@ import EventsHub from '@/components/EventsHub.jsx';
 import CampusHub from '@/components/CampusHub.jsx';
 import InterHub from '@/components/InterHub.jsx';
 import BadgeCenter from '@/components/BadgeCenter.jsx';
+import InboxPage from '@/components/InboxPage.jsx';
 import ProfilePage from '@/components/ProfilePage.jsx';
 import Navigation from '@/components/Navigation.jsx';
 import LoginFlow from '@/components/LoginFlow.jsx';
@@ -118,6 +119,7 @@ const AuthenticatedApp = ({ user, setUser }) => {
           {currentView === 'campus' && <CampusHub user={user} eventId={viewContext?.eventId} initialView={viewContext?.initialView || 'overview'} activeFilter={viewContext?.activeFilter} />}
           {currentView === 'events' && <EventsHub user={user} onNavigateToBeacon={handleNavigateToBeacon} />}
           {currentView === 'inter' && <InterHub user={user} initialView={viewContext?.initialView || 'feed'} />}
+          {currentView === 'inbox' && <InboxPage user={user} />}
           {currentView === 'badges' && <BadgeCenter user={user} />}
           {currentView === 'profile' && <ProfilePage user={user} />}
           {currentView === 'buddybeacon' && <BuddyBeacon eventId={viewContext?.eventId} />}

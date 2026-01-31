@@ -36,17 +36,17 @@ export default function KickUserDialog({ isOpen, podId, targetUser, actorId, onC
 
         try {
             await kickMemberFromPod(podId, actorId, targetUser.id, reason);
-            
+
             // Call parent callback to refresh pod data
             if (onSuccess) {
                 onSuccess();
             }
-            
+
             // Close dialog
             onClose();
         } catch (err) {
             console.error('Kick failed:', err);
-            
+
             if (err.response?.status === 403) {
                 setError('You do not have permission to kick this user');
             } else if (err.response?.data?.error) {
@@ -116,11 +116,10 @@ export default function KickUserDialog({ isOpen, podId, targetUser, actorId, onC
                     <Button
                         onClick={handleKick}
                         disabled={!reason || loading}
-                        className={`flex-1 ${
-                            !reason || loading
+                        className={`flex-1 ${!reason || loading
                                 ? 'opacity-50 cursor-not-allowed'
                                 : 'bg-red-600 hover:bg-red-700 text-white'
-                        }`}
+                            }`}
                     >
                         {loading ? 'Kicking...' : 'Kick User'}
                     </Button>

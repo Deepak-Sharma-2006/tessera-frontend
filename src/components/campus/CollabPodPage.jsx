@@ -234,7 +234,7 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
         setLeavingPod(true);
         try {
             await leavePod(podId, userId);
-            
+
             // Navigate back after leaving
             if (onBack) {
                 onBack();

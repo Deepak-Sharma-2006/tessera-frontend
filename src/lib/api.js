@@ -243,5 +243,107 @@ export const joinPodEnhanced = (podId, userId) => {
     });
 };
 
+/**
+ * ✅ STAGE 4: Promote a member to admin
+ * @param {string} podId - Pod ID
+ * @param {string} actorId - User performing promotion (must be Owner)
+ * @param {string} targetId - User being promoted
+ * @returns {Promise} Updated pod
+ */
+export const promoteToAdmin = (podId, actorId, targetId) => {
+    return api.post(`/pods/${podId}/promote-to-admin`, {
+        actorId,
+        targetId
+    });
+};
+
+/**
+ * ✅ STAGE 4: Demote an admin to member
+ * @param {string} podId - Pod ID
+ * @param {string} actorId - User performing demotion (must be Owner)
+ * @param {string} targetId - Admin being demoted
+ * @returns {Promise} Updated pod
+ */
+export const demoteToMember = (podId, actorId, targetId) => {
+    return api.post(`/pods/${podId}/demote-to-member`, {
+        actorId,
+        targetId
+    });
+};
+
+/**
+ * ✅ INBOX FEATURE: Fetch all inbox items for current user
+ * @param {string} userId - Current user's ID
+ * @returns {Promise<Array>} List of inbox items sorted by newest first
+ */
+export const fetchMyInbox = (userId) => {
+    return api.get('/inbox/my', {
+        params: { userId }
+    }).then(res => res.data);
+};
+
+/**
+ * ✅ INBOX FEATURE: Fetch unread inbox items
+ * @param {string} userId - Current user's ID
+ * @returns {Promise<Array>} List of unread inbox items
+ */
+export const fetchUnreadInbox = (userId) => {
+    return api.get('/inbox/my/unread', {
+        params: { userId }
+    }).then(res => res.data);
+};
+
+/**
+ * ✅ INBOX FEATURE: Mark an inbox item as read
+ * @param {string} itemId - ID of the inbox item
+ * @returns {Promise} Updated inbox item
+ */
+export const markInboxAsRead = (itemId) => {
+    return api.patch(`/inbox/${itemId}/read`).then(res => res.data);
+};
+
+/**
+ * ✅ INBOX FEATURE: Delete an inbox item
+ * @param {string} itemId - ID of the inbox item
+ * @returns {Promise} 204 No Content
+ */
+export const deleteInboxItem = (itemId) => {
+    return api.delete(`/inbox/${itemId}`);
+};
+
+/**
+ * ✅ INBOX FEATURE: Delete multiple inbox items in bulk
+ * @param {Array<string>} itemIds - Array of inbox item IDs to delete
+ * @returns {Promise} { deleted: number }
+ */
+export const deleteInboxItemsBulk = (itemIds) => {
+    return api.delete('/inbox/bulk', {
+        data: { ids: itemIds }
+    }).then(res => res.data);
+};
+
+/**
+ * ✅ INBOX FEATURE: Clear all inbox items of a specific type
+ * @param {string} userId - Current user's ID
+ * @param {string} type - Notification type (APPLICATION_REJECTION, POD_BAN)
+ * @returns {Promise} { deleted: number, type: string }
+ */
+export const clearInboxByType = (userId, type) => {
+    return api.delete('/inbox/clear-type', {
+        params: { userId, type }
+    }).then(res => res.data);
+};
+
+/**
+ * ✅ INBOX FEATURE: Clear all inbox items for current user
+ * @param {string} userId - Current user's ID
+ * @returns {Promise} { deleted: number }
+ */
+export const clearAllInbox = (userId) => {
+    return api.delete('/inbox/clear-all', {
+        params: { userId }
+    }).then(res => res.data);
+};
+
 // Default export of the configured axios instance
 export default api;

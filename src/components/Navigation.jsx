@@ -36,6 +36,13 @@ export default function Navigation({ currentView, onViewChange, user }) {
       gradient: 'from-purple-500 to-pink-500'
     },
     {
+      id: 'inbox',
+      label: 'Inbox',
+      icon: '📬',
+      description: 'Notifications & messages',
+      gradient: 'from-green-500 to-teal-500'
+    },
+    {
       id: 'badges',
       label: 'Badges',
       icon: '🏅',

@@ -1,21 +1,24 @@
 import { useState } from 'react';
 import KickUserDialog from './KickUserDialog.jsx';
+import PromotionDialog from './PromotionDialog.jsx';
 
 /**
- * ✅ STAGE 3: PodMemberList Component
+ * ✅ STAGE 3 & 4: PodMemberList Component
  * 
  * Displays pod members with role badges and context menu (3-dots).
  * 
  * Features:
  * - Shows member roles: Owner, Admin, Member
- * - Context menu only appears if current user can kick target
+ * - Context menu only appears if current user can kick/promote target
  * - Hierarchy enforcement: Owner > Admin > Member
  * - Kick action triggers KickUserDialog
+ * - Promote/Demote actions trigger PromotionDialog
  * - Leave pod action available for current user
  */
 export default function PodMemberList({ pod, currentUserId, currentUserRole, onPodUpdate, onLeavePod }) {
     const [contextMenu, setContextMenu] = useState({ open: false, member: null, x: 0, y: 0 });
     const [kickDialog, setKickDialog] = useState({ open: false, member: null });
+    const [promotionDialog, setPromotionDialog] = useState({ open: false, member: null, action: null });
 
     // Determine role hierarchy
     const getRoleHierarchy = (userId) => {
@@ -28,10 +31,10 @@ export default function PodMemberList({ pod, currentUserId, currentUserRole, onP
     // Check if actor can kick target (hierarchy enforcement)
     const canKick = (targetUserId) => {
         if (targetUserId === currentUserId) return false; // Can't kick self
-        
+
         const actorHierarchy = getRoleHierarchy(currentUserId);
         const targetHierarchy = getRoleHierarchy(targetUserId);
-        
+
         return actorHierarchy > targetHierarchy;
     };
 
@@ -47,7 +50,7 @@ export default function PodMemberList({ pod, currentUserId, currentUserRole, onP
     const handleContextMenu = (e, member) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         setContextMenu({
             open: true,
             member,
@@ -64,6 +67,18 @@ export default function PodMemberList({ pod, currentUserId, currentUserRole, onP
     // Handle kick action
     const handleKickClick = (member) => {
         setKickDialog({ open: true, member });
+        setContextMenu({ open: false, member: null, x: 0, y: 0 });
+    };
+
+    // ✅ STAGE 4: Handle promotion action
+    const handlePromoteClick = (member) => {
+        setPromotionDialog({ open: true, member, action: 'promote' });
+        setContextMenu({ open: false, member: null, x: 0, y: 0 });
+    };
+
+    // ✅ STAGE 4: Handle demotion action
+    const handleDemoteClick = (member) => {
+        setPromotionDialog({ open: true, member, action: 'demote' });
         setContextMenu({ open: false, member: null, x: 0, y: 0 });
     };
 
@@ -133,13 +148,12 @@ export default function PodMemberList({ pod, currentUserId, currentUserRole, onP
                                     {member.id === currentUserId ? 'You' : member.fullName}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                                        member.role === 'Owner'
-                                            ? 'bg-yellow-500/30 text-yellow-300 border border-yellow-500/50'
-                                            : member.role === 'Admin'
+                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${member.role === 'Owner'
+                                        ? 'bg-yellow-500/30 text-yellow-300 border border-yellow-500/50'
+                                        : member.role === 'Admin'
                                             ? 'bg-purple-500/30 text-purple-300 border border-purple-500/50'
                                             : 'bg-slate-500/30 text-slate-300 border border-slate-500/50'
-                                    }`}>
+                                        }`}>
                                         {member.role}
                                     </span>
                                 </div>
@@ -147,7 +161,8 @@ export default function PodMemberList({ pod, currentUserId, currentUserRole, onP
                         </div>
 
                         {/* Context Menu Button */}
-                        {member.id !== currentUserId && canKick(member.id) && (
+                        {/* Show menu if: can kick OR is Owner (for promotion) */}
+                        {member.id !== currentUserId && (canKick(member.id) || pod?.ownerId === currentUserId) && (
                             <button
                                 onClick={(e) => handleContextMenu(e, member)}
                                 className="ml-2 p-1 text-slate-400 hover:text-white hover:bg-slate-600 rounded transition-colors"
@@ -172,12 +187,13 @@ export default function PodMemberList({ pod, currentUserId, currentUserRole, onP
             {/* Context Menu Dropdown */}
             {contextMenu.open && contextMenu.member && (
                 <div
-                    className="fixed bg-slate-700 rounded-lg border border-slate-600 shadow-2xl py-1 z-40 min-w-[160px]"
+                    className="fixed bg-slate-700 rounded-lg border border-slate-600 shadow-2xl py-1 z-40 min-w-[180px]"
                     style={{
                         top: `${contextMenu.y}px`,
                         left: `${contextMenu.x}px`
                     }}
                 >
+                    {/* Kick Option - Show if can kick */}
                     {canKick(contextMenu.member.id) && (
                         <button
                             onClick={() => handleKickClick(contextMenu.member)}
@@ -185,6 +201,31 @@ export default function PodMemberList({ pod, currentUserId, currentUserRole, onP
                         >
                             Kick from Pod
                         </button>
+                    )}
+
+                    {/* ✅ STAGE 4: Promotion Options - Show if Owner */}
+                    {pod?.ownerId === currentUserId && contextMenu.member.id !== currentUserId && (
+                        <>
+                            {/* Make Admin - Show if target is Member */}
+                            {contextMenu.member.role === 'Member' && (
+                                <button
+                                    onClick={() => handlePromoteClick(contextMenu.member)}
+                                    className="w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-green-500/20 transition-colors"
+                                >
+                                    Make Admin
+                                </button>
+                            )}
+
+                            {/* Remove Admin - Show if target is Admin */}
+                            {contextMenu.member.role === 'Admin' && (
+                                <button
+                                    onClick={() => handleDemoteClick(contextMenu.member)}
+                                    className="w-full text-left px-4 py-2 text-sm text-yellow-400 hover:bg-yellow-500/20 transition-colors"
+                                >
+                                    Remove Admin
+                                </button>
+                            )}
+                        </>
                     )}
                 </div>
             )}
@@ -196,6 +237,22 @@ export default function PodMemberList({ pod, currentUserId, currentUserRole, onP
                 targetUser={kickDialog.member}
                 actorId={currentUserId}
                 onClose={() => setKickDialog({ open: false, member: null })}
+                onSuccess={() => {
+                    // Refresh pod data
+                    if (onPodUpdate) {
+                        onPodUpdate();
+                    }
+                }}
+            />
+
+            {/* ✅ STAGE 4: Promotion Dialog */}
+            <PromotionDialog
+                isOpen={promotionDialog.open}
+                podId={pod?.id}
+                targetUser={promotionDialog.member}
+                actorId={currentUserId}
+                action={promotionDialog.action}
+                onClose={() => setPromotionDialog({ open: false, member: null, action: null })}
                 onSuccess={() => {
                     // Refresh pod data
                     if (onPodUpdate) {
