@@ -40,6 +40,7 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
     );
 
     // Fetch pod info and messages from new endpoint
+    // Also AUTO-JOIN if user is not already a member
     useEffect(() => {
         let mounted = true;
         const fetchPod = async () => {
@@ -47,6 +48,28 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                 const res = await api.get(`/pods/${podId}`);
                 if (!mounted) return;
                 setPod(res.data);
+
+                // ✅ AUTO-JOIN: Check if user is not already a member, then join
+                const isAlreadyMember = 
+                    res.data.ownerId === userId ||
+                    (res.data.memberIds && res.data.memberIds.includes(userId)) ||
+                    (res.data.adminIds && res.data.adminIds.includes(userId));
+                
+                if (!isAlreadyMember) {
+                    console.log('🔀 User not a member, auto-joining pod...');
+                    try {
+                        await api.post(`/pods/${podId}/join-enhanced`, { userId });
+                        console.log('✅ Auto-joined pod successfully');
+                        // Refresh pod data after joining to get updated member list
+                        const refreshRes = await api.get(`/pods/${podId}`);
+                        if (mounted) {
+                            setPod(refreshRes.data);
+                        }
+                    } catch (joinErr) {
+                        console.error('⚠️ Auto-join failed:', joinErr.response?.data?.error || joinErr.message);
+                        // Continue with pod viewing even if join fails (cooldown, banned, etc)
+                    }
+                }
 
                 // Fetch messages from separate endpoint
                 const messagesRes = await api.get(`/pods/${podId}/messages`);
@@ -69,7 +92,7 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
         };
         fetchPod();
         return () => { mounted = false; };
-    }, [podId]);
+    }, [podId, userId]);
 
     // WebSocket for live chat
     const handleIncoming = useCallback((payload) => {
