@@ -163,9 +163,36 @@ export default function App() {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
 
-  const handleLoginComplete = (finalUserData) => {
-    setUser(finalUserData);
-    saveUser(finalUserData);
+  const handleLoginComplete = async (finalUserData) => {
+    try {
+      // ✅ CRITICAL: Fetch complete user data from backend to ensure all profile fields are present
+      const token = localStorage.getItem('token') || localStorage.getItem('jwt_token');
+      if (token) {
+        const res = await fetch('http://localhost:8080/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (res.ok) {
+          const completeUserData = await res.json();
+          console.log("✅ Complete user data fetched:", completeUserData);
+          setUser(completeUserData);
+          saveUser(completeUserData);
+          return;
+        }
+      }
+      
+      // Fallback: use provided data if API call fails
+      setUser(finalUserData);
+      saveUser(finalUserData);
+    } catch (err) {
+      console.error("Error fetching complete user data:", err);
+      // Fallback: use provided data
+      setUser(finalUserData);
+      saveUser(finalUserData);
+    }
   };
 
   // ✅ CRITICAL FIX: Session Verification on App Mount

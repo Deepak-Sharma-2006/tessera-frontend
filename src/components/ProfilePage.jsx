@@ -6,22 +6,25 @@ import { Avatar } from './ui/avatar.jsx'
 import { Input } from './ui/input.jsx'
 import { Textarea } from './ui/textarea.jsx'
 import api from '@/lib/api.js'
+import { formatDate, formatJoinedDate } from '@/utils/dateFormatter.js'
+import LoadingSpinner from './animations/LoadingSpinner.jsx'
 
 export default function ProfilePage({ user, onBackToCampus, profileOwner: initialProfileOwner }) {
   const [isEditing, setIsEditing] = useState(false)
-  const [profileOwner, setProfileOwner] = useState(initialProfileOwner)
-  const [formData, setFormData] = useState({ ...initialProfileOwner })
-  const [loading, setLoading] = useState(false)
+  const [profileOwner, setProfileOwner] = useState(initialProfileOwner || user)
+  const [formData, setFormData] = useState({ ...(initialProfileOwner || user) })
+  const [loading, setLoading] = useState(!initialProfileOwner)
   const [error, setError] = useState(null)
   const [showPublicProfile, setShowPublicProfile] = useState(false)
   const [isEditingBadges, setIsEditingBadges] = useState(false)
-  const [selectedBadges, setSelectedBadges] = useState(initialProfileOwner?.displayedBadges || [])
+  const [selectedBadges, setSelectedBadges] = useState((initialProfileOwner || user)?.displayedBadges || [])
   const isOwnProfile = user?.id === profileOwner?.id
 
   // Fetch profile data if not provided or refresh it
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
+        setLoading(true)
         const profileId = initialProfileOwner?.id || user?.id
         if (profileId) {
           const res = await api.get(`/api/users/${profileId}`)
@@ -34,24 +37,29 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
             console.log("✅ Badges synced on profile load:", syncRes.data.badges)
           } catch (syncErr) {
             console.warn("⚠️ Badge sync failed (non-critical):", syncErr)
-            // Continue with original userData if sync fails
           }
           
           setProfileOwner(userData)
           setFormData(userData)
+          setSelectedBadges(userData?.displayedBadges || [])
         }
       } catch (err) {
         console.error('Failed to fetch profile:', err)
-        // Use the provided profileOwner if fetch fails
+        // Use the provided profileOwner or user if fetch fails
         if (initialProfileOwner) {
           setProfileOwner(initialProfileOwner)
           setFormData(initialProfileOwner)
+        } else if (user) {
+          setProfileOwner(user)
+          setFormData(user)
         }
+      } finally {
+        setLoading(false)
       }
     }
 
     fetchProfileData()
-  }, [initialProfileOwner?.id])
+  }, [initialProfileOwner?.id, user?.id])
 
   // Initialize form data when profileOwner changes
   useEffect(() => {
@@ -173,6 +181,11 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
     'Profile Pioneer': '👤'
   }
 
+  // Loading check: prevent UI from showing hardcoded defaults while fetching data
+  if (loading && !profileOwner) {
+    return <LoadingSpinner />
+  }
+
   return (
     <>
       {/* Public Profile View */}
@@ -212,6 +225,12 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                       {profileOwner?.department || 'Department'}
                     </Badge>
                   </div>
+                  {/* ✅ CRITICAL FIX: Dynamic Joined Date in Public Profile */}
+                  {profileOwner?.createdAt && (
+                    <p className="text-xs text-gray-300 font-semibold mt-4">
+                      ✨ {formatJoinedDate(profileOwner.createdAt)}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -356,6 +375,13 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                     </Badge>
                   )}
                 </div>
+                
+                {/* ✅ CRITICAL FIX: Dynamic Joined Date */}
+                {profileOwner?.createdAt && (
+                  <p className="text-xs text-gray-400 font-semibold">
+                    ✨ {formatJoinedDate(profileOwner.createdAt)}
+                  </p>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -571,7 +597,9 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                   </Button>
                 </div>
               ) : (
-                (profileOwner?.skills || []).length > 0 ? (
+                loading ? (
+                  <p className="text-xs text-gray-400 italic">Loading skills...</p>
+                ) : (profileOwner?.skills || []).length > 0 ? (
                   (profileOwner.skills).map((skill) => (
                     <Badge key={skill} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black border-0 font-semibold">
                       {skill}
@@ -594,9 +622,11 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                     {tag}
                   </Badge>
                 ))
+              ) : loading ? (
+                <p className="text-xs text-gray-400 italic">Loading interests...</p>
               ) : (
                 <p className="text-xs text-gray-500">No interests added yet.</p>
-              )}
+              )}}
             </div>
           </div>
         </Card>
@@ -636,6 +666,8 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                       {role}
                     </Badge>
                   ))
+                ) : loading ? (
+                  <p className="text-xs text-gray-400 italic">Loading roles...</p>
                 ) : (
                   <p className="text-xs text-gray-500">No roles specified yet.</p>
                 )}

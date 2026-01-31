@@ -5,6 +5,8 @@ import { Card } from './ui/card.jsx';
 import { Button } from './ui/button.jsx';
 import { Input } from './ui/input.jsx';
 import { Textarea } from './ui/textarea.jsx';
+import MultiSelect from './ui/MultiSelect.jsx';
+import { SKILLS_LIBRARY, ROLES_LIBRARY, INTERESTS_LIBRARY } from '@/utils/constants.js';
 
 // Main component
 export default function LoginFlow({ onComplete, initialFlowState, user }) {
@@ -13,10 +15,31 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
   // ✅ Helper to extract college from email domain
   const deriveCollege = (email) => {
     if (!email) return 'IIT'; // Default fallback
-    if (email.includes('iit')) return 'IIT';
-    if (email.includes('mit')) return 'MIT';
-    if (email.includes('stanford')) return 'Stanford';
-    return 'Unknown College';
+    
+    const domain = email.toLowerCase().split('@')[1] || '';
+    
+    // College mappings based on email domain
+    const collegeMap = {
+      'iit': 'IIT',
+      'mit': 'MIT',
+      'stanford': 'Stanford',
+      'sinhgad': 'Sinhgad',
+      'symbiosis': 'SYMBIOSIS',
+      'manipal': 'Manipal',
+      'vit': 'VIT',
+      'bits': 'BITS Pilani'
+    };
+    
+    // Check if domain contains any known college
+    for (const [key, collegeName] of Object.entries(collegeMap)) {
+      if (domain.includes(key)) {
+        return collegeName;
+      }
+    }
+    
+    // If no match found, try to use the domain name itself
+    const domainPrefix = domain.split('.')[0].toUpperCase();
+    return domainPrefix || 'Unknown College';
   };
 
   // Sets the starting step based on whether the user was redirected from LinkedIn
@@ -89,7 +112,7 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
   // ✅ DATA SYNC FIX: Watch for the 'user' object to load and sync formData
   useEffect(() => {
     if (user && user.email) {
-      // Only update if the form is currently empty (to avoid overwriting user typing)
+      // Sync all profile data from database
       setFormData(prev => ({
         ...prev,
         email: user.email,
@@ -101,7 +124,21 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
         // Ensure other fields are synced if they exist in DB
         yearOfStudy: user.yearOfStudy || prev.yearOfStudy,
         department: user.department || prev.department,
-        bio: user.bio || prev.bio
+        bio: user.bio || prev.bio,
+        
+        // ✅ CRITICAL FIX: Sync skills, roles, interests from DB
+        skills: user.skills && user.skills.length > 0 ? user.skills : prev.skills,
+        rolesOpenTo: user.rolesOpenTo && user.rolesOpenTo.length > 0 ? user.rolesOpenTo : prev.rolesOpenTo,
+        excitingTags: user.excitingTags && user.excitingTags.length > 0 ? user.excitingTags : prev.excitingTags,
+        interests: user.interests && user.interests.length > 0 ? user.interests : prev.interests,
+        
+        // ✅ Sync other profile data
+        goals: user.goals || prev.goals,
+        githubUrl: user.githubUrl || prev.githubUrl,
+        portfolioUrl: user.portfolioUrl || prev.portfolioUrl,
+        profilePicUrl: user.profilePicUrl || prev.profilePicUrl,
+        linkedinUrl: user.linkedinUrl || prev.linkedinUrl,
+        linkedInProfile: user.linkedInProfile || prev.linkedInProfile
       }));
     }
   }, [user]); // Run whenever 'user' updates
@@ -126,9 +163,6 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
   // --- Options ---
   const yearOptions = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'PG/Masters', 'PhD'];
   const departmentOptions = ['Computer Science', 'Information Technology', 'Electronics', 'Mechanical', 'Other'];
-  const skillOptions = ['React', 'Python', 'JavaScript', 'Node.js', 'Java', 'C++', 'UI/UX Design', 'AI/ML'];
-  const roleOptions = ['Frontend Developer', 'Backend Developer', 'Full Stack Developer', 'UI/UX Designer'];
-  const excitingTagsOptions = ['AI x Health', 'Startup x Campus', 'Social Impact', 'FinTech', 'EdTech'];
 
   // --- INPUT HANDLERS ---
   const handleInputChange = (e) => {
@@ -228,13 +262,27 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
       console.log("🔄 Setting activeUser to:", data);
       setActiveUser(data);
 
-      // Save the email as the user ID (critical!)
+      // Save the complete user data with ALL profile fields
       const userData = {
         id: data.email,  // <-- Use email as ID
         email: data.email,
         fullName: data.fullName,
         userId: data.userId,  // Keep the backend ID as well
-        profileCompleted: data.profileCompleted
+        profileCompleted: data.profileCompleted,
+        // ✅ CRITICAL: Include all profile data from server response
+        skills: data.skills || [],
+        rolesOpenTo: data.rolesOpenTo || [],
+        excitingTags: data.excitingTags || [],
+        interests: data.interests || [],
+        goals: data.goals || '',
+        githubUrl: data.githubUrl || '',
+        portfolioUrl: data.portfolioUrl || '',
+        profilePicUrl: data.profilePicUrl || '',
+        yearOfStudy: data.yearOfStudy || '',
+        department: data.department || '',
+        collegeName: data.collegeName || '',
+        // Include all other fields from response
+        ...data
       };
 
       setFormData(prev => ({ ...prev, ...userData }));
@@ -257,8 +305,43 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
     }
   };
 
+  const handleProfilePictureUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("File size must be less than 5MB");
+      return;
+    }
+
+    if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+      setError("Only JPG and PNG files are allowed");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData(prev => ({
+        ...prev,
+        profilePicture: file,
+        profilePicUrl: reader.result
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const isValidGitHubUrl = (url) => {
+    if (!url) return false;
+    try {
+      const urlObj = new URL(url);
+      return urlObj.hostname === 'github.com' && url.includes('github.com');
+    } catch (e) {
+      return false;
+    }
+  };
+
   const handleStep1Continue = async () => {
-    console.log("�️ Step 1 'Next' Button Clicked! (Profile Endpoint)");
+    console.log("🖱️ Step 1 'Next' Button Clicked! (Profile Endpoint)");
 
     // 1. GET DATA FROM FORMDATA
     const nameVal = formData.fullName?.trim() || '';
@@ -270,6 +353,18 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
     if (!nameVal) {
       console.error("❌ Full name is empty");
       setError("Please enter your full name.");
+      return;
+    }
+
+    if (!yearVal) {
+      console.error("❌ Year of study is empty");
+      setError("Please select your year of study.");
+      return;
+    }
+
+    if (!deptVal) {
+      console.error("❌ Department is empty");
+      setError("Please select your department.");
       return;
     }
 
@@ -393,10 +488,20 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
     try {
       console.log("📤 Step 4: Submitting final profile to /api/users/" + activeId);
 
-      // ✅ FIX 3: Use ID in URL with /api prefix
+      // ✅ FIX 3: Use ID in URL with /api prefix and save all fields
       const response = await api.put(`/api/users/${activeId}`, {
         username: formData.username,
         fullName: formData.fullName,
+        skills: formData.skills,
+        rolesOpenTo: formData.rolesOpenTo,
+        excitingTags: formData.excitingTags,
+        goals: formData.goals,
+        githubUrl: formData.githubUrl,
+        portfolioUrl: formData.portfolioUrl,
+        profilePicUrl: formData.profilePicUrl,
+        yearOfStudy: formData.yearOfStudy,
+        department: formData.department,
+        collegeName: formData.collegeName,
         ...formData
       });
 
@@ -688,13 +793,40 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
                 <div><label className="block font-medium mb-2">Year of Study</label><select name="yearOfStudy" value={formData.yearOfStudy || ""} onChange={handleInputChange} className="dropdown-year-of-study w-full p-3 border border-border rounded-lg"><option value="">Select year</option>{yearOptions.map(y => <option key={y} value={y}>{y}</option>)}</select></div>
                 <div><label className="block font-medium mb-2">Department</label><select name="department" value={formData.department || ""} onChange={handleInputChange} className="dropdown-department w-full p-3 border border-border rounded-lg"><option value="">Select department</option>{departmentOptions.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
               </div>
-              <div><label className="block font-medium mb-2">Profile Picture</label><div className="upload-profile-pic border-2 border-dashed border-border rounded-lg p-6 text-center"><div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-xl">{formData.profilePicUrl ? <img src={formData.profilePicUrl} alt="Profile" className="rounded-full w-full h-full object-cover" /> : (formData.fullName || formData.email || "?").charAt(0).toUpperCase()}</div><Button type="button" variant="outline" size="sm">📸 Upload Photo</Button><p className="text-sm text-muted-foreground mt-2">JPG, PNG up to 5MB</p></div></div>
+              <div>
+                <label className="block font-medium mb-2">Profile Picture</label>
+                <div className="upload-profile-pic border-2 border-dashed border-border rounded-lg p-6 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-xl overflow-hidden">
+                    {formData.profilePicUrl ? (
+                      <img src={formData.profilePicUrl} alt="Profile" className="rounded-full w-full h-full object-cover" />
+                    ) : (
+                      (formData.fullName || formData.email || "?").charAt(0).toUpperCase()
+                    )}
+                  </div>
+                  <input 
+                    type="file" 
+                    accept="image/jpeg,image/png,image/jpg" 
+                    onChange={handleProfilePictureUpload}
+                    id="profilePicInput"
+                    className="hidden"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => document.getElementById('profilePicInput').click()}
+                  >
+                    📸 Upload Photo
+                  </Button>
+                  <p className="text-sm text-muted-foreground mt-2">JPG, PNG up to 5MB</p>
+                  {formData.profilePicUrl && <p className="text-xs text-green-600 mt-2">✓ Photo selected</p>}
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={handleStep1Continue}
-                // ✅ NUCLEAR FIX: Only require Full Name. Ignore the dropdowns.
-                disabled={!formData.fullName || formData.fullName.trim() === ''}
-                className={`w-full py-3 rounded-xl font-semibold transition-all duration-200 ${(!formData.fullName || formData.fullName.trim() === '')
+                disabled={!formData.fullName || formData.fullName.trim() === '' || !formData.yearOfStudy || !formData.department}
+                className={`w-full py-3 rounded-xl font-semibold transition-all duration-200 ${(!formData.fullName || formData.fullName.trim() === '' || !formData.yearOfStudy || !formData.department)
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   : 'bg-indigo-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5'
                   }`}
@@ -708,10 +840,36 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
       {currentStep === 'step2' && (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center p-4">
           <Card className="w-full max-w-4xl p-8">
-            <div className="mb-8"><h2 className="text-2xl font-bold mb-2">Step 2: Skills & Proof</h2><div className="w-full bg-muted rounded-full h-2 mb-4"><div className="bg-primary h-2 rounded-full w-1/2"></div></div></div>
-            <div className="space-y-8">
-              <div><label className="block font-medium mb-4">Select Your Skills</label><div className="flex flex-wrap gap-2 mb-4">{skillOptions.map(s => <button type="button" key={s} onClick={() => toggleArrayItem('skills', s)} className={`px-4 py-2 rounded-lg border transition-all ${(formData.skills || []).includes(s) ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border hover:bg-muted'}`}>{s}</button>)}</div></div>
-              <Button type="button" className="w-full" onClick={handleStep2Continue} disabled={(formData.skills || []).length === 0}>Next →</Button>
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-2">Step 2: Skills & Expertise</h2>
+              <p className="text-sm text-muted-foreground mb-4">What tools do you bring to the synergy?</p>
+              <div className="w-full bg-muted rounded-full h-2"><div className="bg-primary h-2 rounded-full w-1/4"></div></div>
+            </div>
+            <div className="space-y-6">
+              <MultiSelect 
+                options={SKILLS_LIBRARY}
+                selected={formData.skills || []}
+                onChange={(val) => setFormData({ ...formData, skills: val })}
+                placeholder="Search Skills (e.g. React, Python, UI/UX)..."
+              />
+              <div className="flex gap-4">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  className="w-full" 
+                  onClick={() => setCurrentStep('step1')}
+                >
+                  ← Back to Profile
+                </Button>
+                <Button 
+                  type="button" 
+                  className="w-full" 
+                  onClick={handleStep2Continue} 
+                  disabled={(formData.skills || []).length === 0}
+                >
+                  Next →
+                </Button>
+              </div>
             </div>
           </Card>
         </div>
@@ -719,12 +877,62 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
       {currentStep === 'step3' && (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
           <Card className="w-full max-w-3xl p-8">
-            <div className="mb-8"><h2 className="text-2xl font-bold mb-2">Step 3: Roles & Interests</h2><div className="w-full bg-muted rounded-full h-2 mb-4"><div className="bg-primary h-2 rounded-full w-3/4"></div></div></div>
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-2">Step 3: Roles & Interests</h2>
+              <p className="text-sm text-muted-foreground mb-4">Tell us what excites you and what roles you're open to</p>
+              <div className="w-full bg-muted rounded-full h-2"><div className="bg-primary h-2 rounded-full w-1/2"></div></div>
+            </div>
             <div className="space-y-8">
-              <div><label className="block font-medium mb-4">Roles You're Open To</label><div className="flex flex-wrap gap-2">{roleOptions.map(r => <button type="button" key={r} onClick={() => toggleArrayItem('rolesOpenTo', r)} className={`px-4 py-2 rounded-lg border transition-all ${(formData.rolesOpenTo || []).includes(r) ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border hover:bg-muted'}`}>{r}</button>)}</div></div>
-              <div><label className="block font-medium mb-2">Goals for This Semester</label><Textarea name="goals" value={formData.goals || ''} onChange={handleInputChange} placeholder="What do you want to build..." rows={4} /></div>
-              <div><label className="block font-medium mb-4">What Excites You?</label><div className="flex flex-wrap gap-2">{excitingTagsOptions.map(t => <button type="button" key={t} onClick={() => toggleArrayItem('excitingTags', t)} className={`px-4 py-2 rounded-lg border transition-all ${(formData.excitingTags || []).includes(t) ? 'bg-purple-600 text-white border-purple-600' : 'bg-background border-border hover:bg-muted'}`}>✨ {t}</button>)}</div></div>
-              <Button type="button" className="w-full" onClick={() => setCurrentStep('step4')} disabled={(formData.rolesOpenTo || []).length === 0 || !(formData.goals || '').trim()}>Next →</Button>
+              <div>
+                <label className="block font-medium mb-3">Roles You're Open To</label>
+                <MultiSelect 
+                  options={ROLES_LIBRARY}
+                  selected={formData.rolesOpenTo || []}
+                  onChange={(val) => setFormData({ ...formData, rolesOpenTo: val })}
+                  placeholder="Search roles (e.g., Frontend Developer, DevOps, Product Manager)..."
+                />
+              </div>
+
+              {(formData.rolesOpenTo || []).length > 0 && (
+                <>
+                  <div>
+                    <label className="block font-medium mb-3">Goals for This Semester</label>
+                    <Textarea name="goals" value={formData.goals || ''} onChange={handleInputChange} placeholder="What do you want to build..." rows={4} />
+                  </div>
+                  <div>
+                    <label className="block font-medium mb-3">What Excites You?</label>
+                    <MultiSelect 
+                      options={INTERESTS_LIBRARY}
+                      selected={formData.excitingTags || []}
+                      onChange={(val) => setFormData({ ...formData, excitingTags: val })}
+                      placeholder="Search interests (e.g., AI x Health, Web3, Open Source)..."
+                    />
+                  </div>
+                </>
+              )}
+
+              {(formData.rolesOpenTo || []).length === 0 && (
+                <p className="text-sm text-center text-muted-foreground bg-muted/30 p-4 rounded-lg">Select at least one role to continue</p>
+              )}
+
+              <div className="flex gap-4">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  className="w-full" 
+                  onClick={() => setCurrentStep('step2')}
+                >
+                  ← Back to Skills
+                </Button>
+                <Button 
+                  type="button" 
+                  className="w-full" 
+                  onClick={() => setCurrentStep('step4')} 
+                  disabled={(formData.rolesOpenTo || []).length === 0 || !(formData.goals || '').trim() || (formData.excitingTags || []).length === 0}
+                >
+                  Next →
+                </Button>
+              </div>
             </div>
           </Card>
         </div>
@@ -732,11 +940,50 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
       {currentStep === 'step4' && (
         <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center p-4">
           <Card className="w-full max-w-2xl p-8">
-            <div className="mb-8"><h2 className="text-2xl font-bold mb-2">Step 4: Final Touches</h2><div className="w-full bg-muted rounded-full h-2 mb-4"><div className="bg-primary h-2 rounded-full w-full"></div></div></div>
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-2">Step 4: Final Touches</h2>
+              <p className="text-sm text-muted-foreground mb-4">Complete your profile with links</p>
+              <div className="w-full bg-muted rounded-full h-2 mb-4"><div className="bg-primary h-2 rounded-full w-full"></div></div>
+            </div>
             <div className="space-y-6">
-              <div><label className="block font-medium mb-2">GitHub Profile</label><Input name="githubUrl" value={formData.githubUrl || ''} onChange={handleInputChange} placeholder="https://github.com/yourusername" /></div>
-              <div><label className="block font-medium mb-2">Portfolio Website</label><Input name="portfolioUrl" value={formData.portfolioUrl || ''} onChange={handleInputChange} placeholder="https://yourportfolio.com" /></div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700" disabled={isLoading}>{isLoading ? 'Saving...' : '🚀 Complete Profile'}</Button>
+              <div>
+                <label className="block font-medium mb-2">GitHub Profile <span className="text-red-500">*</span></label>
+                <Input 
+                  name="githubUrl" 
+                  value={formData.githubUrl || ''} 
+                  onChange={handleInputChange}
+                  placeholder="https://github.com/yourusername" 
+                  className={`border-2 ${formData.githubUrl && !isValidGitHubUrl(formData.githubUrl) ? 'border-red-500' : 'border-border'}`}
+                />
+                <p className="text-xs text-muted-foreground mt-1">Required to complete your profile</p>
+                {formData.githubUrl && !isValidGitHubUrl(formData.githubUrl) && (
+                  <p className="text-xs text-red-500 mt-1">⚠ Please enter a valid GitHub URL (e.g., https://github.com/username)</p>
+                )}
+                {formData.githubUrl && isValidGitHubUrl(formData.githubUrl) && (
+                  <p className="text-xs text-green-600 mt-1">✓ Valid GitHub URL</p>
+                )}
+              </div>
+              <div>
+                <label className="block font-medium mb-2">Portfolio Website</label>
+                <Input name="portfolioUrl" value={formData.portfolioUrl || ''} onChange={handleInputChange} placeholder="https://yourportfolio.com" />
+              </div>
+              <div className="flex gap-4">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  className="w-full" 
+                  onClick={() => setCurrentStep('step3')}
+                >
+                  ← Back
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700" 
+                  disabled={isLoading || !formData.githubUrl || !isValidGitHubUrl(formData.githubUrl)}
+                >
+                  {isLoading ? 'Saving...' : '🚀 Complete Profile'}
+                </Button>
+              </div>
             </div>
           </Card>
         </div>
