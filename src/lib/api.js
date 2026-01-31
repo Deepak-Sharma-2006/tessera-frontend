@@ -232,6 +232,20 @@ export const leavePod = (podId, userId) => {
 };
 
 /**
+ * Transfer pod ownership to another member/admin
+ * @param {string} podId - Pod ID
+ * @param {string} currentOwnerId - Current owner ID
+ * @param {string} newOwnerId - New owner ID
+ * @returns {Promise} Updated pod
+ */
+export const transferOwnership = (podId, currentOwnerId, newOwnerId) => {
+    return api.post(`/pods/${podId}/transfer-ownership`, {
+        currentOwnerId,
+        newOwnerId
+    });
+};
+
+/**
  * Join a pod (checks cooldown, ban, and capacity)
  * @param {string} podId - Pod ID
  * @param {string} userId - User joining

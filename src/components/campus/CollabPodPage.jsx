@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button.jsx';
 import usePodWs from '@/hooks/usePodWs.js';
 import CollabPodInput from './CollabPodInput.jsx';
 import PodMemberList from '@/components/pods/PodMemberList.jsx';
+import TransferOwnershipDialog from '@/components/pods/TransferOwnershipDialog.jsx';
 import { leavePod } from '@/lib/api.js';
 
 export default function CollabPodPage({ user, podId: propPodId, onBack }) {
@@ -20,6 +21,7 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
     const [attachment, setAttachment] = useState(null);
     const [showMembers, setShowMembers] = useState(false);
     const [leavingPod, setLeavingPod] = useState(false);
+    const [showTransferDialog, setShowTransferDialog] = useState(false);
 
     const messagesEndRef = useRef(null);
 
@@ -227,6 +229,16 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
 
     // ✅ STAGE 3: Handle leaving the pod
     const handleLeavePod = async () => {
+        // Check if user is the owner
+        const isOwner = pod?.ownerId === userId;
+
+        if (isOwner) {
+            // Owner must transfer ownership first
+            setShowTransferDialog(true);
+            return;
+        }
+
+        // Non-owner can leave normally
         if (!window.confirm('Are you sure you want to leave this pod? You can rejoin after 15 minutes.')) {
             return;
         }
@@ -246,6 +258,18 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
             alert('Failed to leave pod. Please try again.');
         } finally {
             setLeavingPod(false);
+        }
+    };
+
+    // Handle successful ownership transfer
+    const handleTransferSuccess = async () => {
+        // Refresh pod data
+        try {
+            const res = await api.get(`/pods/${podId}`);
+            setPod(res.data);
+            alert('Ownership transferred successfully!');
+        } catch (err) {
+            console.error('Failed to refresh pod:', err);
         }
     };
 
@@ -492,6 +516,17 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                     onAttachmentRemove={() => setAttachment(null)}
                 />
             </div>
+
+            {/* Transfer Ownership Dialog */}
+            <TransferOwnershipDialog
+                isOpen={showTransferDialog}
+                podId={podId}
+                currentOwnerId={userId}
+                members={pod?.memberIds?.map(id => ({ id, fullName: id, name: id, email: '' })) || []}
+                admins={pod?.adminIds?.map(id => ({ id, fullName: id, name: id, email: '' })) || []}
+                onClose={() => setShowTransferDialog(false)}
+                onSuccess={handleTransferSuccess}
+            />
         </div>
     );
 }
