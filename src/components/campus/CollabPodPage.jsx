@@ -22,6 +22,8 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
     const [showMembers, setShowMembers] = useState(false);
     const [leavingPod, setLeavingPod] = useState(false);
     const [showTransferDialog, setShowTransferDialog] = useState(false);
+    const [isUserMember, setIsUserMember] = useState(false); // ✅ Track if user is actually a member
+    const [joinErrorMessage, setJoinErrorMessage] = useState(null); // ✅ Track join errors (cooldown, banned)
 
     const messagesEndRef = useRef(null);
 
@@ -55,7 +57,10 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                     (res.data.memberIds && res.data.memberIds.includes(userId)) ||
                     (res.data.adminIds && res.data.adminIds.includes(userId));
                 
-                if (!isAlreadyMember) {
+                if (isAlreadyMember) {
+                    setIsUserMember(true);
+                    setJoinErrorMessage(null);
+                } else {
                     console.log('🔀 User not a member, auto-joining pod...');
                     try {
                         const joinRes = await api.post(`/pods/${podId}/join-enhanced`, { userId });
@@ -63,14 +68,34 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                         // Use the response pod data which already has the user added
                         if (mounted && joinRes.data) {
                             setPod(joinRes.data);
+                            setIsUserMember(true);
+                            setJoinErrorMessage(null);
                             console.log('🔄 Updated pod with join response:', {
                                 memberIds: joinRes.data.memberIds,
                                 memberNames: joinRes.data.memberNames
                             });
                         }
                     } catch (joinErr) {
-                        console.error('⚠️ Auto-join failed:', joinErr.response?.data?.error || joinErr.message);
-                        // If join fails, still fetch latest pod data (might be already member)
+                        if (joinErr.response?.status === 429) {
+                            // Cooldown error - user must wait
+                            const minutesRemaining = joinErr.response?.data?.minutesRemaining || 15;
+                            const msg = `⏱️ You can rejoin this pod in ${minutesRemaining} minute(s). Please try again later.`;
+                            setJoinErrorMessage(msg);
+                            setError(msg);
+                            setIsUserMember(false);
+                            console.error('⏱️ Cooldown in effect:', joinErr.response?.data?.error);
+                        } else if (joinErr.response?.status === 403) {
+                            // Banned from pod
+                            const msg = '🚫 You are banned from this pod and cannot join.';
+                            setJoinErrorMessage(msg);
+                            setError(msg);
+                            setIsUserMember(false);
+                            console.error('⛔ User is banned:', joinErr.response?.data?.error);
+                        } else {
+                            console.error('⚠️ Auto-join failed:', joinErr.response?.data?.error || joinErr.message);
+                            setIsUserMember(false);
+                        }
+                        // If join fails, still fetch latest pod data to show current state
                         try {
                             const refreshRes = await api.get(`/pods/${podId}`);
                             if (mounted) {
