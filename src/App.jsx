@@ -229,7 +229,8 @@ export default function App() {
       // ✅ CRITICAL: Fetch complete user data from backend to ensure all profile fields are present
       const token = localStorage.getItem('token') || localStorage.getItem('jwt_token');
       if (token) {
-        const res = await fetch('http://localhost:8080/api/auth/me', {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+        const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -271,7 +272,8 @@ export default function App() {
         }
 
         // Attempt to verify the token with the backend
-        const res = await fetch('http://localhost:8080/api/auth/me', {
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+        const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

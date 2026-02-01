@@ -14,7 +14,8 @@ import api, {
   respondToInvite 
 } from '@/lib/api.js';
 
-const WS_URL = "http://localhost:8080/ws-studcollab";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const WS_URL = BASE_URL.replace(/^http/, 'ws') + '/ws-studcollab';
 
 // Hook to fetch conversations for a user
 function useConversations(userId) {

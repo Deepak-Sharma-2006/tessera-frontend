@@ -212,7 +212,8 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
     const getImageUrl = (url) => {
         if (!url) return null;
         if (url.startsWith('http')) return url;
-        return `http://localhost:8080${url}`;
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+        return `${API_BASE_URL}${url}`;
     };
 
     // Handle send message from input component
