@@ -67,7 +67,6 @@ export default forwardRef(function InterFeed({ user }, ref) {
   const [pollOptions, setPollOptions] = useState(['', '']);
   const [skillTags, setSkillTags] = useState([]);
   const [newTag, setNewTag] = useState('');
-  const [expandedComments, setExpandedComments] = useState({});
   const [joiningRoomId, setJoiningRoomId] = useState(null);
   const [membershipState, setMembershipState] = useState({});
 
@@ -94,7 +93,7 @@ export default forwardRef(function InterFeed({ user }, ref) {
           COLLAB: data.COLLAB || 0
         }
         setCounts(countObj)
-      } catch (e) {
+      } catch (_err) {
         // ignore
       }
     }
@@ -293,9 +292,10 @@ export default forwardRef(function InterFeed({ user }, ref) {
   };
 
   // Toggle comment visibility for DISCUSSION posts
-  const toggleComments = (postId) => {
-    setExpandedComments(prev => ({ ...prev, [postId]: !prev[postId] }));
-  };
+  // Currently unused as single-view design doesn't require toggling
+  // const toggleComments = (postId) => {
+  //   setExpandedComments(prev => ({ ...prev, [postId]: !prev[postId] }));
+  // };
 
   if (loading) return <div className="p-4 text-center">Loading Inter-College Feed...</div>;
   if (error) return <div className="p-4 text-center text-red-500">Could not load feed.</div>;
@@ -428,7 +428,7 @@ export default forwardRef(function InterFeed({ user }, ref) {
       <div className="space-y-6">
         {getFilteredPosts().map((post) => {
           // Handle both pollOptions and options field names
-          const pollOptions = post.pollOptions || post.options || [];
+          const _pollOptions = post.pollOptions || post.options || [];
           const totalVotes = post.type === 'POLL' && post.pollOptions && Array.isArray(post.pollOptions)
             ? post.pollOptions.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0)
             : 0;

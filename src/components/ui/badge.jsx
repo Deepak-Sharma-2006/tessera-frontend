@@ -25,8 +25,8 @@ const Badge = forwardRef(
             // Default - Solid primary (no gradient)
             'bg-primary text-primary-foreground shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-500': variant === 'default',
 
-            // Secondary - Subtle glass with white/8
-            'backdrop-blur-xl bg-white/8 border border-white/15 text-foreground hover:bg-white/12 hover:border-white/25 shadow-sm': variant === 'secondary',
+            // Secondary - Subtle glass with light tint
+            'backdrop-blur-xl bg-white/6 border border-white/12 text-foreground hover:bg-white/10 hover:border-white/20 shadow-sm': variant === 'secondary',
 
             // Destructive - Danger styling with glassmorphism
             'backdrop-blur-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/15 hover:border-red-500/30 shadow-sm': variant === 'destructive',
@@ -46,7 +46,7 @@ const Badge = forwardRef(
             // Gradient - Subtle gradient approach
             'bg-gradient-to-r from-primary/80 to-primary/60 text-primary-foreground shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-500': variant === 'gradient',
 
-            // Glass - Primary glassmorphism (default variant)
+            // Glass - Primary glassmorphism
             'backdrop-blur-xl bg-white/8 border border-white/15 text-foreground hover:bg-white/12 hover:border-white/25 shadow-sm': variant === 'glass',
           },
 
@@ -91,7 +91,7 @@ const Badge = forwardRef(
               'bg-emerald-500': variant === 'success',
               'bg-amber-500': variant === 'warning',
               'bg-primary': variant === 'info',
-              'bg-primary-foreground': variant === 'gradient',
+              'bg-amber-300': variant === 'gradient',
               'bg-white/50': variant === 'glass',
               'bg-cyan-400': variant === 'neon' && theme === 'cyber',
               'bg-primary-solid': variant === 'neon' && theme !== 'cyber',
