@@ -115,7 +115,7 @@ export default function CollabRooms({ user, onNavigateToRoom, onEnterCollabRoom,
   }
 
   const isRoomOwner = (room) => {
-    return room.creatorId === currentUserId
+    return room.ownerId === currentUserId
   }
 
   const isRoomMember = (room) => {

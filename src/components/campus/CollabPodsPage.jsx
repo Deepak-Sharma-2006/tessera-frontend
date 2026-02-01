@@ -135,10 +135,10 @@ export default function CollabPodsPage({ user, onEnterCollabPod, onRefreshPosts 
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {displayPods.map(pod => {
-                        // Compare pod creator with current user
-                        // The backend now sets creatorId to user.id, so compare IDs directly
-                        const isOwner = pod.creatorId === user?.id || pod.creator?.id === user?.id;
-                        console.log(`Pod Creator: ${pod.creatorId || pod.creator?.id} | Me: ${user?.id} | Match: ${isOwner}`);
+                        // Compare pod owner with current user (permission follows ownership, not creator)
+                        // Backend sets ownerId when pod is transferred
+                        const isOwner = pod.ownerId === user?.id;
+                        console.log(`Pod Owner: ${pod.ownerId} | Me: ${user?.id} | Match: ${isOwner}`);
 
                         return (
                             <Card key={pod.id} className="bg-slate-800/20 border-slate-700 text-white hover:border-slate-600 transition-colors relative group">
