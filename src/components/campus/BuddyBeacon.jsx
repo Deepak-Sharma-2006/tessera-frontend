@@ -391,21 +391,21 @@ export default function BuddyBeacon({ user }) {
             );
             // ✅ FIX #1: Update UI - Mark post as applied in both arrays
             const postId = selectedPost.id;
-            
+
             // Update posts array with hasApplied flag
             setPosts(prev => prev.map(p => {
                 const pId = (p.post?.id || p.id);
                 return pId === postId ? { ...p, hasApplied: true } : p;
             }));
-            
+
             // Also update appliedPosts with new application
-            setAppliedPosts(prev => [...prev, { 
-                applicationId: res.data.id, 
-                post: selectedPost, 
+            setAppliedPosts(prev => [...prev, {
+                applicationId: res.data.id,
+                post: selectedPost,
                 hasApplied: true,
-                applicationStatus: res.data.status 
+                applicationStatus: res.data.status
             }]);
-            
+
             // Close modal and reset state
             setShowApplicationModal(false);
             setSelectedPost(null);
