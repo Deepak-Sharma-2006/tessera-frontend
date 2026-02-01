@@ -13,6 +13,7 @@ import Navigation from '@/components/Navigation.jsx';
 import LoginFlow from '@/components/LoginFlow.jsx';
 import BuddyBeacon from '@/components/campus/BuddyBeacon.jsx';
 import PostCommentsPage from '@/components/campus/PostCommentsPage.jsx';
+import PostCommentsView from '@/components/PostCommentsView.jsx';
 import Logout from '@/pages/Logout.jsx';
 
 // --- Other Components ---
@@ -338,15 +339,7 @@ export default function App() {
 
             <Route path="/post/:postId/comments" element={
               <ProtectedRoute user={user} isVerifying={isVerifying} isProfileComplete={isProfileComplete} loginProps={loginProps}>
-                <>
-                  <Navigation user={user} setUser={setUser} currentView={'campus'} onViewChange={() => { }} />
-                  <XPDisplay user={user} />
-                  <main className="pb-8">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                      <PostCommentsPage user={user} />
-                    </div>
-                  </main>
-                </>
+                <PostCommentsView user={user} setUser={setUser} />
               </ProtectedRoute>
             } />
           </Routes>

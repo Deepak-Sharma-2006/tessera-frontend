@@ -113,13 +113,15 @@ export default function TransferOwnershipDialog({ isOpen, podId, currentOwnerId,
                                 <Avatar className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500">
                                     {(user.fullName || user.name || user.id).charAt(0).toUpperCase()}
                                 </Avatar>
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium text-white">
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-white truncate">
                                         {user.fullName || user.name || user.id}
                                     </p>
-                                    <p className="text-xs text-slate-400">
-                                        {user.email && user.email.trim() ? user.email : `ID: ${user.id}`}
-                                    </p>
+                                    {user.email && user.email.trim() && (
+                                        <p className="text-xs text-slate-400 truncate">
+                                            {user.email}
+                                        </p>
+                                    )}
                                 </div>
                             </label>
                         ))

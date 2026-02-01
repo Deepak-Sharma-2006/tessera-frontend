@@ -58,11 +58,6 @@ export default function PostCommentsPage({ user }) {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between mb-4">
-                <div className="text-sm text-slate-400">{hubName}</div>
-                <Button variant="ghost" onClick={handleBack}>← Back</Button>
-            </div>
-
             <div className="flex items-center justify-between">
                 <Button variant="ghost" onClick={handleBack}>← Back</Button>
                 <div className="text-lg font-semibold">Replies for this post</div>
