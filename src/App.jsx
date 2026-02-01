@@ -125,18 +125,26 @@ const AuthenticatedApp = ({ user, setUser }) => {
     if (newView === 'inter') {
       setViewContext({ initialView: 'feed' });
     } else if (newView === 'campus') {
+      // ✅ FIXED: When navigating away from pods, clear the saved pod context
+      // This prevents redirecting to the last pod when clicking Campus tab
       setViewContext(null);
+      sessionStorage.removeItem('campusHubContext');
     }
   }
 
   // ✅ PERSISTENCE: Save view state to sessionStorage whenever it changes
   // This allows the view to be restored on page refresh
+  // ⚠️ IMPORTANT: Don't save 'pods' view automatically - only restore via URL detection
   useEffect(() => {
-    sessionStorage.setItem('campusHubView', currentView);
-    if (viewContext) {
-      sessionStorage.setItem('campusHubContext', JSON.stringify(viewContext));
-    } else {
-      sessionStorage.removeItem('campusHubContext');
+    // Only save non-pods views to sessionStorage
+    // Pods view is handled via URL-based navigation and should never be cached
+    if (currentView !== 'pods') {
+      sessionStorage.setItem('campusHubView', currentView);
+      if (viewContext) {
+        sessionStorage.setItem('campusHubContext', JSON.stringify(viewContext));
+      } else {
+        sessionStorage.removeItem('campusHubContext');
+      }
     }
   }, [currentView, viewContext]);
 

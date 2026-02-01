@@ -115,7 +115,10 @@ export default function CollabRooms({ user, onNavigateToRoom, onEnterCollabRoom,
   }
 
   const isRoomOwner = (room) => {
-    return room.ownerId === currentUserId
+    // ✅ FIXED: Allow delete if user is CREATOR OR current OWNER
+    // This preserves delete access for creators who haven't transferred ownership
+    // AND allows new owners to delete after ownership transfer
+    return room.ownerId === currentUserId || room.creatorId === currentUserId
   }
 
   const isRoomMember = (room) => {
