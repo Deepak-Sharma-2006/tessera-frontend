@@ -116,7 +116,7 @@ const AuthenticatedApp = ({ user, setUser }) => {
     }
 
     setCurrentView(newView);
-    
+
     // When changing views via tab click, reset context to show default view
     if (newView === 'inter') {
       setViewContext({ initialView: 'feed' });

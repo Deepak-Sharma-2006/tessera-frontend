@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '@/lib/api.js';
 import CollabPodPage from '@/components/campus/CollabPodPage.jsx';
 import Navigation from '@/components/Navigation.jsx';
@@ -13,6 +13,7 @@ import LoadingSpinner from '@/components/animations/LoadingSpinner.jsx';
  */
 export default function PodView({ user, setUser }) {
     const { podId } = useParams();
+    const navigate = useNavigate();
     const [pod, setPod] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -42,6 +43,22 @@ export default function PodView({ user, setUser }) {
         return () => { mounted = false; };
     }, [podId]);
 
+    // ✅ FIXED: Handle tab navigation from inside pod
+    // When user clicks Events, Campus, Inbox, Badges tabs, navigate away from pod
+    const handleTabNavigation = (viewId) => {
+        if (viewId === 'campus') {
+            navigate('/campus');
+        } else if (viewId === 'events') {
+            navigate('/campus', { state: { view: 'events' } });
+        } else if (viewId === 'inter') {
+            navigate('/campus', { state: { view: 'inter' } });
+        } else if (viewId === 'inbox') {
+            navigate('/campus', { state: { view: 'inbox' } });
+        } else if (viewId === 'badges') {
+            navigate('/campus', { state: { view: 'badges' } });
+        }
+    };
+
     if (loading) return <LoadingSpinner />;
     if (error) return <div className="p-4 text-red-500">{error}</div>;
     if (!pod) return <div className="p-4">Pod not found</div>;
@@ -51,7 +68,7 @@ export default function PodView({ user, setUser }) {
 
     return (
         <>
-            <Navigation user={user} setUser={setUser} currentView={currentView} onViewChange={() => { }} />
+            <Navigation user={user} setUser={setUser} currentView={currentView} onViewChange={handleTabNavigation} />
             <XPDisplay user={user} />
             <main className="pb-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
