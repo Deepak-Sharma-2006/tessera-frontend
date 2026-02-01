@@ -63,7 +63,7 @@ export default forwardRef(function InterFeed({ user }, ref) {
   const [counts, setCounts] = useState(null);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [selectedPostType, setSelectedPostType] = useState(null);
-  const [newPost, setNewPost] = useState({ title: '', content: '' });
+  const [newPost, setNewPost] = useState({ title: '', content: '', podName: '' });
   const [pollOptions, setPollOptions] = useState(['', '']);
   const [skillTags, setSkillTags] = useState([]);
   const [newTag, setNewTag] = useState('');
@@ -155,6 +155,12 @@ export default forwardRef(function InterFeed({ user }, ref) {
       return;
     }
 
+    // ✅ Validate podName is provided for COLLAB posts
+    if (selectedPostType === 'COLLAB' && !newPost.podName.trim()) {
+      alert('Please enter a Pod Name for Collab posts.');
+      return;
+    }
+
     try {
       // Only send fields the backend expects
       const payload = {
@@ -166,6 +172,11 @@ export default forwardRef(function InterFeed({ user }, ref) {
         likes: [],
         comments: []
       };
+
+      // ✅ Add podName for COLLAB posts
+      if (selectedPostType === 'COLLAB' && newPost.podName) {
+        payload.podName = newPost.podName;
+      }
 
       if (selectedPostType === 'POLL') {
         payload.pollOptions = pollOptions.filter(opt => opt.trim() !== '').map(opt => ({ text: opt, votes: [] }));
@@ -204,7 +215,7 @@ export default forwardRef(function InterFeed({ user }, ref) {
     } finally {
       setShowCreatePost(false);
       setSelectedPostType(null);
-      setNewPost({ title: '', content: '' });
+      setNewPost({ title: '', content: '', podName: '' });
       setPollOptions(['', '']);
       setSkillTags([]);
       setNewTag('');
@@ -355,6 +366,14 @@ export default forwardRef(function InterFeed({ user }, ref) {
                 <label className="block font-semibold mb-2 text-slate-300">Title *</label>
                 <Input placeholder="What's the title?" value={newPost.title} onChange={(e) => setNewPost(p => ({ ...p, title: e.target.value }))} className="bg-slate-800/50 border-slate-700 focus:ring-blue-500" />
               </div>
+
+              {selectedPostType === 'COLLAB' && (
+                <div>
+                  <label className="block font-semibold mb-2 text-slate-300">Pod Name * <span className="text-xs text-slate-400">(Name for the collaboration room)</span></label>
+                  <Input placeholder="e.g., 'AI Research Collab'" value={newPost.podName} onChange={(e) => setNewPost(p => ({ ...p, podName: e.target.value }))} className="bg-slate-800/50 border-slate-700 focus:ring-blue-500" />
+                </div>
+              )}
+
               <div>
                 <label className="block font-semibold mb-2 text-slate-300">Content / Description</label>
                 <Textarea placeholder="What are the details?" value={newPost.content} onChange={(e) => setNewPost(p => ({ ...p, content: e.target.value }))} className="bg-slate-800/50 border-slate-700 focus:ring-blue-500" />
@@ -445,8 +464,9 @@ export default forwardRef(function InterFeed({ user }, ref) {
                     <div className="flex items-center space-x-4">
                       <Avatar className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500">🤝</Avatar>
                       <div>
-                        <div className="font-semibold">{post.title}</div>
+                        <div className="font-semibold">{post.authorName || 'Anonymous User'}</div>
                         <div className="text-sm text-slate-400">
+                          {post.authorCollege && `${post.authorCollege} • `}
                           {new Date(post.createdAt).toLocaleString()}
                         </div>
                       </div>
@@ -454,6 +474,7 @@ export default forwardRef(function InterFeed({ user }, ref) {
                     <Badge variant="outline" className={`border-green-600/50 bg-green-500/20 font-semibold text-green-400`}>🤝 Collaboration</Badge>
                   </div>
                   <div className="space-y-4">
+                    <h3 className="font-semibold text-xl">{post.title}</h3>
                     {post.content && <p className="text-slate-300">{post.content}</p>}
 
                     {/* Display Tags/Skills */}

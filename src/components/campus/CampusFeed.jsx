@@ -50,8 +50,8 @@ const RESTRICTED_POST_TYPES = [
 ];
 
 export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP' }, ref) {
-  // Simulate current user ID (replace with real user ID in production)
-  const currentUserId = "placeholder-user-id";
+  // Get current user ID from user prop (passed from parent component)
+  const currentUserId = user?.id || "placeholder-user-id";
   const { theme } = useTheme();
   const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -136,9 +136,6 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
       const podResponse = await api.get(`/pods/${post.linkedPodId}`);
       const pod = podResponse.data;
 
-      // Check if user is the creator
-      const isCreator = pod.creatorId === currentUserId;
-
       // Call enhanced join endpoint with cooldown checking
       await api.post(`/pods/${post.linkedPodId}/join-enhanced`, {
         userId: currentUserId
@@ -166,7 +163,7 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
     }
   };
 
-  const [newPost, setNewPost] = useState({ title: '', content: '' });
+  const [newPost, setNewPost] = useState({ title: '', content: '', podName: '' });
   const [pollOptions, setPollOptions] = useState(['', '']);
 
   // Form helper functions for polls
@@ -207,6 +204,12 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
       return;
     }
 
+    // ✅ Validate podName is provided for LOOKING_FOR posts
+    if (selectedPostType === 'LOOKING_FOR' && !newPost.podName.trim()) {
+      alert('Please enter a Pod Name for Looking For posts.');
+      return;
+    }
+
     try {
       // 1. MAP UI LABELS TO BACKEND ENUMS
       // The backend expects UPPERCASE_UNDERSCORE format
@@ -238,6 +241,11 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
         createdAt: new Date().toISOString()
       };
 
+      // ✅ Add podName for LOOKING_FOR posts
+      if (selectedPostType === 'LOOKING_FOR' && newPost.podName) {
+        cleanPayload.podName = newPost.podName;
+      }
+
       // Add poll options if this is a poll
       if (selectedPostType === 'POLL') {
         cleanPayload.pollOptions = pollOptions.filter(opt => opt.trim() !== '').map(opt => ({ text: opt }));
@@ -260,7 +268,7 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
       // Success: Close modal, reset form, and refresh feed
       setShowCreatePost(false);
       setSelectedPostType(null);
-      setNewPost({ title: '', content: '' });
+      setNewPost({ title: '', content: '', podName: '' });
       setPollOptions(['', '']);
 
       // Auto-switch to the tab matching the newly created post type
@@ -440,7 +448,19 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
                   )}
 
                   {post.postType === 'LOOKING_FOR' ? (
-                    <Button onClick={() => handleJoinPod(post)} className="bg-gradient-to-r from-green-600 to-teal-600 text-white">Join</Button>
+                    (() => {
+                      const isOwner = post.authorId === currentUserId;
+                      const isMember = post.podMembers?.includes(currentUserId);
+                      if (isOwner || isMember) {
+                        return (
+                          <Button onClick={() => post.linkedPodId && navigate(`/campus/collab-pods/${post.linkedPodId}`)} className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white">Open Pod</Button>
+                        );
+                      } else {
+                        return (
+                          <Button onClick={() => handleJoinPod(post)} className="bg-gradient-to-r from-green-600 to-teal-600 text-white">Join</Button>
+                        );
+                      }
+                    })()
                   ) : post.postType === 'POLL' ? (
                     <div />
                   ) : (
@@ -481,6 +501,14 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
                 <label className="block font-semibold mb-2 text-slate-300">Title *</label>
                 <Input placeholder="What's the title?" value={newPost.title} onChange={(e) => setNewPost(p => ({ ...p, title: e.target.value }))} className="bg-slate-800/50 border-slate-700 focus:ring-blue-500" />
               </div>
+
+              {selectedPostType === 'LOOKING_FOR' && (
+                <div>
+                  <label className="block font-semibold mb-2 text-slate-300">Pod Name * <span className="text-xs text-slate-400">(The name for the collaboration pod)</span></label>
+                  <Input placeholder="e.g., 'UI/UX Design Team'" value={newPost.podName} onChange={(e) => setNewPost(p => ({ ...p, podName: e.target.value }))} className="bg-slate-800/50 border-slate-700 focus:ring-blue-500" />
+                </div>
+              )}
+
               <div>
                 <label className="block font-semibold mb-2 text-slate-300">Content / Description</label>
                 <Textarea placeholder="What are the details?" value={newPost.content} onChange={(e) => setNewPost(p => ({ ...p, content: e.target.value }))} className="bg-slate-800/50 border-slate-700 focus:ring-blue-500" />

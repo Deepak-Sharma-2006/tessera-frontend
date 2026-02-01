@@ -52,23 +52,23 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
   // ✅ STRICT SEPARATION: Founding Dev and Campus Catalyst are INDEPENDENT
   // Campus Catalyst: ONLY if role === 'COLLEGE_HEAD' (NOT dependent on isDev or Founding Dev badge)
   const isCatalyst = user?.role === 'COLLEGE_HEAD';
-  
+
   // Founding Dev: ONLY if isDev === true (NOT dependent on role or Campus Catalyst badge)
   const isDev = user?.isDev === true;
-  
+
   // Event creation access: CATALYST ONLY (role-based) or DEV for testing
   const canCreateEvent = isCatalyst || isDev;
 
   // Debug: Log user data to verify flags are being received correctly
   useEffect(() => {
-    console.log('[EventsHub] User flags:', { 
-      userId: user?.id, 
-      isDev: user?.isDev, 
+    console.log('[EventsHub] User flags:', {
+      userId: user?.id,
+      isDev: user?.isDev,
       role: user?.role,
       isCatalyst: isCatalyst,
       isDev_local: isDev,
       canCreateEvent: canCreateEvent,
-      badges: user?.badges 
+      badges: user?.badges
     });
   }, [user, isCatalyst, isDev, canCreateEvent]);
   const categoryOptions = [
@@ -640,7 +640,7 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
       )}
 
       {/* Create Event Modal */}
-      {showCreateModal && isModerator && (
+      {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 rounded-2xl shadow-2xl">
             <div className="flex items-center justify-between mb-8">

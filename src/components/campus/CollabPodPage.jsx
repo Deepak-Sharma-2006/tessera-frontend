@@ -502,7 +502,7 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                                 {pod?.scope === 'GLOBAL' ? '🌍 Global Room' : '🏛️ Campus Pod'}
                             </span>
                         </div>
-                        <span className="font-bold text-lg text-white leading-tight truncate">{pod.title}</span>
+                        <span className="font-bold text-lg text-white leading-tight truncate">{pod.name}</span>
                         <span className="text-xs text-slate-400 font-medium">{memberNames}</span>
                     </div>
                 </div>
