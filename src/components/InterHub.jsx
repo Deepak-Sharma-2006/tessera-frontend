@@ -71,7 +71,7 @@ export default function InterHub({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="text-center space-y-4">
+      <div className="text-center space-y-4 pointer-events-none">
         <div className="flex items-center justify-center space-x-3">
           <div className={`w-16 h-16 ${theme === 'windows1992' ? 'rounded-none bg-primary border-4 border-outset' : 'rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500'} flex items-center justify-center shadow-lg ${theme === 'windows1992' ? '' : 'hover:shadow-neon'} transition-all duration-300`}>
             <span className={`text-3xl ${theme === 'windows1992' ? 'text-primary-foreground text-lg' : 'text-white'}`}>
@@ -124,7 +124,7 @@ export default function InterHub({
       </div>
 
       {/* Navigation */}
-      <div className="flex flex-wrap gap-3 justify-center">
+      <div className="flex flex-wrap gap-3 justify-center relative z-10">
         {navItems.map((item, index) => (
           <button
             key={item.id}

@@ -65,27 +65,52 @@ const AuthenticatedApp = ({ user, setUser }) => {
   const location = useLocation();
   const isFirstMount = useRef(true);
 
-  // Set initial view from navigation state (only from comment pages or pod views)
-  // Fresh page loads should always go to overview
+  // ✅ PERSISTENCE FIX: Restore view state after refresh
+  // When user navigates to /campus/collab-pods/:podId and refreshes,
+  // restore the view from URL instead of resetting to 'campus'
   useEffect(() => {
-    // Check if this is a navigation with state from our app (not a refresh)
-    const hasIntentionalState = location.state?.from === 'comment' || location.state?.from === 'pod';
+    const pathname = location.pathname;
 
+    // On first mount, check if we're coming back from a refresh
+    // by examining the current URL path
     if (isFirstMount.current) {
-      // First mount after page load - always go to campus overview unless explicitly navigated
       isFirstMount.current = false;
-      if (!hasIntentionalState) {
-        setCurrentView('campus');
-        setViewContext(null);
-      } else {
+
+      // If URL contains /collab-pods/:podId, we should be in 'pods' view
+      if (pathname.includes('/collab-pods/')) {
+        setCurrentView('pods');
+        // Pod ID will be extracted by CampusHub's useParams
+        return;
+      }
+
+      // Check if this is a navigation with state from our app (not a refresh)
+      const hasIntentionalState = location.state?.from === 'comment' || location.state?.from === 'pod';
+
+      if (hasIntentionalState) {
+        // Coming from intentional navigation
         setCurrentView(location.state.view);
         if (location.state?.viewContext) {
           setViewContext(location.state.viewContext);
         }
+      } else {
+        // Fresh page load - try to restore from sessionStorage first
+        const savedView = sessionStorage.getItem('campusHubView');
+        const savedContext = sessionStorage.getItem('campusHubContext');
+
+        if (savedView) {
+          setCurrentView(savedView);
+          if (savedContext) {
+            setViewContext(JSON.parse(savedContext));
+          }
+        } else {
+          // No saved state - go to campus overview
+          setCurrentView('campus');
+          setViewContext(null);
+        }
       }
     } else {
       // Subsequent navigations - use the state if available
-      if (hasIntentionalState) {
+      if (location.state?.from === 'comment' || location.state?.from === 'pod') {
         setCurrentView(location.state.view);
         if (location.state?.viewContext) {
           setViewContext(location.state.viewContext);
@@ -103,6 +128,17 @@ const AuthenticatedApp = ({ user, setUser }) => {
       setViewContext(null);
     }
   }
+
+  // ✅ PERSISTENCE: Save view state to sessionStorage whenever it changes
+  // This allows the view to be restored on page refresh
+  useEffect(() => {
+    sessionStorage.setItem('campusHubView', currentView);
+    if (viewContext) {
+      sessionStorage.setItem('campusHubContext', JSON.stringify(viewContext));
+    } else {
+      sessionStorage.removeItem('campusHubContext');
+    }
+  }, [currentView, viewContext]);
 
   const handleNavigateToBeacon = (eventId) => {
     // ✅ FIX: Navigate to campus view with beacon sub-view (maintains layout)
@@ -176,7 +212,7 @@ export default function App() {
             'Content-Type': 'application/json'
           }
         });
-        
+
         if (res.ok) {
           const completeUserData = await res.json();
           console.log("✅ Complete user data fetched:", completeUserData);
@@ -185,7 +221,7 @@ export default function App() {
           return;
         }
       }
-      
+
       // Fallback: use provided data if API call fails
       setUser(finalUserData);
       saveUser(finalUserData);
