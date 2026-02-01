@@ -66,9 +66,12 @@ const AuthenticatedApp = ({ user, setUser }) => {
   const location = useLocation();
   const isFirstMount = useRef(true);
 
-  // ✅ SIMPLIFIED: URL-based view restoration (no sessionStorage for campus)
-  // On refresh: Always start at campus overview UNLESS URL shows specific route
-  // This prevents blank screens from stale sessionStorage state
+  // ✅ IMPROVED: URL-based view restoration with sessionStorage persistence
+  // On first mount (refresh):
+  //   1. If navigating FROM another view (state.from), use that
+  //   2. Else check sessionStorage for last view (better UX on refresh)
+  //   3. Else default to 'campus'
+  // This prevents blank screens while preserving UX on refresh
   useEffect(() => {
     const pathname = location.pathname;
 
@@ -81,8 +84,8 @@ const AuthenticatedApp = ({ user, setUser }) => {
         return;
       }
 
-      // ✅ If navigating with state from app (comment page, pod view), use that state
-      if (location.state?.from === 'comment' || location.state?.from === 'pod') {
+      // ✅ If navigating WITH STATE from another view (comment page, pod view, tab click)
+      if (location.state?.from && location.state?.view) {
         setCurrentView(location.state.view);
         if (location.state?.viewContext) {
           setViewContext(location.state.viewContext);
@@ -90,13 +93,28 @@ const AuthenticatedApp = ({ user, setUser }) => {
         return;
       }
 
-      // ✅ DEFAULT: Any refresh on /campus starts at overview (prevents blank screens)
-      // This is the safest approach - no stale sessionStorage causing issues
+      // ✅ TRY TO RESTORE: Check sessionStorage for last view (on refresh, preserve user's view)
+      const lastView = sessionStorage.getItem('lastViewOnCampus');
+      const lastContext = sessionStorage.getItem('lastViewContext');
+      if (lastView && lastView !== 'pods') {
+        // Only restore non-pod views (pods are explicit)
+        setCurrentView(lastView);
+        if (lastContext) {
+          try {
+            setViewContext(JSON.parse(lastContext));
+          } catch (e) {
+            // Invalid JSON, skip
+          }
+        }
+        return;
+      }
+
+      // ✅ DEFAULT: Campus overview
       setCurrentView('campus');
       setViewContext(null);
     } else {
-      // ✅ Subsequent navigations: only use explicit state, no sessionStorage fallback
-      if (location.state?.from === 'comment' || location.state?.from === 'pod') {
+      // ✅ Subsequent navigations: use state if provided
+      if (location.state?.from && location.state?.view) {
         setCurrentView(location.state.view);
         if (location.state?.viewContext) {
           setViewContext(location.state.viewContext);
@@ -106,41 +124,43 @@ const AuthenticatedApp = ({ user, setUser }) => {
   }, [location]);
 
   const handleViewChange = (newView) => {
-    // ✅ FIXED: When clicking Campus tab, ALWAYS go to overview
-    // Never restore pods or other internal views - they must be explicitly navigated to
+    // ✅ When clicking Campus tab, ALWAYS go to overview (not previous state)
     if (newView === 'campus') {
       setCurrentView('campus');
       setViewContext(null);
-      sessionStorage.removeItem('campusHubView');
-      sessionStorage.removeItem('campusHubContext');
+      sessionStorage.removeItem('lastViewContext');
       return;
     }
 
+    // ✅ For other views, update state
+    // This triggers the persistence effect above to save to sessionStorage
     setCurrentView(newView);
-
-    // When changing views via tab click, reset context to show default view
+    
+    // Reset context for view-specific initialization
     if (newView === 'inter') {
       setViewContext({ initialView: 'feed' });
+    } else if (newView === 'events') {
+      setViewContext(null);
+    } else if (newView === 'inbox') {
+      setViewContext(null);
+    } else if (newView === 'badges') {
+      setViewContext(null);
+    } else if (newView === 'profile') {
+      setViewContext(null);
     }
   }
 
-  // ✅ NO PERSISTENCE: Don't save campus views to sessionStorage
-  // This prevents stale state causing blank screens on refresh
-  // Campus always starts at overview on page refresh - this is intentional and safe
+  // ✅ PERSISTENCE: Save current view to sessionStorage for refresh UX
+  // This preserves the user's current view when they refresh the page
+  // Only save non-pod views as pods are explicit navigation
   useEffect(() => {
-    // For non-campus views (like Global Hub), we can safely persist
-    // But for campus, always keep it clean
-    if (currentView !== 'campus') {
-      sessionStorage.setItem('campusHubView', currentView);
+    if (currentView && currentView !== 'pods') {
+      sessionStorage.setItem('lastViewOnCampus', currentView);
       if (viewContext) {
-        sessionStorage.setItem('campusHubContext', JSON.stringify(viewContext));
+        sessionStorage.setItem('lastViewContext', JSON.stringify(viewContext));
       } else {
-        sessionStorage.removeItem('campusHubContext');
+        sessionStorage.removeItem('lastViewContext');
       }
-    } else {
-      // Clear campus view from sessionStorage to prevent stale restores
-      sessionStorage.removeItem('campusHubView');
-      sessionStorage.removeItem('campusHubContext');
     }
   }, [currentView, viewContext]);
 

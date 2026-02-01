@@ -47,15 +47,15 @@ export default function PodView({ user, setUser }) {
     // When user clicks Events, Campus, Inbox, Badges tabs, navigate away from pod
     const handleTabNavigation = (viewId) => {
         if (viewId === 'campus') {
-            navigate('/campus');
+            navigate('/campus', { state: { from: 'pod', view: 'campus' } });
         } else if (viewId === 'events') {
-            navigate('/campus', { state: { view: 'events' } });
+            navigate('/campus', { state: { from: 'pod', view: 'events' } });
         } else if (viewId === 'inter') {
-            navigate('/campus', { state: { view: 'inter' } });
+            navigate('/campus', { state: { from: 'pod', view: 'inter', viewContext: { initialView: 'feed' } } });
         } else if (viewId === 'inbox') {
-            navigate('/campus', { state: { view: 'inbox' } });
+            navigate('/campus', { state: { from: 'pod', view: 'inbox' } });
         } else if (viewId === 'badges') {
-            navigate('/campus', { state: { view: 'badges' } });
+            navigate('/campus', { state: { from: 'pod', view: 'badges' } });
         }
     };
 
