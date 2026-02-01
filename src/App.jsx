@@ -135,7 +135,7 @@ const AuthenticatedApp = ({ user, setUser }) => {
     // ✅ For other views, update state
     // This triggers the persistence effect above to save to sessionStorage
     setCurrentView(newView);
-    
+
     // Reset context for view-specific initialization
     if (newView === 'inter') {
       setViewContext({ initialView: 'feed' });
