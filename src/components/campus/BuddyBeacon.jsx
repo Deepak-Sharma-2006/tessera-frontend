@@ -235,9 +235,9 @@ export default function BuddyBeacon({ user }) {
                                                 }`}
                                         >
                                             <div className="flex items-center flex-1 min-w-0">
-                                                <Avatar src={applicant.profile?.profilePic} alt={applicant.profile?.name} className="w-9 h-9" />
+                                                <Avatar src={applicant.profile?.profilePicUrl} alt={applicant.profile?.fullName} className="w-9 h-9" />
                                                 <div className="ml-3 flex-1 min-w-0">
-                                                    <p className="font-semibold text-xs text-foreground truncate">{applicant.profile?.name || applicant.name || 'Unknown'}</p>
+                                                    <p className="font-semibold text-xs text-foreground truncate">{applicant.profile?.fullName || applicant.name || 'Unknown'}</p>
                                                     <p className="text-xs text-muted-foreground/60">
                                                         Year: {applicant.profile?.yearOfStudy || applicant.profile?.year || 'N/A'}
                                                     </p>
@@ -395,10 +395,25 @@ export default function BuddyBeacon({ user }) {
                     }
                 }
             );
-            // Update UI
+            // ✅ FIX #1: Update UI - Mark post as applied in both arrays
+            const postId = selectedPost.id;
+
+            // Update posts array with hasApplied flag
+            setPosts(prev => prev.map(p => {
+                const pId = (p.post?.id || p.id);
+                return pId === postId ? { ...p, hasApplied: true } : p;
+            }));
+
+            // Also update appliedPosts with new application
+            setAppliedPosts(prev => [...prev, {
+                applicationId: res.data.id,
+                post: selectedPost,
+                hasApplied: true,
+                applicationStatus: res.data.status
+            }]);
+
+            // Close modal and reset state
             setShowApplicationModal(false);
-            setAppliedPosts(prev => [...prev, { applicationId: res.data.id, post: selectedPost, applicationStatus: res.data.status }]);
-            setPosts(prev => prev.map(p => p.id === selectedPost.id ? { ...p, hasApplied: true } : p));
             setSelectedPost(null);
             setApplicationData({ message: '', relevantSkills: [], newSkill: '' });
             alert('Application Submitted Successfully!');
