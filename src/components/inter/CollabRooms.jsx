@@ -73,7 +73,13 @@ export default function CollabRooms({ user, onNavigateToRoom, onEnterCollabRoom,
 
     // Filter by tab (ACTIVE or JOINED)
     if (activeTab === 'JOINED') {
-      filtered = filtered.filter(room => room.memberIds.includes(currentUserId))
+      // ✅ FIXED: Show rooms user is member of, OR rooms they created/own
+      // Previously only showed memberIds, missing owned rooms
+      filtered = filtered.filter(room => 
+        room.memberIds.includes(currentUserId) || 
+        room.ownerId === currentUserId || 
+        room.creatorId === currentUserId
+      )
     } else {
       // ACTIVE tab shows all rooms
       filtered = filtered.filter(room => room.status === 'ACTIVE')
