@@ -8,8 +8,11 @@ export default function usePodWs({ podId, onMessage }) {
     useEffect(() => {
         if (!podId) return
 
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+        const wsUrl = API_BASE_URL.replace(/^http/, 'ws');
+        
         const client = new Client({
-            webSocketFactory: () => new SockJS('http://localhost:8080/ws-studcollab', null, {
+            webSocketFactory: () => new SockJS(`${wsUrl}/ws-studcollab`, null, {
                 transports: ['websocket']
             }),
             reconnectDelay: 5000,

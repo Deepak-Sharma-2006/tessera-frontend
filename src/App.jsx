@@ -34,7 +34,8 @@ const ProfileSetupHandler = ({ setAppUser, setInitialLoginFlowState }) => {
     const token = localStorage.getItem('token');
 
     if (userId) {
-      fetch(`http://localhost:8080/api/users/${userId}`, {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+      fetch(`${API_BASE_URL}/api/users/${userId}`, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       })
         .then(res => {
