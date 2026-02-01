@@ -95,15 +95,15 @@ export default function CollabPodsPage({ user, onEnterCollabPod, onRefreshPosts 
             <div className="flex justify-center gap-4 mb-8">
                 <button
                     onClick={() => setActiveTab('LOOKING_FOR')}
-                    className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border flex items-center justify-center gap-2 ${activeTab === 'LOOKING_FOR'
-                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-transparent shadow-lg shadow-cyan-500/20'
-                        : 'bg-slate-900/50 text-slate-400 border-slate-700 hover:border-slate-500 hover:text-white'
+                    className={`px-8 py-2.5 rounded-lg text-sm font-medium transition-all duration-500 border flex items-center justify-center gap-2 hover:-translate-y-1 ${activeTab === 'LOOKING_FOR'
+                        ? 'bg-primary text-white border-transparent shadow-lg shadow-primary/20'
+                        : 'bg-white/8 text-white/60 border-white/15 hover:text-white/80'
                         }`}
                 >
                     Looking For
                     <span className={`px-2 py-0.5 rounded text-xs font-bold ${activeTab === 'LOOKING_FOR'
-                        ? 'bg-slate-900/40 text-cyan-300'
-                        : 'bg-slate-800 text-slate-400'
+                        ? 'bg-white/10 text-white'
+                        : 'bg-white/5 text-white/40'
                         }`}>
                         {lookingForPods.length}
                     </span>
@@ -111,15 +111,15 @@ export default function CollabPodsPage({ user, onEnterCollabPod, onRefreshPosts 
 
                 <button
                     onClick={() => setActiveTab('TEAM')}
-                    className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border flex items-center justify-center gap-2 ${activeTab === 'TEAM'
-                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-transparent shadow-lg shadow-cyan-500/20'
-                        : 'bg-slate-900/50 text-slate-400 border-slate-700 hover:border-slate-500 hover:text-white'
+                    className={`px-8 py-2.5 rounded-lg text-sm font-medium transition-all duration-500 border flex items-center justify-center gap-2 hover:-translate-y-1 ${activeTab === 'TEAM'
+                        ? 'bg-primary text-white border-transparent shadow-lg shadow-primary/20'
+                        : 'bg-white/8 text-white/60 border-white/15 hover:text-white/80'
                         }`}
                 >
                     My Teams
                     <span className={`px-2 py-0.5 rounded text-xs font-bold ${activeTab === 'TEAM'
-                        ? 'bg-slate-900/40 text-cyan-300'
-                        : 'bg-slate-800 text-slate-400'
+                        ? 'bg-white/10 text-white'
+                        : 'bg-white/5 text-white/40'
                         }`}>
                         {myTeamPods.length}
                     </span>
@@ -145,13 +145,13 @@ export default function CollabPodsPage({ user, onEnterCollabPod, onRefreshPosts 
                         console.log(`Pod Creator: ${pod.creatorId} | Pod Owner: ${pod.ownerId} | Me: ${user?.id} | Can Delete: ${isOwner}`);
 
                         return (
-                            <Card key={pod.id} className="bg-slate-800/20 border-slate-700 text-white hover:border-slate-600 transition-colors relative group">
+                            <Card key={pod.id} variant="glass" className="transition-all duration-500 hover:shadow-lg hover:-translate-y-1 relative group">
                                 <CardContent className="p-4 space-y-3">
                                     {/* Settings Gear Icon - Only show for pod owners on My Teams tab */}
                                     {isMyTeamsTab && isOwner && (
                                         <button
                                             onClick={() => setSettingsModalPod(pod)}
-                                            className="absolute top-2 right-2 p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-700 rounded"
+                                            className="absolute top-2 right-2 p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10 rounded-lg"
                                             title="Pod settings"
                                         >
                                             <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
@@ -162,15 +162,15 @@ export default function CollabPodsPage({ user, onEnterCollabPod, onRefreshPosts 
                                     )}
 
                                     <div>
-                                        <h3 className="font-semibold text-lg truncate">{pod.name}</h3>
-                                        <p className="text-sm text-slate-300 line-clamp-2">{pod.description}</p>
+                                        <h3 className="font-semibold text-lg truncate text-foreground tracking-tight">{pod.name}</h3>
+                                        <p className="text-sm text-muted-foreground/70 line-clamp-2">{pod.description}</p>
                                     </div>
 
-                                    <div className="flex items-center justify-between text-xs text-slate-400">
+                                    <div className="flex items-center justify-between text-xs text-muted-foreground/70">
                                         <span>Members: {(pod.memberIds || []).length}</span>
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${pod.type === 'LOOKING_FOR'
-                                            ? 'bg-green-900/40 text-green-300'
-                                            : 'bg-blue-900/40 text-blue-300'
+                                        <span className={`px-2 py-1 rounded-md text-xs font-semibold ${pod.type === 'LOOKING_FOR'
+                                            ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300'
+                                            : 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-300'
                                             }`}>
                                             {pod.type === 'LOOKING_FOR' ? 'Public' : 'Private'}
                                         </span>
@@ -218,21 +218,21 @@ export default function CollabPodsPage({ user, onEnterCollabPod, onRefreshPosts 
 
             {/* Settings Modal */}
             {settingsModalPod && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-900 border border-slate-700 rounded-lg max-w-md w-full p-6 space-y-4">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-xl flex items-center justify-center z-50 p-4">
+                    <div className="bg-white/8 border border-white/15 rounded-lg max-w-md w-full p-6 space-y-4">
                         <h2 className="text-xl font-bold text-white">Pod Settings</h2>
-                        <div className="space-y-2 text-slate-300">
+                        <div className="space-y-2 text-white/80">
                             <p><strong>Name:</strong> {settingsModalPod.name}</p>
                             <p><strong>Type:</strong> {settingsModalPod.type === 'LOOKING_FOR' ? 'Public' : 'Private'}</p>
                             <p><strong>Members:</strong> {(settingsModalPod.memberIds || []).length}</p>
                         </div>
 
                         {/* Danger Zone */}
-                        <div className="mt-6 pt-6 border-t border-red-900/30">
+                        <div className="mt-6 pt-6 border-t border-red-500/20">
                             <h4 className="text-red-400 font-bold mb-3">Danger Zone</h4>
                             <button
                                 onClick={() => handleDeletePod(settingsModalPod.id)}
-                                className="w-full py-2 bg-red-900/20 hover:bg-red-900/50 text-red-400 border border-red-900/50 rounded-lg transition-colors flex items-center justify-center gap-2"
+                                className="w-full py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg transition-colors flex items-center justify-center gap-2 hover:-translate-y-1 duration-500"
                             >
                                 <span>🗑️</span> Delete Pod
                             </button>
@@ -240,7 +240,7 @@ export default function CollabPodsPage({ user, onEnterCollabPod, onRefreshPosts 
 
                         <button
                             onClick={() => setSettingsModalPod(null)}
-                            className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors mt-4"
+                            className="w-full py-2 bg-white/8 hover:bg-white/12 text-white border border-white/15 rounded-lg transition-colors duration-500 mt-4 hover:-translate-y-1"
                         >
                             Close
                         </button>

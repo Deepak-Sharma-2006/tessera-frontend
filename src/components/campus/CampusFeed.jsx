@@ -349,26 +349,48 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
   if (error) return <div className="p-4 text-center text-red-500">Could not load feed.</div>;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 py-4">
       {/* --- Create Post Button --- */}
-      <div className="flex justify-center mb-4">
-        <Button onClick={() => setShowCreatePost(true)} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl shadow-lg">✨ Create Post</Button>
+      <div className="flex justify-center mb-6">
+        <Button 
+          onClick={() => setShowCreatePost(true)} 
+          variant="default"
+          className="px-8 py-3 font-semibold tracking-wide shadow-md hover:shadow-lg"
+        >
+          ✨ Create Post
+        </Button>
       </div>
-      {/* --- Standardized Pill Tabs --- */}
-      <div className="flex justify-center gap-4 mb-8">
+      
+      {/* --- Filter Tabs --- */}
+      <div className="flex justify-center gap-3 mb-8 flex-wrap px-2">
         {filters.map((filter) => (
           <button
             key={filter.id}
             onClick={() => setActiveFilter(filter.id)}
-            className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border ${activeFilter === filter.id
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-transparent shadow-lg shadow-cyan-500/20'
-              : 'bg-slate-900/50 text-slate-400 border-slate-700 hover:border-slate-500 hover:text-white'
+            className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-500 border flex items-center gap-2 ${activeFilter === filter.id
+              ? theme === 'cyber' 
+                ? 'bg-cyan-400/15 text-cyan-300 border-cyan-400/40 shadow-md shadow-cyan-400/20 backdrop-blur-xl'
+                : 'bg-primary/20 text-primary-solid border-primary/40 shadow-md backdrop-blur-xl'
+              : theme === 'cyber'
+                ? 'bg-white/5 text-muted-foreground border-white/10 hover:bg-white/10 hover:border-white/20'
+                : 'bg-white/8 text-muted-foreground border-white/15 hover:bg-white/12 hover:border-white/25'
               }`}
           >
-            {filter.label} <span className="ml-2 inline-block bg-slate-800/60 text-xs px-2 py-1 rounded-full">{filter.count}</span>
+            {filter.label} 
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${activeFilter === filter.id 
+              ? theme === 'cyber' 
+                ? 'bg-cyan-400/30 text-cyan-200'
+                : 'bg-primary/30 text-primary-foreground'
+              : theme === 'cyber'
+                ? 'bg-white/8'
+                : 'bg-white/10 text-muted-foreground'
+            }`}>
+              {filter.count}
+            </span>
           </button>
         ))}
       </div>
+      
       {/* --- Posts Display --- */}
       <div className="space-y-6">
         {getFilteredPosts().map((post) => {
@@ -385,27 +407,39 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
           }
 
           return (
-            <Card key={post.id} className="bg-slate-800/20 border-slate-700 text-white backdrop-blur-sm">
+            <Card 
+              key={post.id} 
+              variant="glass"
+              className={theme === 'cyber' ? 'cyber:backdrop-blur-xl cyber:border-cyan-400/15' : 'backdrop-blur-xl'}
+            >
               <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-5">
                   <div className="flex items-center space-x-4">
-                    <Avatar className="w-12 h-12 bg-slate-600">U</Avatar>
+                    <Avatar className="w-12 h-12 bg-primary/30 text-primary-foreground font-bold">
+                      {post.authorName?.[0] || 'U'}
+                    </Avatar>
                     <div>
-                      <div className="font-semibold">{post.authorName || 'Anonymous User'}</div>
-                      <div className="text-sm text-slate-400">
+                      <div className="font-semibold text-foreground tracking-wide">{post.authorName || 'Anonymous User'}</div>
+                      <div className="text-xs text-muted-foreground/70 mt-1">
                         {new Date(post.createdAt).toLocaleString()}
                       </div>
                     </div>
                   </div>
-                  <Badge variant="outline" className={`border-slate-600 bg-slate-700/50 font-semibold ${typeInfo.color || ''}`}>{typeInfo.icon} {typeInfo.label || 'Post'}</Badge>
+                  <Badge 
+                    variant="outline" 
+                    className={`border-white/20 bg-white/5 font-semibold text-xs ${typeInfo.color || 'text-foreground'}`}
+                  >
+                    {typeInfo.icon} {typeInfo.label || 'Post'}
+                  </Badge>
                 </div>
+                
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-xl">{post.title}</h3>
-                  {post.content && <p className="text-slate-300">{post.content}</p>}
+                  <h3 className="font-bold text-lg text-foreground tracking-tight leading-snug">{post.title}</h3>
+                  {post.content && <p className="text-muted-foreground/80 text-sm leading-relaxed">{post.content}</p>}
 
                   {/* Poll Rendering Logic */}
                   {post.postType === 'POLL' && post.pollOptions && Array.isArray(post.pollOptions) && post.pollOptions.length > 0 && (
-                    <div className="space-y-3 pt-2">
+                    <div className="space-y-2.5 pt-4">
                       {post.pollOptions.map((option, index) => {
                         const voteCount = option.votes?.length || 0;
                         const percentage = totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
@@ -415,30 +449,35 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
                             onClick={() => {
                               if (!userHasVoted) handleVote(post.id, option.id || index);
                             }}
-                            className={`w-full relative p-3 rounded-lg border border-slate-700 text-left bg-slate-900/30 transition-colors ${userHasVoted ? 'opacity-70 cursor-not-allowed pointer-events-none' : 'hover:bg-slate-800/50'}`}
+                            className={`w-full relative p-3 rounded-lg border transition-all duration-500 text-left text-sm font-medium ${userHasVoted 
+                              ? 'opacity-60 cursor-not-allowed' 
+                              : theme === 'cyber'
+                                ? 'border-cyan-400/20 bg-cyan-400/5 hover:bg-cyan-400/10 hover:border-cyan-400/30 text-foreground'
+                                : 'border-white/15 bg-white/5 hover:bg-white/10 hover:border-white/25 text-foreground'
+                            }`}
                             disabled={userHasVoted}
                           >
                             <div
-                              className="absolute left-0 top-0 bottom-0 bg-blue-500/30 rounded-lg transition-all duration-500"
+                              className={`absolute left-0 top-0 bottom-0 rounded-lg transition-all duration-500 ${theme === 'cyber' ? 'bg-cyan-400/20' : 'bg-primary/15'}`}
                               style={{ width: `${percentage}%` }}
                             />
                             <div className="flex justify-between items-center relative z-10">
-                              <span className="font-medium text-slate-100">{option.text}</span>
-                              <span className="text-sm font-bold text-slate-300">{voteCount}</span>
+                              <span className="text-foreground font-medium">{option.text}</span>
+                              <span className="text-xs font-bold text-muted-foreground/80">{voteCount}</span>
                             </div>
                           </button>
                         );
                       })}
-                      <div className="text-sm text-slate-400 text-right pr-2">Total votes: {totalVotes}</div>
-
+                      <div className="text-xs text-muted-foreground/60 text-right pr-2 mt-1">Total votes: {totalVotes}</div>
                     </div>
                   )}
                 </div>
-                <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-700">
+                
+                <div className="flex items-center justify-between pt-4 mt-5 border-t border-white/10">
                   {post.postType === 'LOOKING_FOR' ? (
-                    <div className="text-slate-400">&nbsp;</div>
+                    <div>&nbsp;</div>
                   ) : post.postType === 'POLL' ? (
-                    <div className="text-slate-400">Total votes: {post.pollOptions?.reduce((s, o) => s + (o.votes?.length || 0), 0)}</div>
+                    <div className="text-xs text-muted-foreground/60">Total votes: {post.pollOptions?.reduce((s, o) => s + (o.votes?.length || 0), 0)}</div>
                   ) : (
                     <div />
                   )}
@@ -449,18 +488,39 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
                       const isMember = post.podMembers?.includes(currentUserId);
                       if (isOwner || isMember) {
                         return (
-                          <Button onClick={() => post.linkedPodId && navigate(`/campus/collab-pods/${post.linkedPodId}`)} className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white">Open Pod</Button>
+                          <Button 
+                            onClick={() => post.linkedPodId && navigate(`/campus/collab-pods/${post.linkedPodId}`)} 
+                            variant="default"
+                            size="sm"
+                            className="font-semibold"
+                          >
+                            Open Pod
+                          </Button>
                         );
                       } else {
                         return (
-                          <Button onClick={() => handleJoinPod(post)} className="bg-gradient-to-r from-green-600 to-teal-600 text-white">Join</Button>
+                          <Button 
+                            onClick={() => handleJoinPod(post)} 
+                            variant="default"
+                            size="sm"
+                            className="font-semibold"
+                          >
+                            Join Pod
+                          </Button>
                         );
                       }
                     })()
                   ) : post.postType === 'POLL' ? (
                     <div />
                   ) : (
-                    <Button onClick={() => navigate(`/post/${post.id}/comments`, { state: { from: '/campus', sourceView: 'campus', sourceContext: 'campus-feed', sourceFilter: activeFilter } })} variant="outline" size="sm" className="bg-slate-700/50 border-slate-600 hover:bg-slate-700">Reply</Button>
+                    <Button 
+                      onClick={() => navigate(`/post/${post.id}/comments`, { state: { from: '/campus', sourceView: 'campus', sourceContext: 'campus-feed', sourceFilter: activeFilter } })} 
+                      variant="ghost"
+                      size="sm"
+                      className="font-medium"
+                    >
+                      Reply
+                    </Button>
                   )}
                 </div>
               </CardContent>
@@ -471,48 +531,85 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
 
       {/* --- Create Post Modal --- */}
       {showCreatePost && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="max-w-2xl w-full p-8 shadow-2xl bg-slate-900/80 border-slate-700 text-white">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold">Create New Post</h3>
-              <Button variant="ghost" size="sm" onClick={() => setShowCreatePost(false)} className="hover:bg-slate-700">✕</Button>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card 
+            variant="glass" 
+            className="max-w-2xl w-full p-8 shadow-2xl"
+          >
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-2xl font-bold tracking-tight text-foreground">Create New Post</h3>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowCreatePost(false)} 
+                className="text-muted-foreground hover:text-foreground hover:bg-white/10"
+              >
+                ✕
+              </Button>
             </div>
-            <div className="space-y-4">
+            
+            <div className="space-y-6">
               <div>
-                <label className="block font-semibold mb-2 text-slate-300">Post Type *</label>
+                <label className="block font-semibold mb-3 text-foreground tracking-wide text-sm">Post Type *</label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {RESTRICTED_POST_TYPES.map((type) => (
                     <button
                       key={type.id}
                       onClick={() => setSelectedPostType(type.id)}
-                      className={`p-4 border-2 rounded-xl text-center transition-colors ${selectedPostType === type.id ? 'border-blue-500 bg-blue-500/20' : 'border-slate-700 bg-slate-800/50 hover:border-slate-500'}`}
+                      className={`p-4 border-2 rounded-lg text-center transition-all duration-500 ${selectedPostType === type.id 
+                        ? theme === 'cyber'
+                          ? 'border-cyan-400/50 bg-cyan-400/15 shadow-md shadow-cyan-400/20'
+                          : 'border-primary/50 bg-primary/15 shadow-md shadow-primary/20'
+                        : theme === 'cyber'
+                          ? 'border-white/15 bg-white/5 hover:border-white/30 hover:bg-white/10'
+                          : 'border-white/15 bg-white/5 hover:border-white/30 hover:bg-white/10'
+                      }`}
                     >
-                      <div className="text-2xl">{type.icon}</div>
-                      <div className="text-sm font-medium">{type.label}</div>
+                      <div className="text-2xl mb-1">{type.icon}</div>
+                      <div className="text-xs font-semibold text-foreground">{type.label}</div>
                     </button>
                   ))}
                 </div>
               </div>
+              
               <div>
-                <label className="block font-semibold mb-2 text-slate-300">Title *</label>
-                <Input placeholder="What's the title?" value={newPost.title} onChange={(e) => setNewPost(p => ({ ...p, title: e.target.value }))} className="bg-slate-800/50 border-slate-700 focus:ring-blue-500" />
+                <label className="block font-semibold mb-2 text-foreground text-sm tracking-wide">Title *</label>
+                <Input 
+                  placeholder="What's the title?" 
+                  value={newPost.title} 
+                  onChange={(e) => setNewPost(p => ({ ...p, title: e.target.value }))} 
+                  className="bg-white/8 border-white/15 focus:bg-white/12 focus:border-white/30 text-foreground placeholder:text-muted-foreground/50"
+                />
               </div>
 
               {selectedPostType === 'LOOKING_FOR' && (
                 <div>
-                  <label className="block font-semibold mb-2 text-slate-300">Pod Name * <span className="text-xs text-slate-400">(The name for the collaboration pod)</span></label>
-                  <Input placeholder="e.g., 'UI/UX Design Team'" value={newPost.podName} onChange={(e) => setNewPost(p => ({ ...p, podName: e.target.value }))} className="bg-slate-800/50 border-slate-700 focus:ring-blue-500" />
+                  <label className="block font-semibold mb-2 text-foreground text-sm tracking-wide">
+                    Pod Name * 
+                    <span className="text-xs text-muted-foreground/70 ml-2 font-normal">(The name for the collaboration pod)</span>
+                  </label>
+                  <Input 
+                    placeholder="e.g., 'UI/UX Design Team'" 
+                    value={newPost.podName} 
+                    onChange={(e) => setNewPost(p => ({ ...p, podName: e.target.value }))} 
+                    className="bg-white/8 border-white/15 focus:bg-white/12 focus:border-white/30 text-foreground placeholder:text-muted-foreground/50"
+                  />
                 </div>
               )}
 
               <div>
-                <label className="block font-semibold mb-2 text-slate-300">Content / Description</label>
-                <Textarea placeholder="What are the details?" value={newPost.content} onChange={(e) => setNewPost(p => ({ ...p, content: e.target.value }))} className="bg-slate-800/50 border-slate-700 focus:ring-blue-500" />
+                <label className="block font-semibold mb-2 text-foreground text-sm tracking-wide">Content / Description</label>
+                <Textarea 
+                  placeholder="What are the details?" 
+                  value={newPost.content} 
+                  onChange={(e) => setNewPost(p => ({ ...p, content: e.target.value }))} 
+                  className="bg-white/8 border-white/15 focus:bg-white/12 focus:border-white/30 text-foreground placeholder:text-muted-foreground/50 min-h-24"
+                />
               </div>
 
               {selectedPostType === 'POLL' && (
                 <div>
-                  <label className="block font-semibold mb-2 text-slate-300">Poll Options *</label>
+                  <label className="block font-semibold mb-3 text-foreground text-sm tracking-wide">Poll Options *</label>
                   <div className="space-y-2">
                     {pollOptions.map((option, index) => (
                       <div key={index} className="flex items-center gap-2">

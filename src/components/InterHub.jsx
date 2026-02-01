@@ -54,77 +54,36 @@ export default function InterHub({
   const getNavItemStyles = (itemId) => {
     const isActive = activeView === itemId
 
+    if (theme === 'windows1992') {
+      return `
+        group relative flex items-center space-x-3 px-6 py-4 rounded-none border-2 transition-all duration-500 cursor-pointer overflow-hidden
+        ${isActive
+          ? 'bg-primary text-primary-foreground border-inset shadow-inset scale-105'
+          : 'text-muted-foreground hover:text-foreground glass hover:border-primary border-outset hover:bg-muted button-win95'
+        }
+        press-effect
+      `
+    }
+
+    // Modern theme - enhanced active state with color tint, increased opacity, and glow
     return `
-      group relative flex items-center space-x-3 px-4 py-3 ${theme === 'windows1992' ? 'rounded-none border-2' : 'rounded-xl'} transition-all duration-300 cursor-pointer overflow-hidden backdrop-blur-sm
+      group relative flex items-center space-x-3 px-6 py-4 rounded-lg transition-all duration-500 cursor-pointer overflow-hidden backdrop-blur-xl border
       ${isActive
-        ? theme === 'windows1992'
-          ? 'bg-primary text-primary-foreground border-inset shadow-inset'
-          : 'bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105'
-        : theme === 'windows1992'
-          ? 'text-muted-foreground hover:text-foreground glass hover:border-primary border-outset hover:bg-muted button-win95'
-          : 'text-muted-foreground hover:text-foreground glass hover:shadow-glass hover:scale-105 border-transparent'
+        ? theme === 'cyber'
+          ? 'bg-cyan-400/25 text-cyan-200 border-cyan-400/50 shadow-lg shadow-cyan-400/30 scale-105'
+          : 'bg-primary/25 text-primary-solid border-primary/50 shadow-lg shadow-primary/30 scale-105'
+        : theme === 'cyber'
+          ? 'text-muted-foreground/70 border-white/10 hover:bg-white/5 hover:border-white/20 hover:shadow-sm'
+          : 'text-muted-foreground/70 border-white/10 hover:bg-white/5 hover:border-white/20 hover:shadow-sm'
       }
-      ${isActive && theme !== 'windows1992' ? 'shadow-neon' : theme !== 'windows1992' ? 'hover:shadow-glass-lg' : ''} press-effect
+      press-effect
     `
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-4 pointer-events-none">
-        <div className="flex items-center justify-center space-x-3">
-          <div className={`w-16 h-16 ${theme === 'windows1992' ? 'rounded-none bg-primary border-4 border-outset' : 'rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500'} flex items-center justify-center shadow-lg ${theme === 'windows1992' ? '' : 'hover:shadow-neon'} transition-all duration-300`}>
-            <span className={`text-3xl ${theme === 'windows1992' ? 'text-primary-foreground text-lg' : 'text-white'}`}>
-              {theme === 'windows1992' ? '🌍' : '🌐'}
-            </span>
-          </div>
-          <div className="text-left">
-            <h1 className={`text-3xl font-bold ${theme === 'windows1992' ? 'text-primary text-lg font-bold' : 'gradient-text cyber:glow-text'}`}>
-              {theme === 'windows1992' ? 'GLOBAL HUB' : 'Global Hub'}
-            </h1>
-            <p className={`text-muted-foreground ${theme === 'windows1992' ? 'text-xs' : ''}`}>
-              {theme === 'windows1992' ? 'INTER-COLLEGE COLLABORATION' : 'Cross-college collaboration network'}
-            </p>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-          <Card className={`${theme === 'windows1992' ? 'card-glass border-2 border-outset' : 'card-glass'}`}>
-            <CardContent className="p-4 text-center">
-              <div className={`text-2xl font-bold ${theme === 'windows1992' ? 'text-primary text-sm font-bold' : 'text-primary'}`}>
-                {theme === 'windows1992' ? '250+' : '250+'}
-              </div>
-              <div className={`text-sm text-muted-foreground ${theme === 'windows1992' ? 'text-xs' : ''}`}>
-                {theme === 'windows1992' ? 'COLLEGES' : 'Colleges'}
-              </div>
-            </CardContent>
-          </Card>
-          <Card className={`${theme === 'windows1992' ? 'card-glass border-2 border-outset' : 'card-glass'}`}>
-            <CardContent className="p-4 text-center">
-              <div className={`text-2xl font-bold ${theme === 'windows1992' ? 'text-primary text-sm font-bold' : 'text-primary'}`}>
-                {theme === 'windows1992' ? '15K+' : '15K+'}
-              </div>
-              <div className={`text-sm text-muted-foreground ${theme === 'windows1992' ? 'text-xs' : ''}`}>
-                {theme === 'windows1992' ? 'STUDENTS' : 'Students'}
-              </div>
-            </CardContent>
-          </Card>
-          <Card className={`${theme === 'windows1992' ? 'card-glass border-2 border-outset' : 'card-glass'}`}>
-            <CardContent className="p-4 text-center">
-              <div className={`text-2xl font-bold ${theme === 'windows1992' ? 'text-primary text-sm font-bold' : 'text-primary'}`}>
-                {theme === 'windows1992' ? '500+' : '500+'}
-              </div>
-              <div className={`text-sm text-muted-foreground ${theme === 'windows1992' ? 'text-xs' : ''}`}>
-                {theme === 'windows1992' ? 'PROJECTS' : 'Projects'}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
+    <div className="space-y-8 py-6">
       {/* Navigation */}
-      <div className="flex flex-wrap gap-3 justify-center relative z-10">
+      <div className="flex flex-wrap gap-4 justify-center px-2">
         {navItems.map((item, index) => (
           <button
             key={item.id}
@@ -134,20 +93,20 @@ export default function InterHub({
           >
             {/* Button background shimmer (not in windows1992) */}
             {theme !== 'windows1992' && (
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
             )}
 
-            <span className={`text-2xl transition-all duration-300 ${theme === 'windows1992' ? 'text-sm' : 'group-hover:scale-125 group-hover:rotate-12'} relative z-10`}>
+            <span className={`text-2xl transition-all duration-500 ${theme === 'windows1992' ? 'text-sm' : 'group-hover:scale-110'} relative z-10`}>
               {theme === 'windows1992' ?
                 ({ feed: '💬', rooms: '🚀', discovery: '🔍', chat: '📧' }[item.id] || item.icon) :
                 item.icon
               }
             </span>
             <div className="flex-1 text-left relative z-10">
-              <div className={`font-semibold ${theme === 'windows1992' ? 'text-xs font-bold' : ''}`}>
+              <div className={`font-semibold tracking-wide ${theme === 'windows1992' ? 'text-xs font-bold' : 'text-sm'}`}>
                 {theme === 'windows1992' ? item.label.toUpperCase() : item.label}
               </div>
-              <div className={`text-xs opacity-75 ${theme === 'windows1992' ? 'text-xs' : ''}`}>
+              <div className={`text-xs opacity-60 transition-opacity ${theme === 'windows1992' ? 'text-xs' : ''}`}>
                 {theme === 'windows1992' ? item.description.toUpperCase() : item.description}
               </div>
             </div>

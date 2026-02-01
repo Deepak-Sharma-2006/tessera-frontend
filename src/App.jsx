@@ -20,7 +20,6 @@ import Logout from '@/pages/Logout.jsx';
 import LoadingSpinner from '@/components/animations/LoadingSpinner.jsx';
 import { saveUser, loadUser } from '@/lib/session.js';
 import ThemeBackground from '@/components/backgrounds/ThemeBackground.jsx';
-import XPDisplay from '@/components/ui/XPDisplay.jsx';
 import PodView from '@/components/PodView.jsx';
 
 // --- 1. MOVED OUTSIDE: Profile Setup Handler ---
@@ -173,7 +172,6 @@ const AuthenticatedApp = ({ user, setUser }) => {
   return (
     <>
       <Navigation user={user} setUser={setUser} currentView={currentView} onViewChange={handleViewChange} />
-      <XPDisplay user={user} />
       <main className="pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {currentView === 'campus' && <CampusHub user={user} eventId={viewContext?.eventId} initialView={viewContext?.initialView || 'overview'} activeFilter={viewContext?.activeFilter} />}
@@ -210,7 +208,7 @@ const ProtectedRoute = ({ user, isVerifying, isProfileComplete, children, loginP
 export default function App() {
   const [user, setUser] = useState(null);
   const [isVerifying, setIsVerifying] = useState(true); // CRITICAL: Start in verifying state
-  const [theme, setThemeState] = useState('light');
+  const [theme, setThemeState] = useState('cyber');
   const [initialLoginFlowState, setInitialLoginFlowState] = useState({ step: 'login', data: null });
 
   // Load theme

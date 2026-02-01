@@ -172,94 +172,98 @@ export default function BuddyBeacon({ user }) {
         }
 
         return (
-            <Card key={post.id} className="transition-all duration-300">
-                <CardContent className="p-6">
+            <Card key={post.id} variant="glass" className="transition-all duration-500 hover:shadow-lg hover:-translate-y-1">
+                <CardContent className="p-6 space-y-4">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center">
+                        <div className="flex items-center space-x-3">
                             <Avatar src={post.author?.profilePic} alt={post.author?.name} />
-                            <div className="ml-4">
-                                <h3 className="text-lg font-bold">{post.author?.name}</h3>
-                                <p className="text-sm text-gray-500">{post.author?.college}</p>
+                            <div>
+                                <h3 className="text-sm font-semibold text-foreground tracking-tight">{post.author?.name}</h3>
+                                <p className="text-xs text-muted-foreground/70">{post.author?.college}</p>
                             </div>
                         </div>
-                        <Badge variant="info">Team Request</Badge>
+                        <Badge variant={theme === 'cyber' ? 'info' : 'secondary'} size="sm">Team Request</Badge>
                     </div>
-                    <h2 className="mt-4 text-xl font-bold">{post.title || post.eventName || 'Team Request'}</h2>
-                    <p className="mt-2 text-gray-700">{post.description}</p>
-                    <div className="mt-4">
-                        <h4 className="text-sm font-bold">Required Skills:</h4>
-                        <div className="flex flex-wrap mt-2">
+                    
+                    <div>
+                        <h2 className="text-lg font-bold text-foreground tracking-tight">{post.title || post.eventName || 'Team Request'}</h2>
+                        <p className="text-sm text-muted-foreground/80 mt-2 leading-relaxed">{post.description}</p>
+                    </div>
+                    
+                    <div>
+                        <h4 className="text-xs font-semibold text-foreground/90 mb-2 tracking-wide">Required Skills:</h4>
+                        <div className="flex flex-wrap gap-2">
                             {post.requiredSkills && post.requiredSkills.length > 0 ? (
                                 post.requiredSkills.map((skill, index) => (
-                                    <Badge key={index} variant="secondary" className="mr-2 mb-2">
+                                    <Badge key={index} variant="secondary" size="sm">
                                         {skill}
                                     </Badge>
                                 ))
                             ) : (
-                                <p className="text-sm text-gray-400">No specific skills required</p>
+                                <p className="text-xs text-muted-foreground/60">No specific skills required</p>
                             )}
                         </div>
                     </div>
-                    <div className="mt-4 flex justify-between items-center">
-                        <p className="text-sm text-gray-500">
+                    
+                    <div className="flex justify-between text-xs text-muted-foreground/70 py-3 border-t border-white/10">
+                        <p>
                             {hoursElapsed < 24 ? `${24 - hoursElapsed} hours remaining` : 'Expired'}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p>
                             {currentTeamSize}/{post.maxTeamSize || post.teamSize || 4} spots filled
                         </p>
                     </div>
 
                     {/* Applicants Section - Show only for post creator */}
                     {isOwnPost && applicants.length > 0 && (
-                        <div className="mt-6 border-t pt-4">
-                            <h4 className="text-lg font-bold mb-4">Received Applications ({applicants.length})</h4>
+                        <div className="mt-6 pt-4 border-t border-white/10 space-y-3">
+                            <h4 className="text-sm font-bold text-foreground tracking-tight">Received Applications ({applicants.length})</h4>
                             <div className="space-y-3">
                                 {applicants.map((applicant) => {
                                     const appStatus = applicant.status || 'PENDING';
-                                    const isAvailable = applicant.isAvailable !== false; // Default to available if not specified
-                                    const statusColor = {
-                                        'PENDING': 'bg-yellow-100 text-yellow-800',
-                                        'ACCEPTED': 'bg-green-100 text-green-800',
-                                        'REJECTED': 'bg-red-100 text-red-800'
-                                    }[appStatus] || 'bg-gray-100 text-gray-800';
+                                    const isAvailable = applicant.isAvailable !== false;
+                                    const statusVariant = {
+                                        'PENDING': 'warning',
+                                        'ACCEPTED': 'success',
+                                        'REJECTED': 'destructive'
+                                    }[appStatus] || 'secondary';
 
                                     return (
                                         <div
                                             key={applicant.applicantId || applicant._id}
-                                            className={`flex items-center justify-between bg-gray-50 p-3 rounded-lg transition-opacity ${!isAvailable ? 'opacity-50 cursor-not-allowed' : ''
+                                            className={`flex items-center justify-between bg-white/5 border border-white/10 p-3 rounded-lg transition-all duration-300 hover:bg-white/8 ${!isAvailable ? 'opacity-50 cursor-not-allowed' : ''
                                                 }`}
                                         >
-                                            <div className="flex items-center flex-1">
-                                                <Avatar src={applicant.profile?.profilePic} alt={applicant.profile?.name} className="w-10 h-10" />
-                                                <div className="ml-3 flex-1">
-                                                    <p className="font-semibold text-sm">{applicant.profile?.name || applicant.name || 'Unknown'}</p>
-                                                    <p className="text-xs text-gray-500">
+                                            <div className="flex items-center flex-1 min-w-0">
+                                                <Avatar src={applicant.profile?.profilePic} alt={applicant.profile?.name} className="w-9 h-9" />
+                                                <div className="ml-3 flex-1 min-w-0">
+                                                    <p className="font-semibold text-xs text-foreground truncate">{applicant.profile?.name || applicant.name || 'Unknown'}</p>
+                                                    <p className="text-xs text-muted-foreground/60">
                                                         Year: {applicant.profile?.yearOfStudy || applicant.profile?.year || 'N/A'}
                                                     </p>
-                                                    {/* ✅ Display application message/description */}
                                                     {applicant.message && (
-                                                        <p className="text-xs text-gray-600 mt-1 italic">\"Why I'm applying: {applicant.message}\"</p>
+                                                        <p className="text-xs text-muted-foreground/70 mt-1 italic line-clamp-1">"{applicant.message}"</p>
                                                     )}
                                                     {applicant.profile?.skills && applicant.profile.skills.length > 0 && (
                                                         <div className="flex flex-wrap gap-1 mt-1">
                                                             {applicant.profile.skills.slice(0, 2).map((skill, idx) => (
-                                                                <Badge key={idx} variant="secondary" className="text-xs">
+                                                                <Badge key={idx} variant="secondary" size="sm" className="text-xs">
                                                                     {skill}
                                                                 </Badge>
                                                             ))}
                                                             {applicant.profile.skills.length > 2 && (
-                                                                <span className="text-xs text-gray-500">+{applicant.profile.skills.length - 2}</span>
+                                                                <span className="text-xs text-muted-foreground/60">+{applicant.profile.skills.length - 2}</span>
                                                             )}
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="flex gap-2 ml-3">
-                                                <Badge className={`${statusColor} px-2 py-1`}>
+                                            <div className="flex gap-2 ml-3 flex-shrink-0">
+                                                <Badge variant={statusVariant} size="sm">
                                                     {appStatus}
                                                 </Badge>
                                                 {appStatus === 'PENDING' && !isAvailable && (
-                                                    <Badge className="bg-gray-300 text-gray-700 px-2 py-1 cursor-not-allowed">
+                                                    <Badge variant="secondary" size="sm" className="cursor-not-allowed">
                                                         Unavailable
                                                     </Badge>
                                                 )}
@@ -267,13 +271,17 @@ export default function BuddyBeacon({ user }) {
                                                     <>
                                                         <Button
                                                             onClick={() => handleAccept(applicant._id || applicant.applicantId, post.id)}
-                                                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 text-sm"
+                                                            variant="default"
+                                                            size="sm"
+                                                            className="text-xs rounded-md px-2 py-0.5 h-auto"
                                                         >
                                                             ✓ Accept
                                                         </Button>
                                                         <Button
                                                             onClick={() => openRejectionModal(applicant._id || applicant.applicantId, post.id)}
-                                                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm"
+                                                            variant="destructive"
+                                                            size="sm"
+                                                            className="text-xs rounded-md px-2 py-0.5 h-auto"
                                                         >
                                                             ✕ Reject
                                                         </Button>
@@ -295,14 +303,12 @@ export default function BuddyBeacon({ user }) {
                                 }
                             }}
                             disabled={buttonDisabled}
-                            className="mt-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+                            variant="default"
+                            className="w-full mt-4 rounded-lg"
                         >
                             {buttonLabel}
                         </Button>
                     )}
-                    {/* {isOwnPost && (
-                        <p className="mt-4 text-sm text-gray-400 text-center italic">This is your post</p>
-                    )} */}
                 </CardContent>
             </Card>
         );
@@ -455,12 +461,14 @@ export default function BuddyBeacon({ user }) {
                                 setRefreshTrigger(prev => prev + 1);
                             }
                         }}
-                        className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border ${activeFilter === filter.id
-                            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-transparent shadow-lg shadow-cyan-500/20'
-                            : 'bg-slate-900/50 text-slate-400 border-slate-700 hover:border-slate-500 hover:text-white'
+                        className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-500 border ${activeFilter === filter.id
+                            ? theme === 'cyber'
+                              ? 'bg-cyan-400/20 text-cyan-300 border-cyan-400/40 shadow-md shadow-cyan-400/20 backdrop-blur-xl'
+                              : 'bg-primary/20 text-primary-solid border-primary/40 shadow-md shadow-primary/20 backdrop-blur-xl'
+                            : 'bg-white/5 text-muted-foreground/70 border-white/10 hover:border-white/20 hover:text-muted-foreground/90 hover:bg-white/8'
                             }`}
                     >
-                        {filter.label} <span className="ml-2 inline-block bg-slate-800/60 text-xs px-2 py-1 rounded-full">{filter.count}</span>
+                        {filter.label} <span className="ml-2 inline-block bg-white/10 text-xs px-2 py-1 rounded-md text-muted-foreground/80 font-semibold">{filter.count}</span>
                     </button>
                 ))}
             </div>
@@ -520,18 +528,18 @@ export default function BuddyBeacon({ user }) {
             }</div>
             {showApplicationModal && selectedPost && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 rounded-2xl shadow-2xl">
+                    <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto variant='glass' p-8 rounded-lg shadow-lg">
                         <div className="flex items-center justify-between mb-8">
                             <div>
-                                <h3 className="text-2xl font-bold">Apply to Team</h3>
-                                <p className="text-muted-foreground">{selectedPost.eventName}</p>
+                                <h3 className="text-2xl font-bold tracking-tight">Apply to Team</h3>
+                                <p className="text-muted-foreground/70 text-sm mt-1">{selectedPost.eventName}</p>
                             </div>
-                            <Button variant="ghost" size="icon" onClick={() => setShowApplicationModal(false)} className="rounded-full">✕</Button>
+                            <Button variant="ghost" size="icon" onClick={() => setShowApplicationModal(false)} className="rounded-lg">✕</Button>
                         </div>
                         <div className="space-y-6">
-                            <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                                <h4 className="font-semibold text-blue-800 mb-2">Team Details:</h4>
-                                <div className="space-y-1 text-sm text-blue-700">
+                            <div className={theme === 'cyber' ? 'bg-cyan-400/10 border border-cyan-400/20 p-4 rounded-lg' : 'bg-primary/10 border border-primary/20 p-4 rounded-lg'}>
+                                <h4 className={theme === 'cyber' ? 'font-semibold text-cyan-300 mb-2' : 'font-semibold text-primary-solid mb-2'}>Team Details:</h4>
+                                <div className="space-y-1 text-sm text-muted-foreground/80">
                                     {/* ✅ FIX #2: Show complete post data */}
                                     <div><strong>Team:</strong> {selectedPost?.title || selectedPost?.eventName || 'Team Request'}</div>
                                     <div><strong>Leader:</strong> {selectedPost?.author?.name || selectedPost?.authorName || 'Unknown'}</div>
@@ -545,35 +553,35 @@ export default function BuddyBeacon({ user }) {
                                 </div>
                             </div>
                             <div>
-                                <label className="block font-semibold mb-3 text-lg">Your Relevant Skills</label>
+                                <label className="block font-semibold mb-3 text-foreground tracking-wide">Your Relevant Skills</label>
                                 <div className="space-y-3">
                                     {applicationData.relevantSkills.length > 0 && (
                                         <div className="flex flex-wrap gap-2">
                                             {applicationData.relevantSkills.map((skill) => (
-                                                <Badge key={skill} variant="outline" className="cursor-pointer hover:bg-destructive/10" onClick={() => removeSkill(skill)}>
+                                                <Badge key={skill} variant="secondary" className="cursor-pointer hover:bg-red-500/20 transition-colors duration-300" onClick={() => removeSkill(skill)}>
                                                     {skill} ✕
                                                 </Badge>
                                             ))}
                                         </div>
                                     )}
                                     <div className="flex space-x-2">
-                                        <Input placeholder="Add a skill..." value={applicationData.newSkill} onChange={(e) => setApplicationData(prev => ({ ...prev, newSkill: e.target.value }))} onKeyDown={(e) => e.key === 'Enter' && addSkill()} className="rounded-xl" />
-                                        <Button variant="outline" onClick={addSkill} className="rounded-xl">Add</Button>
+                                        <Input placeholder="Add a skill..." value={applicationData.newSkill} onChange={(e) => setApplicationData(prev => ({ ...prev, newSkill: e.target.value }))} onKeyDown={(e) => e.key === 'Enter' && addSkill()} />
+                                        <Button variant="secondary" onClick={addSkill} className="rounded-lg">Add</Button>
                                     </div>
                                 </div>
                             </div>
                             <div>
-                                <label className="block font-semibold mb-3 text-lg">Why do you want to join this team? *</label>
-                                <Textarea placeholder="Tell them about your experience..." value={applicationData.message} onChange={(e) => setApplicationData(prev => ({ ...prev, message: e.target.value }))} rows={4} className="rounded-xl p-4" />
-                                <div className="text-sm text-right mt-1" style={{ color: (applicationData.message || '').length > MAX_MESSAGE_LENGTH ? 'red' : undefined }}>
+                                <label className="block font-semibold mb-3 text-foreground tracking-wide">Why do you want to join this team? *</label>
+                                <Textarea placeholder="Tell them about your experience..." value={applicationData.message} onChange={(e) => setApplicationData(prev => ({ ...prev, message: e.target.value }))} rows={4} />
+                                <div className="text-sm text-right mt-1 text-muted-foreground/60" style={{ color: (applicationData.message || '').length > MAX_MESSAGE_LENGTH ? '#f59e0b' : undefined }}>
                                     {(applicationData.message || '').length}/{MAX_MESSAGE_LENGTH}
                                 </div>
                             </div>
                             <div className="flex space-x-4">
-                                <Button onClick={handleSubmitApplication} disabled={!applicationData.message.trim() || (applicationData.message || '').length > MAX_MESSAGE_LENGTH} className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600">
+                                <Button onClick={handleSubmitApplication} disabled={!applicationData.message.trim() || (applicationData.message || '').length > MAX_MESSAGE_LENGTH} variant="default" className="flex-1 py-3 rounded-lg">
                                     🚀 Submit Application
                                 </Button>
-                                <Button variant="outline" onClick={() => setShowApplicationModal(false)} className="py-3 rounded-xl">Cancel</Button>
+                                <Button variant="ghost" onClick={() => setShowApplicationModal(false)} className="py-3 rounded-lg border border-white/20">Cancel</Button>
                             </div>
                         </div>
                     </Card>
@@ -581,11 +589,11 @@ export default function BuddyBeacon({ user }) {
             )}
             {showRejectionModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <Card className="max-w-md w-full p-8 rounded-2xl shadow-2xl">
-                        <h3 className="text-xl font-bold mb-4">Reject Applicant</h3>
-                        <div className="mb-4">
-                            <label className="block font-semibold mb-2">Reason</label>
-                            <select value={rejectionData.reason} onChange={e => setRejectionData(prev => ({ ...prev, reason: e.target.value }))} className="w-full p-2 rounded">
+                    <Card className="max-w-md w-full p-8 variant='glass' rounded-lg shadow-lg">
+                        <h3 className="text-xl font-bold tracking-tight mb-6">Reject Applicant</h3>
+                        <div className="mb-6">
+                            <label className="block font-semibold mb-3 text-foreground/90">Reason</label>
+                            <select value={rejectionData.reason} onChange={e => setRejectionData(prev => ({ ...prev, reason: e.target.value }))} className="w-full backdrop-blur-xl bg-white/8 border border-white/15 text-foreground p-2 rounded-lg hover:bg-white/12 hover:border-white/20 focus:bg-white/12 focus:border-white/30 transition-all duration-500">
                                 <option value="">Select reason...</option>
                                 <option value="NOT_A_GOOD_FIT">Skill mismatch</option>
                                 <option value="TEAM_FULL">Team full</option>
@@ -593,13 +601,13 @@ export default function BuddyBeacon({ user }) {
                                 <option value="OTHER">Other</option>
                             </select>
                         </div>
-                        <div className="mb-4">
-                            <label className="block font-semibold mb-2">Custom Note (optional)</label>
-                            <Textarea value={rejectionData.note} onChange={e => setRejectionData(prev => ({ ...prev, note: e.target.value }))} rows={3} className="w-full p-2 rounded" />
+                        <div className="mb-6">
+                            <label className="block font-semibold mb-3 text-foreground/90">Custom Note (optional)</label>
+                            <Textarea value={rejectionData.note} onChange={e => setRejectionData(prev => ({ ...prev, note: e.target.value }))} rows={3} />
                         </div>
                         <div className="flex gap-4">
-                            <Button onClick={handleReject} disabled={!rejectionData.reason}>Reject</Button>
-                            <Button variant="outline" onClick={() => setShowRejectionModal(false)}>Cancel</Button>
+                            <Button onClick={handleReject} disabled={!rejectionData.reason} variant="default" className="flex-1 rounded-lg">Reject</Button>
+                            <Button variant="ghost" onClick={() => setShowRejectionModal(false)} className="flex-1 rounded-lg border border-white/20">Cancel</Button>
                         </div>
                     </Card>
                 </div>

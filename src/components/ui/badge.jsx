@@ -1,134 +1,140 @@
 import { forwardRef } from 'react'
 import React from 'react'
 import { cn } from '@/lib/utils.js'
+import { useTheme } from '@/lib/theme.js'
 
 const Badge = forwardRef(
   ({ className, variant = 'glass', size = 'default', interactive = false, pulse = false, dot = false, earned = false, level, children, ...props }, ref) => {
+    const { theme } = useTheme()
+
     return (
       <div
         className={cn(
-          // Base styles with enhanced animations
-          'inline-flex items-center font-semibold transition-all duration-300 select-none relative overflow-hidden group',
+          // Base styles with enhanced animations - professional subtle approach
+          'inline-flex items-center font-semibold transition-all duration-500 select-none relative overflow-hidden group',
 
           // Sizes with better proportions
           {
-            'px-3 py-1.5 text-xs rounded-xl': size === 'sm',
-            'px-4 py-2 text-sm rounded-xl': size === 'default',
-            'px-5 py-2.5 text-base rounded-2xl': size === 'lg',
+            'px-3 py-1.5 text-xs rounded-lg': size === 'sm',
+            'px-4 py-2 text-sm rounded-lg': size === 'default',
+            'px-5 py-2.5 text-base rounded-lg': size === 'lg',
           },
 
-          // Variants with glassmorphism
+          // Variants with glassmorphism - professional sober aesthetic
           {
-            // Default - Primary gradient
-            'bg-gradient-to-r from-primary to-purple-600 text-primary-foreground shadow-lg hover:shadow-xl hover:shadow-primary/30': variant === 'default',
+            // Default - Solid primary (no gradient)
+            'bg-primary text-primary-foreground shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-500': variant === 'default',
 
-            // Secondary - Subtle glass
-            'glass-subtle text-secondary-foreground hover:shadow-glass': variant === 'secondary',
+            // Secondary - Subtle glass with white/8
+            'backdrop-blur-xl bg-white/8 border border-white/15 text-foreground hover:bg-white/12 hover:border-white/25 shadow-sm': variant === 'secondary',
 
-            // Destructive - Danger styling
-            'bg-destructive text-destructive-foreground shadow-md hover:shadow-lg hover:shadow-destructive/30': variant === 'destructive',
+            // Destructive - Danger styling with glassmorphism
+            'backdrop-blur-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/15 hover:border-red-500/30 shadow-sm': variant === 'destructive',
 
-            // Outline - Glass border
-            'border-2 border-glass-border glass text-foreground hover:shadow-glass hover:bg-glass-bg': variant === 'outline',
+            // Outline - Glass border only
+            'backdrop-blur-xl border border-white/20 bg-white/5 text-foreground hover:bg-white/10 hover:border-white/30 shadow-sm': variant === 'outline',
 
-            // Success - Green glass
-            'glass text-green-700 border border-green-200/50 bg-green-100/30 hover:bg-green-200/40 dark:bg-green-900/20 dark:text-green-400 dark:border-green-700/50': variant === 'success',
+            // Success - Green glassmorphism
+            'backdrop-blur-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15 hover:border-emerald-500/30 shadow-sm': variant === 'success',
 
-            // Warning - Yellow glass
-            'glass text-yellow-700 border border-yellow-200/50 bg-yellow-100/30 hover:bg-yellow-200/40 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-700/50': variant === 'warning',
+            // Warning - Amber glassmorphism
+            'backdrop-blur-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500/15 hover:border-amber-500/30 shadow-sm': variant === 'warning',
 
-            // Info - Blue glass
-            'glass text-blue-700 border border-blue-200/50 bg-blue-100/30 hover:bg-blue-200/40 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-700/50': variant === 'info',
+            // Info - Primary glassmorphism
+            'backdrop-blur-xl bg-primary/10 border border-primary/20 text-primary dark:text-primary-solid hover:bg-primary/15 hover:border-primary/30 shadow-sm': variant === 'info',
 
-            // Gradient - Multi-color gradient
-            'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-lg hover:shadow-xl hover:shadow-purple-500/40 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600': variant === 'gradient',
+            // Gradient - Subtle gradient approach
+            'bg-gradient-to-r from-primary/80 to-primary/60 text-primary-foreground shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-500': variant === 'gradient',
 
-            // Glass - Primary glassmorphism
-            'glass text-foreground border border-glass-border hover:shadow-glass-lg': variant === 'glass',
-
-            // Neon - Cyber theme special
-            'glass text-cyan-400 border border-cyan-500/30 shadow-neon hover:shadow-xl hover:shadow-cyan-500/40 cyber:animate-pulse': variant === 'neon',
+            // Glass - Primary glassmorphism (default variant)
+            'backdrop-blur-xl bg-white/8 border border-white/15 text-foreground hover:bg-white/12 hover:border-white/25 shadow-sm': variant === 'glass',
           },
 
-          // Interactive styles
-          interactive && 'cursor-pointer hover:scale-110 press-effect hover-lift',
+          // Neon - Cyber theme with sober saturation (80%) - moved outside object literal
+          variant === 'neon' && (theme === 'cyber'
+            ? 'backdrop-blur-xl bg-cyan-400/10 border border-cyan-400/20 text-cyan-300 hover:bg-cyan-400/15 hover:border-cyan-400/30 shadow-sm'
+            : 'backdrop-blur-xl bg-primary/10 border border-primary/20 text-primary-solid hover:bg-primary/15 hover:border-primary/30 shadow-sm'),
+
+          // Interactive styles - subtle hover, no heavy scale
+          interactive && 'cursor-pointer hover:-translate-y-1 transition-transform duration-500',
 
           // Pulse animation
           pulse && 'animate-pulse',
 
-          // Earned badge special effects
-          earned && 'badge-earn shadow-glow',
+          // Earned badge special effects - subtle glow
+          earned && 'shadow-lg',
 
           className
         )}
         ref={ref}
         {...props}
       >
-        {/* Shimmer effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out"></div>
+        {/* Shimmer effect - reduced opacity for professional look */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out"></div>
 
-        {/* Level indicator for leveled badges */}
+        {/* Level indicator for leveled badges - professional styling */}
         {level && (
-          <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg">
+          <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
             {level}
           </div>
         )}
 
-        {/* Dot indicator with enhanced styling */}
+        {/* Dot indicator with theme-aware styling */}
         {dot && (
           <div className={cn(
-            'w-2.5 h-2.5 rounded-full mr-2 relative',
+            'w-2.5 h-2.5 rounded-full mr-2 relative transition-all duration-500',
             {
               'bg-primary-foreground': variant === 'default',
-              'bg-secondary-foreground': variant === 'secondary',
-              'bg-destructive-foreground': variant === 'destructive',
-              'bg-slate-200': variant === 'outline',
-              'bg-green-600 dark:bg-green-400': variant === 'success',
-              'bg-yellow-600 dark:bg-yellow-400': variant === 'warning',
-              'bg-blue-600 dark:bg-blue-400': variant === 'info',
-              'bg-white': variant === 'gradient',
-              'bg-foreground': variant === 'glass',
-              'bg-cyan-400 shadow-neon': variant === 'neon',
+              'bg-white/40': variant === 'secondary',
+              'bg-red-500': variant === 'destructive',
+              'bg-white/30': variant === 'outline',
+              'bg-emerald-500': variant === 'success',
+              'bg-amber-500': variant === 'warning',
+              'bg-primary': variant === 'info',
+              'bg-primary-foreground': variant === 'gradient',
+              'bg-white/50': variant === 'glass',
+              'bg-cyan-400': variant === 'neon' && theme === 'cyber',
+              'bg-primary-solid': variant === 'neon' && theme !== 'cyber',
             }
           )}>
-            {/* Pulse effect for dot */}
-            <div className="absolute inset-0 rounded-full bg-current animate-ping opacity-30"></div>
+            {/* Subtle pulse effect for dot */}
+            <div className="absolute inset-0 rounded-full bg-current animate-pulse opacity-40"></div>
           </div>
         )}
 
-        {/* Content with enhanced styling */}
+        {/* Content with professional styling */}
         <span className="relative z-10 flex items-center space-x-1">
           {children}
         </span>
 
-        {/* Special effects for different variants */}
+        {/* Special effects for different variants - subtle for professional look */}
         {variant === 'gradient' && (
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out opacity-0 hover:opacity-100 rounded-xl"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out opacity-0 hover:opacity-40 rounded-lg"></div>
         )}
 
-        {variant === 'neon' && (
-          <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+        {variant === 'neon' && theme === 'cyber' && (
+          <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400/15 to-cyan-400/5 rounded-lg blur opacity-0 group-hover:opacity-60 transition-opacity duration-300 -z-10"></div>
         )}
 
         {earned && (
           <>
-            {/* Sparkle effects for earned badges */}
+            {/* Sparkle effects for earned badges - subtle animation */}
             <div className="absolute -inset-2 pointer-events-none">
-              {[...Array(6)].map((_, i) => (
+              {[...Array(4)].map((_, i) => (
                 <div
                   key={i}
-                  className="absolute w-1 h-1 bg-yellow-400 rounded-full opacity-60 animate-bounce"
+                  className="absolute w-1 h-1 bg-amber-400 rounded-full opacity-50 animate-pulse"
                   style={{
-                    left: `${10 + i * 15}%`,
-                    top: `${10 + (i % 2) * 80}%`,
-                    animationDelay: `${i * 0.2}s`,
-                    animationDuration: '2s'
+                    left: `${15 + i * 20}%`,
+                    top: `${15 + (i % 2) * 70}%`,
+                    animationDelay: `${i * 0.3}s`,
+                    animationDuration: '2.5s'
                   }}
                 />
               ))}
             </div>
-            {/* Glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 via-orange-500/20 to-red-500/20 rounded-xl blur opacity-50 animate-pulse -z-10"></div>
+            {/* Subtle glow effect for earned badges */}
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-400/10 via-orange-400/10 to-amber-400/10 rounded-lg blur opacity-60 animate-pulse -z-10"></div>
           </>
         )}
       </div>
@@ -138,7 +144,7 @@ const Badge = forwardRef(
 
 Badge.displayName = 'Badge'
 
-// Enhanced Badge Group with better spacing and effects
+// Enhanced Badge Group with professional spacing
 const BadgeGroup = forwardRef(
   ({ className, spacing = 'normal', wrap = true, animated = false, children, ...props }, ref) => {
     return (
@@ -189,7 +195,7 @@ const CounterBadge = forwardRef(
         ref={ref}
         size="sm"
         variant="destructive"
-        className="min-w-6 h-6 px-2 py-0 text-xs font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-110 press-effect"
+        className="min-w-6 h-6 px-2 py-0 text-xs font-bold rounded-full shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-500"
         pulse={count > 0}
         {...props}
       >
@@ -211,14 +217,14 @@ const ProgressBadge = forwardRef(
         className={cn('px-4 py-2 space-x-2', className)}
         {...props}
       >
-        <span className="text-xs">{label}</span>
-        <div className="w-12 h-2 bg-muted rounded-full overflow-hidden">
+        <span className="text-xs font-medium tracking-wide">{label}</span>
+        <div className="w-12 h-1.5 bg-white/10 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-green-400 to-blue-500 rounded-full transition-all duration-1000 ease-out progress-fill"
-            style={{ '--progress-width': `${progress}%` }}
+            className="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${progress}%` }}
           />
         </div>
-        <span className="text-xs font-bold">{progress}%</span>
+        <span className="text-xs font-bold text-muted-foreground/80">{progress}%</span>
       </Badge>
     )
   }

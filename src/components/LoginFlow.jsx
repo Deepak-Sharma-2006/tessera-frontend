@@ -625,7 +625,7 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-purple-500/5 flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-8">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center"><span className="text-white text-2xl font-bold">L</span></div>
+            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center"><span className="text-white text-2xl font-bold">T</span></div>
             <h2 className="text-2xl font-bold mb-2">Welcome Back</h2>
             <p className="text-muted-foreground">{formData.email}</p>
           </div>
@@ -662,7 +662,7 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-purple-500/5 flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-8">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center"><span className="text-white text-2xl font-bold">L</span></div>
+            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center"><span className="text-white text-2xl font-bold">T</span></div>
             <h2 className="text-2xl font-bold mb-2">Create Account</h2>
             <p className="text-muted-foreground">{formData.email}</p>
           </div>
@@ -699,9 +699,9 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
       <div className="flow-login-signup min-h-screen bg-gradient-to-br from-primary/5 via-background to-purple-500/5 flex items-center justify-center p-4">
         <Card className="frame-login-start w-full max-w-md p-8">
           <div className="text-center mb-8">
-            <div className="logo-looped w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center"><span className="text-white text-2xl font-bold">L</span></div>
-            <h1 className="title-welcome-msg text-3xl font-bold mb-2">Welcome to Looped 🚀</h1>
-            <p className="text-muted-foreground">Connect, collaborate, and build amazing things together</p>
+            <div className="logo-looped w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center"><span className="text-white text-2xl font-bold">T</span></div>
+            <h1 className="title-welcome-msg text-3xl font-bold mb-2">Welcome to Tessera</h1>
+            <p className="text-muted-foreground">Every student is a unique piece that contributes to the larger picture</p>
           </div>
           <div className="space-y-6">
             <div>
@@ -803,20 +803,20 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
   return (
     <form onSubmit={handleProfileSubmit}>
       {currentStep === 'step1' && (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-          <Card className="frame-profile-builder-step1 w-full max-w-2xl p-8">
-            <div className="mb-8"><h2 className="title-step1 text-2xl font-bold mb-2">Step 1: Basic Info</h2><div className="w-full bg-muted rounded-full h-2 mb-4"><div className="bg-primary h-2 rounded-full w-1/4"></div></div></div>
+        <div className="min-h-screen bg-gradient-to-br from-deep-obsidian via-deep-obsidian to-cyan-950/20 flex items-center justify-center p-4">
+          <Card className="frame-profile-builder-step1 w-full max-w-2xl p-8 backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 to-deep-obsidian border border-cyan-400/30 shadow-lg shadow-cyan-400/10">
+            <div className="mb-8"><h2 className="title-step1 text-2xl font-bold mb-2 text-cyan-200">Step 1: Basic Info</h2><div className="w-full bg-cyan-950/30 rounded-full h-2 mb-4"><div className="bg-gradient-to-r from-cyan-500 to-cyan-400 h-2 rounded-full w-1/4"></div></div></div>
             <div className="space-y-6">
-              <div><label className="block font-medium mb-2">Full Name</label><Input name="fullName" value={formData.fullName || ''} onChange={handleInputChange} placeholder="Enter your full name" /></div>
-              <div><label className="block font-medium mb-2">College Name</label><Input name="collegeName" value={formData.collegeName || ''} disabled /><p className="text-sm text-muted-foreground mt-1">Detected from your email domain</p></div>
+              <div><label className="block font-medium mb-2 text-cyan-200">Full Name</label><Input name="fullName" value={formData.fullName || ''} onChange={handleInputChange} placeholder="Enter your full name" className="bg-cyan-950/20 border-cyan-400/30 text-cyan-50 placeholder-cyan-600" /></div>
+              <div><label className="block font-medium mb-2 text-cyan-200">College Name</label><Input name="collegeName" value={formData.collegeName || ''} disabled className="bg-cyan-950/20 border-cyan-400/30 text-cyan-50" /><p className="text-sm text-cyan-400/70 mt-1">Detected from your email domain</p></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><label className="block font-medium mb-2">Year of Study</label><select name="yearOfStudy" value={formData.yearOfStudy || ""} onChange={handleInputChange} className="dropdown-year-of-study w-full p-3 border border-border rounded-lg"><option value="">Select year</option>{yearOptions.map(y => <option key={y} value={y}>{y}</option>)}</select></div>
-                <div><label className="block font-medium mb-2">Department</label><select name="department" value={formData.department || ""} onChange={handleInputChange} className="dropdown-department w-full p-3 border border-border rounded-lg"><option value="">Select department</option>{departmentOptions.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
+                <div><label className="block font-medium mb-2 text-cyan-200">Year of Study</label><select name="yearOfStudy" value={formData.yearOfStudy || ""} onChange={handleInputChange} className="dropdown-year-of-study w-full p-3 border border-cyan-400/30 rounded-lg bg-cyan-950/20 text-cyan-50 backdrop-blur-xl focus:outline-none focus:ring-2 focus:ring-cyan-400/50"><option value="" className="bg-cyan-950 text-cyan-50">Select year</option>{yearOptions.map(y => <option key={y} value={y} className="bg-cyan-950 text-cyan-50">{y}</option>)}</select></div>
+                <div><label className="block font-medium mb-2 text-cyan-200">Department</label><select name="department" value={formData.department || ""} onChange={handleInputChange} className="dropdown-department w-full p-3 border border-cyan-400/30 rounded-lg bg-cyan-950/20 text-cyan-50 backdrop-blur-xl focus:outline-none focus:ring-2 focus:ring-cyan-400/50"><option value="" className="bg-cyan-950 text-cyan-50">Select department</option>{departmentOptions.map(d => <option key={d} value={d} className="bg-cyan-950 text-cyan-50">{d}</option>)}</select></div>
               </div>
               <div>
-                <label className="block font-medium mb-2">Profile Picture</label>
-                <div className="upload-profile-pic border-2 border-dashed border-border rounded-lg p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-xl overflow-hidden">
+                <label className="block font-medium mb-2 text-cyan-200">Profile Picture</label>
+                <div className="upload-profile-pic border-2 border-dashed border-cyan-400/40 rounded-lg p-6 text-center backdrop-blur-xl bg-cyan-950/10">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-cyan-500 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-xl overflow-hidden">
                     {formData.profilePicUrl ? (
                       <img src={formData.profilePicUrl} alt="Profile" className="rounded-full w-full h-full object-cover" />
                     ) : (
@@ -835,11 +835,12 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
                     variant="outline" 
                     size="sm"
                     onClick={() => document.getElementById('profilePicInput').click()}
+                    className="border-cyan-400/40 text-cyan-200 hover:bg-cyan-400/10"
                   >
                     📸 Upload Photo
                   </Button>
-                  <p className="text-sm text-muted-foreground mt-2">JPG, PNG up to 5MB</p>
-                  {formData.profilePicUrl && <p className="text-xs text-green-600 mt-2">✓ Photo selected</p>}
+                  <p className="text-sm text-cyan-400/70 mt-2">JPG, PNG up to 5MB</p>
+                  {formData.profilePicUrl && <p className="text-xs text-cyan-400 mt-2">✓ Photo selected</p>}
                 </div>
               </div>
               <button
@@ -847,8 +848,8 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
                 onClick={handleStep1Continue}
                 disabled={!formData.fullName || formData.fullName.trim() === '' || !formData.yearOfStudy || !formData.department}
                 className={`w-full py-3 rounded-xl font-semibold transition-all duration-200 ${(!formData.fullName || formData.fullName.trim() === '' || !formData.yearOfStudy || !formData.department)
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-indigo-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5'
+                  ? 'bg-cyan-950/20 text-cyan-600 cursor-not-allowed border border-cyan-400/20'
+                  : 'bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/35 hover:to-cyan-400/30 shadow-lg shadow-cyan-400/20 hover:-translate-y-0.5'
                   }`}
               >
                 Next →
@@ -858,12 +859,12 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
         </div>
       )}
       {currentStep === 'step2' && (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-4xl p-8">
+        <div className="min-h-screen bg-gradient-to-br from-deep-obsidian via-deep-obsidian to-cyan-950/20 flex items-center justify-center p-4">
+          <Card className="w-full max-w-4xl p-8 backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 to-deep-obsidian border border-cyan-400/30 shadow-lg shadow-cyan-400/10">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-2">Step 2: Skills & Expertise</h2>
-              <p className="text-sm text-muted-foreground mb-4">What tools do you bring to the synergy?</p>
-              <div className="w-full bg-muted rounded-full h-2"><div className="bg-primary h-2 rounded-full w-1/4"></div></div>
+              <h2 className="text-2xl font-bold mb-2 text-cyan-200">Step 2: Skills & Expertise</h2>
+              <p className="text-sm text-cyan-400/70 mb-4">What tools do you bring to the synergy?</p>
+              <div className="w-full bg-cyan-950/30 rounded-full h-2"><div className="bg-gradient-to-r from-cyan-500 to-cyan-400 h-2 rounded-full w-1/4"></div></div>
             </div>
             <div className="space-y-6">
               <MultiSelect 
@@ -876,14 +877,14 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
                 <Button 
                   type="button" 
                   variant="outline"
-                  className="w-full" 
+                  className="w-full border-cyan-400/40 text-cyan-200 hover:bg-cyan-400/10" 
                   onClick={() => setCurrentStep('step1')}
                 >
                   ← Back to Profile
                 </Button>
                 <Button 
                   type="button" 
-                  className="w-full" 
+                  className="w-full bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/35 hover:to-cyan-400/30 shadow-lg shadow-cyan-400/20" 
                   onClick={handleStep2Continue} 
                   disabled={(formData.skills || []).length === 0}
                 >
@@ -895,16 +896,16 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
         </div>
       )}
       {currentStep === 'step3' && (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-3xl p-8">
+        <div className="min-h-screen bg-gradient-to-br from-deep-obsidian via-deep-obsidian to-cyan-950/20 flex items-center justify-center p-4">
+          <Card className="w-full max-w-3xl p-8 backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 to-deep-obsidian border border-cyan-400/30 shadow-lg shadow-cyan-400/10">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-2">Step 3: Roles & Interests</h2>
-              <p className="text-sm text-muted-foreground mb-4">Tell us what excites you and what roles you're open to</p>
-              <div className="w-full bg-muted rounded-full h-2"><div className="bg-primary h-2 rounded-full w-1/2"></div></div>
+              <h2 className="text-2xl font-bold mb-2 text-cyan-200">Step 3: Roles & Interests</h2>
+              <p className="text-sm text-cyan-400/70 mb-4">Tell us what excites you and what roles you're open to</p>
+              <div className="w-full bg-cyan-950/30 rounded-full h-2"><div className="bg-gradient-to-r from-cyan-500 to-cyan-400 h-2 rounded-full w-1/2"></div></div>
             </div>
             <div className="space-y-8">
               <div>
-                <label className="block font-medium mb-3">Roles You're Open To</label>
+                <label className="block font-medium mb-3 text-cyan-200">Roles You're Open To</label>
                 <MultiSelect 
                   options={ROLES_LIBRARY}
                   selected={formData.rolesOpenTo || []}
@@ -916,11 +917,11 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
               {(formData.rolesOpenTo || []).length > 0 && (
                 <>
                   <div>
-                    <label className="block font-medium mb-3">Goals for This Semester</label>
-                    <Textarea name="goals" value={formData.goals || ''} onChange={handleInputChange} placeholder="What do you want to build..." rows={4} />
+                    <label className="block font-medium mb-3 text-cyan-200">Goals for This Semester</label>
+                    <Textarea name="goals" value={formData.goals || ''} onChange={handleInputChange} placeholder="What do you want to build..." rows={4} className="!bg-magenta-950/20 !border-magenta-400/30 !text-cyan-50 !placeholder-cyan-600 !backdrop-blur-xl !hover:bg-magenta-950/30 !hover:border-magenta-400/40 !focus-visible:bg-magenta-950/30 !focus-visible:border-magenta-400/50" />
                   </div>
                   <div>
-                    <label className="block font-medium mb-3">What Excites You?</label>
+                    <label className="block font-medium mb-3 text-cyan-200">What Excites You?</label>
                     <MultiSelect 
                       options={INTERESTS_LIBRARY}
                       selected={formData.excitingTags || []}
@@ -932,21 +933,21 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
               )}
 
               {(formData.rolesOpenTo || []).length === 0 && (
-                <p className="text-sm text-center text-muted-foreground bg-muted/30 p-4 rounded-lg">Select at least one role to continue</p>
+                <p className="text-sm text-center text-cyan-400/70 bg-cyan-950/30 p-4 rounded-lg">Select at least one role to continue</p>
               )}
 
               <div className="flex gap-4">
                 <Button 
                   type="button" 
                   variant="outline"
-                  className="w-full" 
+                  className="w-full border-cyan-400/40 text-cyan-200 hover:bg-cyan-400/10" 
                   onClick={() => setCurrentStep('step2')}
                 >
                   ← Back to Skills
                 </Button>
                 <Button 
                   type="button" 
-                  className="w-full" 
+                  className="w-full bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/35 hover:to-cyan-400/30 shadow-lg shadow-cyan-400/20" 
                   onClick={() => setCurrentStep('step4')} 
                   disabled={(formData.rolesOpenTo || []).length === 0 || !(formData.goals || '').trim() || (formData.excitingTags || []).length === 0}
                 >
@@ -958,47 +959,47 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
         </div>
       )}
       {currentStep === 'step4' && (
-        <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-2xl p-8">
+        <div className="min-h-screen bg-gradient-to-br from-deep-obsidian via-deep-obsidian to-cyan-950/20 flex items-center justify-center p-4">
+          <Card className="w-full max-w-2xl p-8 backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 to-deep-obsidian border border-cyan-400/30 shadow-lg shadow-cyan-400/10">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-2">Step 4: Final Touches</h2>
-              <p className="text-sm text-muted-foreground mb-4">Complete your profile with links</p>
-              <div className="w-full bg-muted rounded-full h-2 mb-4"><div className="bg-primary h-2 rounded-full w-full"></div></div>
+              <h2 className="text-2xl font-bold mb-2 text-cyan-200">Step 4: Final Touches</h2>
+              <p className="text-sm text-cyan-400/70 mb-4">Complete your profile with links</p>
+              <div className="w-full bg-cyan-950/30 rounded-full h-2 mb-4"><div className="bg-gradient-to-r from-cyan-500 to-cyan-400 h-2 rounded-full w-full"></div></div>
             </div>
             <div className="space-y-6">
               <div>
-                <label className="block font-medium mb-2">GitHub Profile <span className="text-red-500">*</span></label>
+                <label className="block font-medium mb-2 text-cyan-200">GitHub Profile <span className="text-magenta-400">*</span></label>
                 <Input 
                   name="githubUrl" 
                   value={formData.githubUrl || ''} 
                   onChange={handleInputChange}
                   placeholder="https://github.com/yourusername" 
-                  className={`border-2 ${formData.githubUrl && !isValidGitHubUrl(formData.githubUrl) ? 'border-red-500' : 'border-border'}`}
+                  className={`bg-cyan-950/20 text-cyan-50 placeholder-cyan-600 ${formData.githubUrl && !isValidGitHubUrl(formData.githubUrl) ? 'border-2 border-magenta-400' : 'border border-cyan-400/30'}`}
                 />
-                <p className="text-xs text-muted-foreground mt-1">Required to complete your profile</p>
+                <p className="text-xs text-cyan-400/70 mt-1">Required to complete your profile</p>
                 {formData.githubUrl && !isValidGitHubUrl(formData.githubUrl) && (
-                  <p className="text-xs text-red-500 mt-1">⚠ Please enter a valid GitHub URL (e.g., https://github.com/username)</p>
+                  <p className="text-xs text-magenta-400 mt-1">⚠ Please enter a valid GitHub URL (e.g., https://github.com/username)</p>
                 )}
                 {formData.githubUrl && isValidGitHubUrl(formData.githubUrl) && (
-                  <p className="text-xs text-green-600 mt-1">✓ Valid GitHub URL</p>
+                  <p className="text-xs text-cyan-400 mt-1">✓ Valid GitHub URL</p>
                 )}
               </div>
               <div>
-                <label className="block font-medium mb-2">Portfolio Website</label>
-                <Input name="portfolioUrl" value={formData.portfolioUrl || ''} onChange={handleInputChange} placeholder="https://yourportfolio.com" />
+                <label className="block font-medium mb-2 text-cyan-200">Portfolio Website</label>
+                <Input name="portfolioUrl" value={formData.portfolioUrl || ''} onChange={handleInputChange} placeholder="https://yourportfolio.com" className="bg-cyan-950/20 border-cyan-400/30 text-cyan-50 placeholder-cyan-600" />
               </div>
               <div className="flex gap-4">
                 <Button 
                   type="button" 
                   variant="outline"
-                  className="w-full" 
+                  className="w-full border-cyan-400/40 text-cyan-200 hover:bg-cyan-400/10" 
                   onClick={() => setCurrentStep('step3')}
                 >
                   ← Back
                 </Button>
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700" 
+                  className="w-full bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/35 hover:to-cyan-400/30 shadow-lg shadow-cyan-400/20" 
                   disabled={isLoading || !formData.githubUrl || !isValidGitHubUrl(formData.githubUrl)}
                 >
                   {isLoading ? 'Saving...' : '🚀 Complete Profile'}
@@ -1009,20 +1010,20 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
         </div>
       )}
       {currentStep === 'success' && (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 flex items-center justify-center p-4">
-          <Card className="frame-profile-complete-success w-full max-w-lg p-8 text-center">
-            <div className="mb-8"><div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 rounded-full flex items-center justify-center animate-pulse"><span className="text-white text-4xl">🎉</span></div><h2 className="title text-3xl font-bold mb-2">🎉 You're Looped In!</h2><p className="text-muted-foreground mb-4">Welcome to the Looped community! Your profile is complete.</p></div>
-            <div className="mb-8"><div className="text-badge-earned bg-gradient-to-r from-yellow-100 to-orange-100 border border-yellow-200 rounded-lg p-4"><div className="text-2xl mb-2">⭐</div><p className="font-medium text-yellow-800">Badge Earned: Core Looped</p><p className="text-sm text-yellow-700">Successfully completed your profile setup</p></div></div>
+        <div className="min-h-screen bg-gradient-to-br from-deep-obsidian via-deep-obsidian to-cyan-950/20 flex items-center justify-center p-4">
+          <Card className="frame-profile-complete-success w-full max-w-lg p-8 text-center backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 to-deep-obsidian border border-cyan-400/30 shadow-lg shadow-cyan-400/10">
+            <div className="mb-8"><div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-cyan-500 to-cyan-400 rounded-full flex items-center justify-center animate-pulse"><span className="text-white text-4xl">🎉</span></div><h2 className="title text-3xl font-bold mb-2 text-cyan-200">🎉 Welcome to Tessera!</h2><p className="text-cyan-400/70 mb-4">Welcome to the Tessera community! Your profile is complete.</p></div>
+            <div className="mb-8"><div className="text-badge-earned bg-gradient-to-r from-magenta-950/40 to-magenta-950/30 border border-magenta-400/40 rounded-lg p-4"><div className="text-2xl mb-2">⭐</div><p className="font-medium text-magenta-300">Badge Earned: Core Tessera</p><p className="text-sm text-magenta-300/70">Successfully completed your profile setup</p></div></div>
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-4 text-center text-sm">
-                <div><div className="font-semibold text-lg text-blue-600">{(formData.skills || []).length}</div><div className="text-muted-foreground">Skills Added</div></div>
-                <div><div className="font-semibold text-lg text-green-600">{(formData.rolesOpenTo || []).length}</div><div className="text-muted-foreground">Roles Open To</div></div>
-                <div><div className="font-semibold text-lg text-purple-600">100%</div><div className="text-muted-foreground">Profile Complete</div></div>
+                <div><div className="font-semibold text-lg text-cyan-400">{(formData.skills || []).length}</div><div className="text-cyan-400/70">Skills Added</div></div>
+                <div><div className="font-semibold text-lg text-cyan-400">{(formData.rolesOpenTo || []).length}</div><div className="text-cyan-400/70">Roles Open To</div></div>
+                <div><div className="font-semibold text-lg text-cyan-400">100%</div><div className="text-cyan-400/70">Profile Complete</div></div>
               </div>
               <Button
                 type="button"
                 onClick={goToDashboard}
-                className="btn-go-to-dashboard w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                className="btn-go-to-dashboard w-full bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/35 hover:to-cyan-400/30 shadow-lg shadow-cyan-400/20">
                 🚀 Go to Dashboard
               </Button>
             </div>

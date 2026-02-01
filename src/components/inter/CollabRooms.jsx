@@ -150,18 +150,6 @@ export default function CollabRooms({ user, onNavigateToRoom, onEnterCollabRoom,
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className={`text-2xl font-bold text-foreground ${theme === 'windows1992' ? 'text-lg font-bold' : ''}`}>
-            {theme === 'windows1992' ? 'COLLAB ROOMS' : 'Collaboration Rooms'}
-          </h2>
-          <p className={`text-muted-foreground ${theme === 'windows1992' ? 'text-xs' : ''}`}>
-            {theme === 'windows1992' ? 'CROSS-COLLEGE PROJECT SPACES' : 'Cross-college project collaboration spaces'}
-          </p>
-        </div>
-      </div>
-
       {/* Error Message */}
       {error && (
         <Card className="bg-red-500/10 border-red-500/20">
@@ -175,15 +163,15 @@ export default function CollabRooms({ user, onNavigateToRoom, onEnterCollabRoom,
       <div className="flex justify-center gap-4 mb-8">
         <button
           onClick={() => setActiveTab('ACTIVE')}
-          className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border flex items-center justify-center gap-2 ${activeTab === 'ACTIVE'
-            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-transparent shadow-lg shadow-cyan-500/20'
-            : 'bg-slate-900/50 text-slate-400 border-slate-700 hover:border-slate-500 hover:text-white'
+          className={`px-8 py-2.5 rounded-lg text-sm font-medium transition-all duration-500 border flex items-center justify-center gap-2 hover:-translate-y-1 backdrop-blur-xl ${activeTab === 'ACTIVE'
+            ? 'bg-cyan-400/25 text-cyan-200 border-cyan-400/50 shadow-lg shadow-cyan-400/30 scale-105'
+            : 'text-muted-foreground/70 border-white/10 hover:bg-white/5 hover:border-white/20'
             }`}
         >
           Active Rooms
           <span className={`px-2 py-0.5 rounded text-xs font-bold ${activeTab === 'ACTIVE'
-            ? 'bg-slate-900/40 text-cyan-300'
-            : 'bg-slate-800 text-slate-400'
+            ? 'bg-cyan-400/20 text-cyan-300'
+            : 'bg-white/5 text-white/40'
             }`}>
             {rooms.filter(r => r.status === 'ACTIVE').length}
           </span>
@@ -191,15 +179,15 @@ export default function CollabRooms({ user, onNavigateToRoom, onEnterCollabRoom,
 
         <button
           onClick={() => setActiveTab('JOINED')}
-          className={`px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border flex items-center justify-center gap-2 ${activeTab === 'JOINED'
-            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-transparent shadow-lg shadow-cyan-500/20'
-            : 'bg-slate-900/50 text-slate-400 border-slate-700 hover:border-slate-500 hover:text-white'
+          className={`px-8 py-2.5 rounded-lg text-sm font-medium transition-all duration-500 border flex items-center justify-center gap-2 hover:-translate-y-1 backdrop-blur-xl ${activeTab === 'JOINED'
+            ? 'bg-cyan-400/25 text-cyan-200 border-cyan-400/50 shadow-lg shadow-cyan-400/30 scale-105'
+            : 'text-muted-foreground/70 border-white/10 hover:bg-white/5 hover:border-white/20'
             }`}
         >
           My Rooms
           <span className={`px-2 py-0.5 rounded text-xs font-bold ${activeTab === 'JOINED'
-            ? 'bg-slate-900/40 text-cyan-300'
-            : 'bg-slate-800 text-slate-400'
+            ? 'bg-cyan-400/20 text-cyan-300'
+            : 'bg-white/5 text-white/40'
             }`}>
             {rooms.filter(r => r.memberIds.includes(currentUserId) || r.ownerId === currentUserId).length}
           </span>

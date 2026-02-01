@@ -50,32 +50,22 @@ export default function CampusOverview() {
 
   return (
     <div className="space-y-8">
-      {/* Welcome Header */}
-      <div className="text-center space-y-4">
-        <h1 className={`text-4xl font-bold ${theme === 'windows1992' ? 'text-primary' : 'gradient-text'}`}>
-          {theme === 'windows1992' ? 'CAMPUS OVERVIEW' : 'Campus Overview'}
-        </h1>
-        <p className={`text-lg text-muted-foreground ${theme === 'windows1992' ? 'text-xs' : ''}`}>
-          {theme === 'windows1992' ? 'YOUR CAMPUS ACTIVITY DASHBOARD' : 'Your campus activity dashboard'}
-        </p>
-      </div>
-
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
           <Card 
             key={index} 
-            className={`${theme === 'windows1992' ? 'card-glass border-2 border-outset' : 'card-glass hover:shadow-glass-lg hover:-translate-y-2'} text-center transition-all duration-300`}
+            className={`${theme === 'windows1992' ? 'card-glass border-2 border-outset' : 'backdrop-blur-xl border border-white/10 hover:border-white/20 hover:shadow-lg hover:-translate-y-1'} text-center transition-all duration-500`}
             variant="glass"
           >
-            <CardContent className="p-6">
-              <div className={`text-2xl font-bold ${theme === 'windows1992' ? 'text-primary text-sm' : stat.color}`}>
+            <CardContent className="p-8">
+              <div className={`text-3xl font-bold tracking-tight ${theme === 'windows1992' ? 'text-primary text-sm' : 'bg-gradient-to-br from-primary-solid to-purple-500 bg-clip-text text-transparent'}`}>
                 {stat.value}
               </div>
-              <div className={`text-sm text-muted-foreground ${theme === 'windows1992' ? 'text-xs' : ''}`}>
+              <div className={`text-sm text-muted-foreground/80 font-medium mt-2 ${theme === 'windows1992' ? 'text-xs' : ''}`}>
                 {stat.label}
               </div>
-              <div className={`text-xs ${stat.color} font-medium ${theme === 'windows1992' ? 'text-xs' : ''}`}>
+              <div className={`text-xs font-semibold mt-3 ${stat.color} ${theme === 'windows1992' ? 'text-xs' : ''}`}>
                 {stat.change}
               </div>
             </CardContent>
@@ -86,9 +76,9 @@ export default function CampusOverview() {
       {/* Main Content Grid */}
       <div className="grid md:grid-cols-2 gap-8">
         {/* Recent Activity */}
-        <Card className={`${theme === 'windows1992' ? 'card-glass border-2 border-outset' : 'card-glass'}`}>
-          <CardHeader>
-            <h3 className={`font-semibold text-lg ${theme === 'windows1992' ? 'text-xs font-bold' : ''}`}>
+        <Card className={`${theme === 'windows1992' ? 'card-glass border-2 border-outset' : 'backdrop-blur-xl border border-white/10 hover:border-white/15 transition-all'}`}>
+          <CardHeader className="pb-6">
+            <h3 className={`font-semibold text-lg tracking-tight ${theme === 'windows1992' ? 'text-xs font-bold' : 'text-primary-foreground'}`}>
               {theme === 'windows1992' ? 'RECENT ACTIVITY' : 'Recent Activity'}
             </h3>
           </CardHeader>
@@ -96,16 +86,16 @@ export default function CampusOverview() {
             {recentActivity.map((activity) => (
               <div 
                 key={activity.id} 
-                className={`flex items-center space-x-4 p-4 rounded-xl ${theme === 'windows1992' ? 'bg-muted border border-border rounded-none' : 'bg-muted/30 hover:bg-muted/50'} transition-all duration-200`}
+                className={`flex items-center space-x-4 p-4 rounded-xl transition-all duration-300 ${theme === 'windows1992' ? 'bg-muted border border-border rounded-none' : 'bg-white/5 border border-white/5 hover:bg-white/8 hover:border-white/10'}`}
               >
-                <div className={`text-2xl ${theme === 'windows1992' ? 'text-sm' : ''}`}>
+                <div className={`text-2xl flex-shrink-0 ${theme === 'windows1992' ? 'text-sm' : ''}`}>
                   {activity.icon}
                 </div>
-                <div className="flex-1">
-                  <div className={`font-medium ${theme === 'windows1992' ? 'text-xs font-bold' : ''}`}>
+                <div className="flex-1 min-w-0">
+                  <div className={`font-medium text-sm truncate ${theme === 'windows1992' ? 'text-xs font-bold' : 'text-foreground'}`}>
                     {activity.title}
                   </div>
-                  <div className={`text-sm text-muted-foreground ${theme === 'windows1992' ? 'text-xs' : ''}`}>
+                  <div className={`text-xs text-muted-foreground/70 mt-1 ${theme === 'windows1992' ? 'text-xs' : ''}`}>
                     {activity.time} • {activity.participants} participants
                   </div>
                 </div>
@@ -115,9 +105,9 @@ export default function CampusOverview() {
         </Card>
 
         {/* Popular Topics */}
-        <Card className={`${theme === 'windows1992' ? 'card-glass border-2 border-outset' : 'card-glass'}`}>
-          <CardHeader>
-            <h3 className={`font-semibold text-lg ${theme === 'windows1992' ? 'text-xs font-bold' : ''}`}>
+        <Card className={`${theme === 'windows1992' ? 'card-glass border-2 border-outset' : 'backdrop-blur-xl border border-white/10 hover:border-white/15 transition-all'}`}>
+          <CardHeader className="pb-6">
+            <h3 className={`font-semibold text-lg tracking-tight ${theme === 'windows1992' ? 'text-xs font-bold' : 'text-primary-foreground'}`}>
               {theme === 'windows1992' ? 'TRENDING TOPICS' : 'Trending Topics'}
             </h3>
           </CardHeader>
@@ -125,19 +115,19 @@ export default function CampusOverview() {
             {popularTopics.map((topic, index) => (
               <div 
                 key={index} 
-                className={`flex items-center justify-between p-3 rounded-lg ${theme === 'windows1992' ? 'bg-muted border border-border rounded-none' : 'bg-muted/30 hover:bg-muted/50'} transition-all duration-200`}
+                className={`flex items-center justify-between p-4 rounded-lg transition-all duration-300 ${theme === 'windows1992' ? 'bg-muted border border-border rounded-none' : 'bg-white/5 border border-white/5 hover:bg-white/8 hover:border-white/10'}`}
               >
                 <div>
-                  <div className={`font-medium ${theme === 'windows1992' ? 'text-xs font-bold' : ''}`}>
+                  <div className={`font-medium text-sm ${theme === 'windows1992' ? 'text-xs font-bold' : 'text-foreground'}`}>
                     {topic.name}
                   </div>
-                  <div className={`text-sm text-muted-foreground ${theme === 'windows1992' ? 'text-xs' : ''}`}>
+                  <div className={`text-xs text-muted-foreground/70 mt-1 ${theme === 'windows1992' ? 'text-xs' : ''}`}>
                     {topic.posts} posts
                   </div>
                 </div>
                 <Badge 
                   variant={topic.trend === 'up' ? 'success' : topic.trend === 'down' ? 'destructive' : 'secondary'}
-                  className={`${theme === 'windows1992' ? 'text-xs' : ''}`}
+                  className={`flex-shrink-0 ${theme === 'windows1992' ? 'text-xs' : 'font-semibold'}`}
                 >
                   {topic.trend === 'up' ? '↗️' : topic.trend === 'down' ? '↘️' : '→'}
                 </Badge>

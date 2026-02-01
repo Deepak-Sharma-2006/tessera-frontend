@@ -207,38 +207,30 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
     <>
       {/* Public Profile View */}
       {showPublicProfile && isOwnProfile ? (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <div className="min-h-screen bg-gradient-to-br from-deep-obsidian via-deep-obsidian to-cyan-950/20">
           {/* Background accent elements */}
           <div className="fixed inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-magenta-500/10 rounded-full blur-3xl"></div>
           </div>
 
           <div className="relative max-w-4xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-            {/* Header */}
-            <div className="text-center mb-12">
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent mb-3">
-                👁️ Your Public Profile
-              </h1>
-              <p className="text-gray-400 text-lg">This is exactly how others see you on Synergy</p>
-            </div>
-
             {/* Public Profile Card */}
-            <Card className="border-pink-500/40 bg-gradient-to-br from-pink-500/15 via-rose-500/10 to-slate-900/80 backdrop-blur-xl p-12 shadow-2xl mb-8">
+            <Card className="border-cyan-400/40 backdrop-blur-xl bg-gradient-to-br from-cyan-950/30 via-deep-obsidian to-cyan-950/20 p-12 shadow-lg shadow-cyan-400/10 mb-8">
               <div className="flex items-center gap-8 mb-12">
-                <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-pink-400 via-rose-400 to-orange-400 shadow-lg flex items-center justify-center text-white text-5xl font-bold border-2 border-pink-400/50">
+                <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-cyan-400 to-cyan-300 shadow-lg flex items-center justify-center text-deep-obsidian text-5xl font-bold border-2 border-cyan-400/60">
                   {profileOwner?.fullName?.charAt(0) || 'U'}
                 </div>
                 <div className="flex-1">
                   <h2 className="text-4xl font-bold text-white mb-4">{profileOwner?.fullName || 'Your Name'}</h2>
                   <div className="flex flex-wrap gap-3">
-                    <Badge className="bg-cyan-500/30 text-cyan-200 border-cyan-500/50 px-4 py-2 text-sm font-semibold">
+                    <Badge className="backdrop-blur-xl bg-cyan-400/20 text-cyan-200 border-cyan-400/40 px-4 py-2 text-sm font-semibold">
                       {profileOwner?.collegeName || 'College'}
                     </Badge>
-                    <Badge className="bg-purple-500/30 text-purple-200 border-purple-500/50 px-4 py-2 text-sm font-semibold">
+                    <Badge className="backdrop-blur-xl bg-cyan-400/20 text-cyan-200 border-cyan-400/40 px-4 py-2 text-sm font-semibold">
                       {profileOwner?.yearOfStudy || 'Year'}
                     </Badge>
-                    <Badge className="bg-emerald-500/30 text-emerald-200 border-emerald-500/50 px-4 py-2 text-sm font-semibold">
+                    <Badge className="backdrop-blur-xl bg-cyan-400/20 text-cyan-200 border-cyan-400/40 px-4 py-2 text-sm font-semibold">
                       {profileOwner?.department || 'Department'}
                     </Badge>
                   </div>
@@ -254,14 +246,14 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
               {/* Public Badges Section */}
               {profileOwner?.displayedBadges && profileOwner.displayedBadges.length > 0 && (
                 <div>
-                  <h3 className="text-2xl font-bold text-pink-300 mb-8">🏆 Featured Achievements</h3>
+                  <h3 className="text-2xl font-bold text-cyan-300 mb-8">🏆 Featured Achievements</h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                     {profileOwner.displayedBadges.map((badge, idx) => (
                       <div key={idx} className="flex flex-col items-center group">
-                        <div className="w-24 h-24 bg-gradient-to-br from-orange-400 via-amber-400 to-yellow-500 rounded-3xl flex items-center justify-center text-5xl transition-all group-hover:scale-125 group-hover:shadow-2xl group-hover:shadow-orange-500/50 border-2 border-orange-300/50 shadow-xl">
+                        <div className="w-24 h-24 bg-gradient-to-br from-cyan-400 to-cyan-300 rounded-3xl flex items-center justify-center text-5xl transition-all group-hover:scale-125 group-hover:shadow-2xl group-hover:shadow-cyan-400/50 border-2 border-cyan-400/60 shadow-lg">
                           {badgeIcons[badge] || '🏅'}
                         </div>
-                        <span className="text-sm mt-4 font-bold text-center max-w-24 text-gray-300 group-hover:text-orange-300 transition line-clamp-2">
+                        <span className="text-sm mt-4 font-bold text-center max-w-24 text-cyan-200 group-hover:text-cyan-100 transition line-clamp-2">
                           {badge}
                         </span>
                       </div>
@@ -282,18 +274,9 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
             <div className="flex gap-4 justify-center">
               <Button
                 onClick={() => setShowPublicProfile(false)}
-                className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-gray-200 font-semibold px-8 py-3 rounded-lg transition-all hover:shadow-lg"
+                className="backdrop-blur-xl bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 hover:bg-cyan-400/30 font-semibold px-8 py-3 rounded-lg transition-all hover:shadow-lg hover:shadow-cyan-400/20"
               >
                 ← Back to Full Profile
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowPublicProfile(false)
-                  setIsEditing(true)
-                }}
-                className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-semibold px-8 py-3 rounded-lg transition-all hover:shadow-lg"
-              >
-                ✏️ Edit Profile
               </Button>
             </div>
           </div>
@@ -309,7 +292,7 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
 
       <div className="relative max-w-7xl mx-auto py-8 px-4 space-y-8 animate-in fade-in duration-700">
         {/* Immersive XP Progress Bar - Always Visible */}
-        <div className="sticky top-24 z-40 mb-8">
+        <div className="mb-8">
           <XPProgressBar user={profileOwner} />
         </div>
 
@@ -351,14 +334,14 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                 </div>
                 
                 <div className="flex flex-wrap gap-3 mb-4">
-                  <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/50 px-4 py-2 text-sm">
+                  <Badge className="backdrop-blur-xl bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 px-4 py-2 text-sm">
                     {profileOwner?.collegeName || 'College'} • {profileOwner?.yearOfStudy || 'Year'}
                   </Badge>
-                  <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/50 px-4 py-2 text-sm">
+                  <Badge className="backdrop-blur-xl bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 px-4 py-2 text-sm">
                     {profileOwner?.department || 'Department'}
                   </Badge>
                   {profileOwner?.role && (
-                    <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/50 px-4 py-2 text-sm">
+                    <Badge className="backdrop-blur-xl bg-magenta-400/20 text-magenta-200 border border-magenta-400/40 px-4 py-2 text-sm">
                       {profileOwner.role}
                     </Badge>
                   )}
@@ -381,14 +364,14 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                         <Button
                           onClick={handleSave}
                           disabled={loading}
-                          className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-black font-semibold rounded-lg px-6 py-2 shadow-lg"
+                          className="bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 hover:from-cyan-400/35 hover:to-cyan-400/30 border border-cyan-400/40 text-cyan-200 font-semibold rounded-lg px-6 py-2 shadow-lg shadow-cyan-400/20 hover:-translate-y-1 duration-500"
                         >
                           {loading ? 'Saving...' : '✓ Save'}
                         </Button>
                         <Button
                           onClick={() => setIsEditing(false)}
                           variant="outline"
-                          className="border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10 rounded-lg px-6 py-2"
+                          className="border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 rounded-lg px-6 py-2"
                         >
                           Cancel
                         </Button>
@@ -397,13 +380,13 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                       <div className="flex flex-col gap-2">
                         <Button
                           onClick={() => setIsEditing(true)}
-                          className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-black font-semibold rounded-lg px-6 py-2 shadow-lg"
+                          className="bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 hover:from-cyan-400/35 hover:to-cyan-400/30 border border-cyan-400/40 text-cyan-200 font-semibold rounded-lg px-6 py-2 shadow-lg shadow-cyan-400/20 hover:-translate-y-1 duration-500"
                         >
                           ✏️ Edit Profile
                         </Button>
                         <Button
                           onClick={() => setShowPublicProfile(true)}
-                          className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-semibold rounded-lg px-6 py-2 shadow-lg"
+                          className="bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 hover:from-cyan-400/35 hover:to-cyan-400/30 border border-cyan-400/40 text-cyan-200 font-semibold rounded-lg px-6 py-2 shadow-lg shadow-cyan-400/20 hover:-translate-y-1 duration-500"
                         >
                           👁️ Public Profile
                         </Button>
@@ -415,13 +398,13 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                     <Button
                       onClick={handleEndorse}
                       disabled={loading}
-                      className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-black font-semibold rounded-lg px-6 py-2 shadow-lg"
+                      className="bg-gradient-to-r from-magenta-400/25 to-magenta-400/20 hover:from-magenta-400/35 hover:to-magenta-400/30 border border-magenta-400/40 text-magenta-200 font-semibold rounded-lg px-6 py-2 shadow-lg shadow-magenta-400/20 hover:-translate-y-1 duration-500"
                     >
                       {loading ? 'Endorsing...' : '🌟 Endorse'}
                     </Button>
                     <Button
                       variant="outline"
-                      className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10 rounded-lg px-6 py-2"
+                      className="border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 rounded-lg px-6 py-2"
                     >
                       👁️ Profile
                     </Button>
@@ -434,20 +417,20 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 via-cyan-500/5 to-slate-900/50 backdrop-blur-xl p-6 text-center hover:border-cyan-500/40 transition-all hover:shadow-lg hover:shadow-cyan-500/20">
-            <p className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">15</p>
-            <p className="text-sm text-gray-400 mt-3 font-medium">Collaborations</p>
+          <Card className="border-cyan-400/30 backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 to-deep-obsidian p-6 text-center hover:border-cyan-400/50 transition-all hover:shadow-lg hover:shadow-cyan-400/20">
+            <p className="text-4xl font-bold text-cyan-300">15</p>
+            <p className="text-sm text-muted-foreground/70 mt-3 font-medium">Collaborations</p>
           </Card>
-          <Card className="border-purple-500/20 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-slate-900/50 backdrop-blur-xl p-6 text-center hover:border-purple-500/40 transition-all hover:shadow-lg hover:shadow-purple-500/20">
-            <p className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">8</p>
-            <p className="text-sm text-gray-400 mt-3 font-medium">Projects</p>
+          <Card className="border-cyan-400/30 backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 to-deep-obsidian p-6 text-center hover:border-cyan-400/50 transition-all hover:shadow-lg hover:shadow-cyan-400/20">
+            <p className="text-4xl font-bold text-cyan-300">8</p>
+            <p className="text-sm text-muted-foreground/70 mt-3 font-medium">Projects</p>
           </Card>
-          <Card className="border-orange-500/20 bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-slate-900/50 backdrop-blur-xl p-6 text-center hover:border-orange-500/40 transition-all hover:shadow-lg hover:shadow-orange-500/20">
-            <p className="text-4xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">{profileOwner?.endorsementsCount || 0}</p>
-            <p className="text-sm text-gray-400 mt-3 font-medium">Endorsements</p>
+          <Card className="border-magenta-400/30 backdrop-blur-xl bg-gradient-to-br from-magenta-950/20 to-deep-obsidian p-6 text-center hover:border-magenta-400/50 transition-all hover:shadow-lg hover:shadow-magenta-400/20">
+            <p className="text-4xl font-bold text-magenta-300">{profileOwner?.endorsementsCount || 0}</p>
+            <p className="text-sm text-muted-foreground/70 mt-3 font-medium">Endorsements</p>
           </Card>
-          <Card className="border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-slate-900/50 backdrop-blur-xl p-6 text-center hover:border-emerald-500/40 transition-all hover:shadow-lg hover:shadow-emerald-500/20">
-            <p className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">{profileOwner?.badges?.length || 0}</p>
+          <Card className="border-cyan-400/30 backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 to-deep-obsidian p-6 text-center hover:border-cyan-400/50 transition-all hover:shadow-lg hover:shadow-cyan-400/20">
+            <p className="text-4xl font-bold text-cyan-300">{profileOwner?.badges?.length || 0}</p>
             <p className="text-sm text-gray-400 mt-3 font-medium">Achievements</p>
           </Card>
         </div>
@@ -514,45 +497,13 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
               <p className="text-gray-400 text-center py-8">No badges earned yet. Complete achievements to unlock badges!</p>
             )}
           </Card>
-        ) : profileOwner?.badges && profileOwner.badges.length > 0 ? (
-          <Card className="border-orange-500/30 bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-slate-900/50 backdrop-blur-xl p-8 shadow-2xl">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 bg-clip-text text-transparent">🏆 Unlocked Achievements</h2>
-              {isOwnProfile && (
-                <Button
-                  onClick={() => setIsEditingBadges(true)}
-                  size="sm"
-                  className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold px-4 py-2 rounded-lg"
-                >
-                  ✏️ Choose Featured
-                </Button>
-              )}
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-              {profileOwner.badges.map((badge, idx) => (
-                <div key={idx} className="flex flex-col items-center group">
-                  <div className="w-20 h-20 bg-gradient-to-br from-orange-400 via-amber-400 to-yellow-500 shadow-xl rounded-3xl flex items-center justify-center text-4xl transition-all group-hover:scale-125 group-hover:shadow-2xl group-hover:shadow-orange-500/50 border-2 border-orange-300/50">
-                    {badgeIcons[badge] || '🏅'}
-                  </div>
-                  <span className="text-xs mt-4 font-bold text-center max-w-20 text-gray-300 group-hover:text-orange-300 transition line-clamp-2">
-                    {badge}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </Card>
-        ) : (
-          <Card className="border-orange-500/30 bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-slate-900/50 backdrop-blur-xl p-12 shadow-2xl text-center">
-            <p className="text-gray-400 text-lg mb-2">No badges earned yet</p>
-            <p className="text-gray-500 text-sm">Complete achievements and get endorsed by peers to earn badges!</p>
-          </Card>
-        )}
+        ) : null}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Skills & Expertise */}
-        <Card className="border-cyan-500/30 bg-gradient-to-br from-cyan-500/10 via-slate-900/50 to-slate-900/80 backdrop-blur-xl p-8 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/20 transition-all">
-          <h2 className="text-lg font-bold text-transparent bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text mb-6 flex items-center gap-2">
+        <Card className="border-cyan-400/30 backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 to-deep-obsidian p-8 shadow-lg shadow-cyan-400/10 hover:shadow-xl hover:shadow-cyan-400/15 transition-all">
+          <h2 className="text-lg font-bold text-cyan-300 mb-6 flex items-center gap-2">
             💼 Skills & Expertise
           </h2>
           
@@ -568,19 +519,19 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                         value={skill}
                         onChange={(e) => handleSkillChange(index, e.target.value)}
                         placeholder="Enter skill"
-                        className="text-sm bg-slate-800/50 border-cyan-500/30"
+                        className="text-sm bg-cyan-950/20 border-cyan-400/30"
                       />
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => removeSkill(index)}
-                        className="text-red-400 border-red-500/30"
+                        className="text-cyan-300 border-cyan-400/40 hover:bg-cyan-400/10"
                       >
                         Remove
                       </Button>
                     </div>
                   ))}
-                  <Button variant="outline" onClick={addSkill} className="w-full text-xs border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10">
+                  <Button variant="outline" onClick={addSkill} className="w-full text-xs border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10">
                     + Add Skill
                   </Button>
                 </div>
@@ -589,7 +540,7 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                   <p className="text-xs text-gray-400 italic">Loading skills...</p>
                 ) : (profileOwner?.skills || []).length > 0 ? (
                   (profileOwner.skills).map((skill) => (
-                    <Badge key={skill} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black border-0 font-semibold">
+                    <Badge key={skill} className="backdrop-blur-xl bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 font-semibold">
                       {skill}
                     </Badge>
                   ))
@@ -602,11 +553,11 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
 
           {/* Interests */}
           <div>
-            <h3 className="text-sm font-bold text-purple-300 mb-4 uppercase tracking-widest">Interests & Passions</h3>
+            <h3 className="text-sm font-bold text-cyan-300 mb-4 uppercase tracking-widest">Interests & Passions</h3>
             <div className="flex flex-wrap gap-2">
               {(profileOwner?.excitingTags || []).length > 0 ? (
                 (profileOwner.excitingTags).map((tag) => (
-                  <Badge key={tag} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 font-semibold">
+                  <Badge key={tag} className="backdrop-blur-xl bg-magenta-400/20 text-magenta-200 border border-magenta-400/40 font-semibold">
                     {tag}
                   </Badge>
                 ))
@@ -614,31 +565,31 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                 <p className="text-xs text-gray-400 italic">Loading interests...</p>
               ) : (
                 <p className="text-xs text-gray-500">No interests added yet.</p>
-              )}}
+              )}
             </div>
           </div>
         </Card>
 
         {/* Middle Column - Goals & Roles */}
-        <Card className="border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-slate-900/50 to-slate-900/80 backdrop-blur-xl p-8 shadow-xl hover:shadow-2xl hover:shadow-purple-500/20 transition-all">
-          <h2 className="text-lg font-bold text-transparent bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text mb-6 flex items-center gap-2">
+        <Card className="border-magenta-400/30 backdrop-blur-xl bg-gradient-to-br from-magenta-950/20 to-deep-obsidian p-8 shadow-lg shadow-magenta-400/10 hover:shadow-xl hover:shadow-magenta-400/15 transition-all">
+          <h2 className="text-lg font-bold text-magenta-300 mb-6 flex items-center gap-2">
             🎯 Mission & Goals
           </h2>
           
           <div className="space-y-6">
             <div>
-              <p className="text-xs font-bold text-purple-300 mb-3 uppercase tracking-widest">Your Goals</p>
+              <p className="text-xs font-bold text-magenta-300 mb-3 uppercase tracking-widest">Your Goals</p>
               {isEditing ? (
                 <Textarea
                   value={formData.goals || ''}
                   onChange={(e) => handleFieldChange('goals', e.target.value)}
                   placeholder="Describe your goals and aspirations..."
-                  className="text-sm bg-slate-800/50 border-purple-500/30 resize-none"
+                  className="text-sm bg-magenta-950/20 border-magenta-400/30 resize-none"
                   rows={4}
                 />
               ) : (
-                <div className="bg-slate-800/30 border border-purple-500/20 rounded-lg p-4">
-                  <p className="text-sm text-gray-300 leading-relaxed">
+                <div className="backdrop-blur-xl bg-magenta-950/20 border border-magenta-400/30 rounded-lg p-4">
+                  <p className="text-sm text-foreground/80 leading-relaxed">
                     {profileOwner?.goals || 'No goals defined yet. Share what you aspire to achieve!'}
                   </p>
                 </div>
@@ -646,11 +597,11 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
             </div>
 
             <div>
-              <p className="text-xs font-bold text-pink-300 mb-3 uppercase tracking-widest">Roles Open To</p>
+              <p className="text-xs font-bold text-magenta-300 mb-3 uppercase tracking-widest">Roles Open To</p>
               <div className="flex flex-wrap gap-2">
                 {(profileOwner?.rolesOpenTo || []).length > 0 ? (
                   (profileOwner.rolesOpenTo).map((role, idx) => (
-                    <Badge key={idx} className="bg-gradient-to-r from-pink-500 to-rose-500 text-white border-0 font-semibold text-xs">
+                    <Badge key={idx} className="backdrop-blur-xl bg-magenta-400/20 text-magenta-200 border border-magenta-400/40 font-semibold text-xs">
                       {role}
                     </Badge>
                   ))
@@ -665,50 +616,7 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
         </Card>
 
         {/* Right Column - Achievements & XP */}
-        <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-slate-900/50 to-slate-900/80 backdrop-blur-xl p-8 shadow-xl hover:shadow-2xl hover:shadow-amber-500/20 transition-all">
-          <h2 className="text-lg font-bold text-transparent bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text mb-6 flex items-center gap-2">
-            ⭐ Progress & Achievements
-          </h2>
-
-          <div className="space-y-6">
-            {/* Level */}
-            <div className="bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border border-amber-500/30 rounded-2xl p-6 text-center">
-              <p className="text-xs font-bold text-amber-300 mb-3 uppercase tracking-widest">Current Level</p>
-              <p className="text-5xl font-bold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
-                {profileOwner?.level || 1}
-              </p>
-            </div>
-
-            {/* XP Progress - Prominent */}
-            <div className="space-y-4">
-              <p className="text-xs font-bold text-yellow-300 uppercase tracking-widest">Experience Points</p>
-              <div className="bg-gradient-to-br from-amber-900/40 to-slate-900/50 border-2 border-amber-400/50 rounded-2xl p-6 space-y-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-semibold text-gray-300">Current XP</span>
-                  <span className="text-2xl font-bold text-amber-300">{profileOwner?.xp || 0}</span>
-                </div>
-                {/* XP Bar */}
-                <div className="w-full bg-slate-800/80 rounded-full h-6 border-2 border-amber-500/50 overflow-hidden shadow-lg">
-                  <div 
-                    className="bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 h-full rounded-full transition-all duration-700 shadow-lg shadow-amber-500/50 flex items-center justify-center"
-                    style={{width: `${Math.min((profileOwner?.xp || 0) / ((profileOwner?.totalXP || 100) / 100), 100)}%`}}
-                  >
-                    {Math.min((profileOwner?.xp || 0) / ((profileOwner?.totalXP || 100) / 100), 100) > 20 && (
-                      <span className="text-xs font-bold text-black">
-                        {Math.round(Math.min((profileOwner?.xp || 0) / ((profileOwner?.totalXP || 100) / 100), 100))}%
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">0</span>
-                  <span className="text-xs font-bold text-amber-400">{Math.round((profileOwner?.xp || 0) / (profileOwner?.totalXP || 100) * 100)}% Complete</span>
-                  <span className="text-xs text-gray-400">Total: {profileOwner?.totalXP || 0}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
+        {/* Removed Progress & Achievements component */}
       </div>
 
       {/* Back Button */}
@@ -716,7 +624,7 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
         <div className="flex justify-center pt-8">
           <Button
             onClick={onBackToCampus}
-            className="flex items-center gap-2 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 border border-slate-600/50 text-gray-200 font-semibold px-6 py-3 rounded-lg transition-all hover:shadow-lg"
+            className="flex items-center gap-2 backdrop-blur-xl bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 hover:bg-cyan-400/30 font-semibold px-6 py-3 rounded-lg transition-all hover:shadow-lg hover:shadow-cyan-400/20"
           >
             <span>←</span>
             <span>Back to Campus Hub</span>

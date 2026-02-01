@@ -390,11 +390,11 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
             });
         }
 
-        // ✅ STAGE 3: Render system messages as centered gray pills
+        // ✅ STAGE 3: Render system messages as centered glassmorphic pills
         if (isSystemMessage) {
             return (
                 <div className="flex w-full mb-4 justify-center">
-                    <div className="px-4 py-2 bg-slate-700/50 text-slate-300 rounded-full text-sm text-center max-w-md">
+                    <div className="px-4 py-2 backdrop-blur-xl bg-cyan-400/15 text-cyan-200 border border-cyan-400/30 rounded-full text-sm text-center max-w-md">
                         {msg.content}
                     </div>
                 </div>
@@ -405,10 +405,10 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
         return (
             <div className={`flex w-full mb-3 ${isMe ? "justify-end" : "justify-start"} group`}>
                 <div className="flex items-end gap-2">
-                    <div className={`min-w-[60px] max-w-[75%] px-3 py-2 rounded-2xl shadow-md ${isMe
+                    <div className={`min-w-[60px] max-w-[75%] px-3 py-2 rounded-2xl shadow-md backdrop-blur-xl ${isMe
                         ? "bg-cyan-600 text-white rounded-br-none"
-                        : "bg-slate-800 text-slate-200 rounded-bl-none"}
-                        `}>
+                        : "bg-cyan-950/20 text-foreground border border-cyan-400/30 rounded-bl-none hover:bg-cyan-950/30"}
+                        transition-all`}>
                         {/* Sender name for others' messages */}
                         {!isMe && (
                             <div className="text-xs font-semibold text-cyan-400 mb-1">{msg.senderName}</div>
@@ -458,7 +458,7 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                     {/* Reply button - Always rendered, opacity hidden to prevent jitter */}
                     <button
                         onClick={() => setReplyingTo(msg)}
-                        className="flex-shrink-0 p-1 hover:bg-slate-700 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="flex-shrink-0 p-1 hover:bg-cyan-400/10 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Reply"
                     >
                         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" className="text-cyan-400" stroke="currentColor" strokeWidth="2">
@@ -473,10 +473,10 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
 
 
     return (
-        <div className="fixed inset-0 top-[64px] z-40 bg-slate-950 flex flex-col">
+        <div className="fixed inset-0 top-[64px] z-40 bg-deep-obsidian flex flex-col">
             {/* fixed inset-0 top-[64px] = Forces full screen below navbar */}
             {/* Header - Only show breadcrumb context, main navigation is handled by parent */}
-            <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 bg-slate-900/95 border-b border-slate-800 flex-shrink-0 justify-between">
+            <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 backdrop-blur-xl bg-cyan-950/20 border-b border-cyan-400/20 flex-shrink-0 justify-between">
                 {/* Left section: Back button and pod info */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <Button variant="ghost" size="icon" className="mr-2" onClick={() => {
@@ -496,14 +496,14 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                     <div className="flex flex-col flex-1 min-w-0">
                         {/* Show context badge */}
                         <div className="flex items-center gap-2 mb-1">
-                            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${pod?.scope === 'GLOBAL'
-                                ? 'bg-purple-500/30 text-purple-300 border border-purple-500/50'
-                                : 'bg-blue-500/30 text-blue-300 border border-blue-500/50'}`}>
+                            <span className={`text-xs font-semibold px-2 py-1 rounded-full backdrop-blur-xl ${pod?.scope === 'GLOBAL'
+                                ? 'bg-magenta-500/20 text-magenta-300 border border-magenta-400/40'
+                                : 'bg-cyan-400/20 text-cyan-300 border border-cyan-400/40'}`}>
                                 {pod?.scope === 'GLOBAL' ? '🌍 Global Room' : '🏛️ Campus Pod'}
                             </span>
                         </div>
                         <span className="font-bold text-lg text-white leading-tight truncate">{pod.name}</span>
-                        <span className="text-xs text-slate-400 font-medium">{memberNames}</span>
+                        <span className="text-xs text-muted-foreground/70 font-medium">{memberNames}</span>
                     </div>
                 </div>
 
@@ -542,12 +542,12 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
 
             {/* ✅ STAGE 3: Members Drawer */}
             {showMembers && (
-                <div className="absolute right-0 top-[60px] w-80 bg-slate-900 border-l border-slate-800 h-full overflow-y-auto z-30 shadow-2xl">
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 sticky top-0 bg-slate-900">
+                <div className="absolute right-0 top-[60px] w-80 backdrop-blur-xl bg-cyan-950/30 border-l border-cyan-400/30 h-full overflow-y-auto z-30 shadow-2xl shadow-cyan-400/10">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-cyan-400/20 sticky top-0 backdrop-blur-xl bg-cyan-950/20">
                         <h3 className="font-semibold text-white">Pod Members</h3>
                         <button
                             onClick={() => setShowMembers(false)}
-                            className="text-slate-400 hover:text-white"
+                            className="text-muted-foreground/70 hover:text-cyan-300 transition-colors"
                         >
                             <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                                 <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" />
@@ -575,9 +575,9 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
             )}
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-3 py-4 bg-slate-900" style={{ backgroundImage: 'linear-gradient(135deg,rgba(0,255,255,0.03) 25%,transparent 25%,transparent 50%,rgba(0,255,255,0.03) 50%,rgba(0,255,255,0.03) 75%,transparent 75%,transparent)', backgroundSize: '40px 40px' }}>
+            <div className="flex-1 overflow-y-auto px-3 py-4 bg-gradient-to-br from-deep-obsidian via-cyan-950/10 to-deep-obsidian">
                 {messages.length === 0 && (
-                    <div className="text-center text-slate-500 mt-10">No messages yet. Start the conversation!</div>
+                    <div className="text-center text-muted-foreground/60 mt-10">No messages yet. Start the conversation!</div>
                 )}
                 {messages.map((msg, i) => (
                     <MessageBubble key={msg.id || i} msg={msg} />
@@ -586,15 +586,15 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
             </div>
 
             {/* Footer */}
-            <div className="sticky bottom-0 z-10 bg-slate-900/95 border-t border-slate-800">
+            <div className="sticky bottom-0 z-10 backdrop-blur-xl bg-cyan-950/20 border-t border-cyan-400/20 shadow-lg shadow-cyan-400/5">
                 {/* Reply Preview Bar */}
                 {replyingTo && (
-                    <div className="px-3 py-2 bg-slate-800/60 border-b border-slate-700 flex items-center justify-between text-sm">
+                    <div className="px-3 py-2 backdrop-blur-xl bg-cyan-400/10 border-b border-cyan-400/20 flex items-center justify-between text-sm">
                         <div className="flex-1">
                             <div className="text-cyan-400 font-semibold text-xs">Replying to {replyingTo.senderName}</div>
-                            <div className="text-slate-300 text-xs truncate">{replyingTo.content}</div>
+                            <div className="text-cyan-300 text-xs truncate">{replyingTo.content}</div>
                         </div>
-                        <button onClick={() => setReplyingTo(null)} className="text-slate-400 hover:text-white ml-2 flex-shrink-0">
+                        <button onClick={() => setReplyingTo(null)} className="text-muted-foreground/70 hover:text-cyan-300 transition-colors ml-2 flex-shrink-0">
                             <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                         </button>
                     </div>

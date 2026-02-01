@@ -5,151 +5,62 @@
 :root {
   --font-size: 14px;
   
-  /* Light Theme - Clean, bright, soft shadows */
-  --background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,1) 100%);
-  --background-solid: #ffffff;
-  --background-pattern: radial-gradient(circle at 25% 25%, rgba(99,102,241,0.03) 0%, transparent 50%), 
-                      radial-gradient(circle at 75% 75%, rgba(139,92,246,0.03) 0%, transparent 50%);
-  --foreground: #0f172a;
-  --card: rgba(255, 255, 255, 0.9);
-  --card-border: rgba(148, 163, 184, 0.15);
-  --card-foreground: #0f172a;
-  --popover: rgba(255, 255, 255, 0.95);
-  --popover-foreground: #0f172a;
-  --primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  --primary-solid: #6366f1;
-  --primary-foreground: #ffffff;
-  --secondary: rgba(241, 245, 249, 0.9);
-  --secondary-foreground: #334155;
-  --muted: rgba(248, 250, 252, 0.8);
-  --muted-foreground: #64748b;
-  --accent: rgba(226, 232, 240, 0.9);
-  --accent-foreground: #0f172a;
-  --destructive: #ef4444;
+  /* Cyber Neon Theme (Default) - Sober-Neon Aesthetic (Deep Obsidian + Luminescent Glow) */
+  --background: linear-gradient(135deg, #020617 0%, #0a0e27 100%);
+  --background-solid: #020617;
+  --background-pattern: radial-gradient(circle at 25% 25%, rgba(0, 228, 228, 0.06) 0%, transparent 50%), 
+                      radial-gradient(circle at 75% 75%, rgba(228, 0, 228, 0.06) 0%, transparent 50%),
+                      radial-gradient(circle at 50% 50%, rgba(100, 200, 100, 0.03) 0%, transparent 70%);
+  --foreground: #e0e7ff;
+  --card: rgba(10, 14, 39, 0.5);
+  --card-border: rgba(0, 228, 228, 0.12);
+  --card-foreground: #e0e7ff;
+  --popover: rgba(2, 6, 23, 0.8);
+  --popover-foreground: #e0e7ff;
+  --primary: linear-gradient(135deg, #00e4e4 0%, #d946ef 100%);
+  --primary-solid: #00e4e4;
+  --primary-foreground: #020617;
+  --secondary: rgba(30, 27, 60, 0.6);
+  --secondary-foreground: #6bd655;
+  --muted: rgba(30, 27, 60, 0.5);
+  --muted-foreground: #94a3b8;
+  --accent: rgba(50, 40, 80, 0.6);
+  --accent-foreground: #00e4e4;
+  --destructive: #ff2080;
   --destructive-foreground: #ffffff;
-  --border: rgba(148, 163, 184, 0.2);
-  --input: rgba(248, 250, 252, 0.9);
-  --input-background: rgba(255, 255, 255, 0.9);
-  --ring: #6366f1;
-  --glass-bg: rgba(255, 255, 255, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.4);
-  --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.2);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --radius: 12px;
-  
-  /* Enhanced Animation variables */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
-  --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  --elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
-  
-  /* Post type colors for Light theme */
-  --post-ask: #3b82f6;
-  --post-help: #10b981;
-  --post-poll: #f59e0b;
-  --post-looking: #8b5cf6;
-  --post-discussion: #6366f1;
-  --post-collab: #ef4444;
-}
-
-/* Windows 1992 Theme - Retro OS / Win95-inspired UI */
-.windows1992 {
-  --background: #c0c0c0;
-  --background-solid: #c0c0c0;
-  --background-pattern: none;
-  --foreground: #000000;
-  --card: #c0c0c0;
-  --card-border: #808080;
-  --card-foreground: #000000;
-  --popover: #c0c0c0;
-  --popover-foreground: #000000;
-  --primary: #000080;
-  --primary-solid: #000080;
-  --primary-foreground: #ffffff;
-  --secondary: #c0c0c0;
-  --secondary-foreground: #000000;
-  --muted: #808080;
-  --muted-foreground: #404040;
-  --accent: #000080;
-  --accent-foreground: #ffffff;
-  --destructive: #800000;
-  --destructive-foreground: #ffffff;
-  --border: #808080;
-  --input: #ffffff;
-  --input-background: #ffffff;
-  --ring: #000080;
-  --glass-bg: #c0c0c0;
-  --glass-border: #808080;
-  --shadow-soft: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080;
-  --shadow-medium: inset 2px 2px 0 #ffffff, inset -2px -2px 0 #808080;
-  --shadow-large: inset 2px 2px 0 #ffffff, inset -2px -2px 0 #404040;
-  --shadow-glow: none;
-  --shadow-xl: inset 2px 2px 0 #ffffff, inset -2px -2px 0 #404040;
-  --shadow-inset: inset -1px -1px 0 #ffffff, inset 1px 1px 0 #808080;
-  --shadow-outset: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080;
-  --radius: 0px;
-  
-  /* Post type colors for Windows 1992 theme */
-  --post-ask: #000080;
-  --post-help: #008000;
-  --post-poll: #800080;
-  --post-looking: #800000;
-  --post-discussion: #000080;
-  --post-collab: #800000;
-  
-  font-family: 'MS Sans Serif', sans-serif !important;
-  cursor: default;
-}
-
-/* Cyber Neon Theme */
-.cyber {
-  --background: linear-gradient(135deg, rgba(6,7,20,0.98) 0%, rgba(13,11,26,0.95) 100%);
-  --background-solid: #060714;
-  --background-pattern: radial-gradient(circle at 25% 25%, rgba(0,255,255,0.08) 0%, transparent 50%), 
-                      radial-gradient(circle at 75% 75%, rgba(255,0,255,0.08) 0%, transparent 50%),
-                      radial-gradient(circle at 50% 50%, rgba(57,255,20,0.05) 0%, transparent 70%);
-  --foreground: #00ffff;
-  --card: rgba(13, 11, 26, 0.7);
-  --card-border: rgba(0, 255, 255, 0.3);
-  --card-foreground: #00ffff;
-  --popover: rgba(13, 11, 26, 0.95);
-  --popover-foreground: #00ffff;
-  --primary: linear-gradient(135deg, #00ffff 0%, #ff00ff 100%);
-  --primary-solid: #00ffff;
-  --primary-foreground: #060714;
-  --secondary: rgba(20, 17, 35, 0.8);
-  --secondary-foreground: #39ff14;
-  --muted: rgba(20, 17, 35, 0.7);
-  --muted-foreground: #8892b0;
-  --accent: rgba(33, 25, 50, 0.8);
-  --accent-foreground: #00ffff;
-  --destructive: #ff0080;
-  --destructive-foreground: #ffffff;
-  --border: rgba(0, 255, 255, 0.2);
-  --input: rgba(20, 17, 35, 0.9);
-  --input-background: rgba(20, 17, 35, 0.9);
-  --ring: #00ffff;
-  --glass-bg: rgba(13, 11, 26, 0.4);
-  --glass-border: rgba(0, 255, 255, 0.4);
-  --shadow-soft: 0 0 10px rgba(0, 255, 255, 0.3);
-  --shadow-medium: 0 0 20px rgba(0, 255, 255, 0.4);
-  --shadow-large: 0 0 30px rgba(0, 255, 255, 0.5);
-  --shadow-glow: 0 0 40px rgba(0, 255, 255, 0.8), 0 0 80px rgba(255, 0, 255, 0.4);
-  --shadow-xl: 0 0 50px rgba(0, 255, 255, 0.6), 0 0 100px rgba(255, 0, 255, 0.3);
+  --border: rgba(0, 228, 228, 0.08);
+  --input: rgba(30, 27, 60, 0.7);
+  --input-background: rgba(30, 27, 60, 0.7);
+  --ring: #00e4e4;
+  --glass-bg: rgba(10, 14, 39, 0.2);
+  --glass-border: rgba(0, 228, 228, 0.2);
+  --shadow-soft: 0 0 12px rgba(0, 228, 228, 0.15);
+  --shadow-medium: 0 0 24px rgba(0, 228, 228, 0.2);
+  --shadow-large: 0 0 40px rgba(0, 228, 228, 0.25);
+  --shadow-glow: 0 0 30px rgba(0, 228, 228, 0.4), 0 0 60px rgba(217, 70, 239, 0.2);
+  --shadow-xl: 0 0 50px rgba(0, 228, 228, 0.35), 0 0 100px rgba(217, 70, 239, 0.15);
   --radius: 20px;
   
-  /* Post type colors for Cyber theme */
-  --post-ask: #00ffff;
-  --post-help: #39ff14;
-  --post-poll: #ff00ff;
-  --post-looking: #ffff00;
-  --post-discussion: #0080ff;
+  /* Enhanced Animation variables - Luxury Spring */
+  --transition-fast: 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-normal: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-slow: 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  
+  /* Post type colors for Cyber theme - 80% saturation, sober neons */
+  --post-ask: #00d4d4;
+  --post-help: #6bd655;
+  --post-poll: #d946d9;
+  --post-looking: #d4d400;
+  --post-discussion: #0088ff;
   --post-collab: #ff0080;
+}
+
+/* Cyber theme explicitly applied (fallback, already in :root) */
+.cyber {
+  /* Already inherited from :root */
 }
 
 @layer base {
@@ -406,6 +317,60 @@
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
+
+  /* Professional Glassmorphism Suite */
+  .glass-card {
+    background: rgba(10, 14, 39, 0.3);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 228, 228, 0.1);
+    transition: all var(--transition-normal);
+  }
+
+  .glass-card:hover {
+    background: rgba(10, 14, 39, 0.4);
+    border-color: rgba(0, 228, 228, 0.2);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .glass-card-light {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .glass-card-light:hover {
+    background: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.7);
+  }
+
+  .glass-input {
+    background: rgba(10, 14, 39, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 228, 228, 0.08);
+    transition: all var(--transition-fast);
+  }
+
+  .glass-input:focus {
+    background: rgba(10, 14, 39, 0.3);
+    border-color: rgba(0, 228, 228, 0.3);
+    box-shadow: 0 0 20px rgba(0, 228, 228, 0.2);
+  }
+
+  /* Sober Neon Glow (Internal Shadow + Subtle Light Source) */
+  .neon-glow-cyan {
+    box-shadow: inset 0 0 20px rgba(0, 228, 228, 0.05), 0 0 20px rgba(0, 228, 228, 0.15);
+  }
+
+  .neon-glow-magenta {
+    box-shadow: inset 0 0 20px rgba(217, 70, 239, 0.05), 0 0 20px rgba(217, 70, 239, 0.15);
+  }
+
+  .neon-glow-lime {
+    box-shadow: inset 0 0 20px rgba(107, 214, 85, 0.05), 0 0 20px rgba(107, 214, 85, 0.15);
+  }
   
   .windows1992 .glass-subtle {
     background: var(--muted);
@@ -429,7 +394,7 @@
   }
   
   .scale-in {
-    animation: scaleIn var(--transition-normal) var(--bounce) forwards;
+    animation: scaleIn var(--transition-normal) var(--spring) forwards;
   }
   
   .slide-up {
@@ -445,25 +410,25 @@
   }
   
   .float {
-    animation: float 3s ease-in-out infinite;
+    animation: float 4s ease-in-out infinite;
   }
   
   .pulse-glow {
-    animation: pulseGlow 2s ease-in-out infinite;
+    animation: pulseGlow 2.5s ease-in-out infinite;
   }
   
   .shimmer {
-    animation: shimmer 2s linear infinite;
+    animation: shimmer 2.5s linear infinite;
   }
 
-  /* Interactive effects */
+  /* Interactive effects with professional polish */
   .hover-lift {
-    transition: all var(--transition-fast);
+    transition: all var(--transition-normal);
   }
   
   .hover-lift:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: var(--shadow-medium);
   }
   
   .windows1992 .hover-lift:hover {
@@ -472,22 +437,22 @@
   }
   
   .hover-glow {
-    transition: all var(--transition-fast);
+    transition: all var(--transition-normal);
   }
   
   .hover-glow:hover {
-    box-shadow: var(--shadow-glow);
-    transform: scale(1.05);
+    box-shadow: var(--shadow-medium);
+    transform: scale(1.02);
   }
   
   .windows1992 .hover-glow:hover {
     box-shadow: var(--shadow-outset);
-    transform: scale(1.02);
+    transform: scale(1.01);
   }
   
   .press-effect:active {
-    transform: scale(0.95);
-    transition: transform 100ms ease-out;
+    transform: scale(0.98);
+    transition: transform 150ms ease-out;
   }
   
   .windows1992 .press-effect:active {
@@ -496,7 +461,7 @@
   }
   
   .tilt-hover {
-    transition: transform var(--transition-fast);
+    transition: transform var(--transition-normal);
   }
   
   .tilt-hover:hover {

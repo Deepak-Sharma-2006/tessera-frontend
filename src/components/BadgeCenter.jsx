@@ -473,38 +473,16 @@ export default function BadgeCenter({ user, setUser }) {
 
   return (
     <div className="badge-center-ui space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 via-orange-600 to-red-600 bg-clip-text text-transparent">
-          🏅 Badge Center
-        </h1>
-        <p className="text-lg text-muted-foreground">Track your achievements and showcase your skills</p>
-        
-        {/* Progress Bar */}
-        <div className="max-w-md mx-auto">
-          <div className="flex justify-between text-sm text-muted-foreground mb-2">
-            <span>Progress</span>
-            <span>{totalEarned} of {totalBadges} badges</span>
-          </div>
-          <div className="w-full bg-muted rounded-full h-3">
-            <div 
-              className="bg-gradient-to-r from-yellow-500 to-orange-500 h-3 rounded-full transition-all duration-500"
-              style={{ width: `${(totalEarned / totalBadges) * 100}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
       {/* Top Navigation Tabs */}
-      <div className="flex flex-wrap justify-center gap-2 p-2 bg-muted/30 rounded-xl">
+      <div className="flex flex-wrap justify-center gap-2 p-2">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-3 rounded-lg transition-all duration-200 font-medium ${
+            className={`px-6 py-3 rounded-lg transition-all duration-200 font-medium backdrop-blur-xl border ${
               activeTab === tab.id
-                ? 'bg-primary text-primary-foreground shadow-md transform scale-105'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                ? 'bg-cyan-400/25 text-cyan-200 border-cyan-400/50 shadow-lg shadow-cyan-400/30 scale-105'
+                : 'text-muted-foreground/70 border-white/15 bg-white/8 hover:bg-white/12 hover:border-white/20'
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -515,52 +493,23 @@ export default function BadgeCenter({ user, setUser }) {
         ))}
       </div>
 
-      {/* Category Filter - Only for 'all' tab */}
-      {activeTab === 'all' && (
-        <div className="flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => setSelectedCategory('all')}
-            className={`px-4 py-2 rounded-full text-sm transition-all ${
-              selectedCategory === 'all'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground hover:bg-muted/70'
-            }`}
-          >
-            All Categories
-          </button>
-          {badgeCategories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
-              className={`px-4 py-2 rounded-full text-sm transition-all ${
-                selectedCategory === category.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/70'
-              }`}
-            >
-              {category.name}
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* Active Badges Strip */}
-      <div className="component-profile-badge-strip bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-2xl border border-yellow-200">
-        <h3 className="font-semibold text-lg mb-4 text-center">Featured Badges (Displayed on Profile)</h3>
+      <div className="component-profile-badge-strip backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 via-deep-obsidian to-cyan-950/20 p-6 rounded-2xl border border-cyan-400/30 shadow-lg shadow-cyan-400/10">
+        <h3 className="font-semibold text-lg mb-4 text-center text-cyan-300">Featured Badges (Displayed on Profile)</h3>
         <div className="flex justify-center space-x-4">
           {getActiveBadges().map((badge) => (
             <div 
               key={badge.id} 
-              className={`flex flex-col items-center p-4 rounded-xl border-2 relative ${
-                badge.tier === 'Legendary' || badge.tier === 'Elite' ? 'border-yellow-300 bg-yellow-50 shadow-lg' : 
-                badge.isPenaltyBadge ? 'border-red-300 bg-red-50 shadow-lg' : 
-                badge.isModeratorBadge ? 'border-blue-300 bg-blue-50 shadow-lg' :
-                'border-gray-200 bg-white'
+              className={`flex flex-col items-center p-4 rounded-xl border-2 backdrop-blur-xl transition-all relative ${
+                badge.tier === 'Legendary' || badge.tier === 'Elite' ? 'border-cyan-400/50 bg-cyan-400/15 shadow-lg shadow-cyan-400/20' : 
+                badge.isPenaltyBadge ? 'border-magenta-400/50 bg-magenta-400/15 shadow-lg shadow-magenta-400/20' : 
+                badge.isModeratorBadge ? 'border-cyan-400/50 bg-cyan-400/15 shadow-lg shadow-cyan-400/20' :
+                'border-cyan-400/30 bg-cyan-950/20'
               }`}
             >
               {/* Cannot hide indicator for special badges */}
               {(badge.cannotBeHidden || badge.id === 'signal-guardian') && (
-                <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                <div className="absolute -top-2 -right-2 w-5 h-5 bg-magenta-500 rounded-full flex items-center justify-center shadow-lg shadow-magenta-500/50">
                   <span className="text-white text-xs">🔒</span>
                 </div>
               )}
@@ -568,23 +517,23 @@ export default function BadgeCenter({ user, setUser }) {
               <div className={`text-3xl mb-2 ${badge.tier === 'Legendary' || badge.tier === 'Elite' ? 'animate-pulse' : ''} ${badge.isPenaltyBadge ? 'opacity-80' : ''}`}>
                 {badge.icon}
               </div>
-              <span className="font-medium text-sm text-center">{badge.name}</span>
+              <span className="font-medium text-sm text-center text-white">{badge.name}</span>
               <Badge className={`${getTierColor(badge.tier)} text-xs mt-1`}>
                 {getTierStars(badge.tier)}
               </Badge>
               
               {/* Duration indicator for timed badges */}
               {badge.duration && badge.duration !== 'Permanent' && (
-                <div className="text-xs text-orange-600 mt-1">
+                <div className="text-xs text-cyan-300 mt-1">
                   {getRemainingTime(badge.expiresAt)}
                 </div>
               )}
             </div>
           ))}
           {getActiveBadges().length < 3 && (
-            <div className="flex flex-col items-center p-4 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50">
-              <div className="text-3xl mb-2 text-gray-400">➕</div>
-              <span className="text-sm text-gray-500 text-center">Empty Slot</span>
+            <div className="flex flex-col items-center p-4 rounded-xl border-2 border-dashed border-cyan-400/30 bg-cyan-950/10 backdrop-blur-xl">
+              <div className="text-3xl mb-2 text-cyan-400/60">➕</div>
+              <span className="text-sm text-cyan-300/70 text-center">Empty Slot</span>
             </div>
           )}
         </div>

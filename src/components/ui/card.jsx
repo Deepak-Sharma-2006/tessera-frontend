@@ -6,41 +6,41 @@ const Card = forwardRef(
     return (
       <div
         className={cn(
-          // Base styles with enhanced effects
-          'rounded-2xl border transition-all duration-500 relative overflow-hidden group',
+          // Base styles with professional polish
+          'rounded-lg border transition-all duration-500 relative overflow-hidden group',
           
           // Variants with glassmorphism
           {
-            // Default - Simple card
+            // Default - Clean card
             'bg-card text-card-foreground border-border shadow-soft': variant === 'default',
             
             // Elevated - Higher shadow
             'bg-card text-card-foreground border-border shadow-large': variant === 'elevated',
             
             // Outlined - Emphasis on border
-            'bg-card text-card-foreground border-2 border-border shadow-soft': variant === 'outlined',
+            'bg-card text-card-foreground border border-border shadow-soft': variant === 'outlined',
             
-            // Glass - Primary glassmorphism effect
-            'glass text-card-foreground border-glass-border shadow-glass backdrop-blur-xl': variant === 'glass',
+            // Glass - Professional glassmorphism
+            'backdrop-blur-xl bg-white/8 text-card-foreground border border-white/15 shadow-md': variant === 'glass',
             
             // Gradient - Subtle gradient background
-            'bg-gradient-to-br from-card via-card/95 to-card/90 text-card-foreground border-glass-border shadow-glass': variant === 'gradient',
+            'bg-gradient-to-br from-white/15 via-white/10 to-white/8 text-card-foreground border border-white/15 backdrop-blur-xl shadow-sm': variant === 'gradient',
             
-            // Neon - Cyber theme special
-            'glass text-card-foreground border-glass-border shadow-neon cyber:border-cyan-500/30': variant === 'neon',
+            // Neon - Cyber theme with sober glow
+            'backdrop-blur-xl bg-cyan-400/5 text-card-foreground border border-cyan-400/20 shadow-sm cyber:shadow-glow': variant === 'neon',
             
             // Floating - Card that appears to float
-            'glass text-card-foreground border-glass-border shadow-glass-lg float': variant === 'floating',
+            'backdrop-blur-xl bg-white/10 text-card-foreground border border-white/20 shadow-lg': variant === 'floating',
           },
           
-          // Hover effects
-          hover && !interactive && 'hover:shadow-glass-lg hover:-translate-y-2 hover:scale-[1.02]',
+          // Hover effects - subtle for professional feel
+          hover && !interactive && 'hover:shadow-lg hover:border-white/25 hover:-translate-y-1 hover:bg-white/12',
           
-          // Interactive effects (more pronounced for clickable cards)
-          interactive && 'cursor-pointer hover:shadow-glass-lg hover:-translate-y-3 hover:scale-[1.03] press-effect',
+          // Interactive effects (for clickable cards)
+          interactive && 'cursor-pointer hover:shadow-lg hover:-translate-y-2 hover:bg-white/15 press-effect',
           
-          // Glow effect
-          glow && 'shadow-glow hover:shadow-xl hover:shadow-primary/40',
+          // Glow effect - desaturated
+          glow && 'shadow-md shadow-primary/15 hover:shadow-lg hover:shadow-primary/25',
           
           // Tilt effect
           tilt && 'tilt-hover',
@@ -50,37 +50,36 @@ const Card = forwardRef(
         ref={ref}
         {...props}
       >
-        {/* Top border highlight with animation */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        {/* Top border highlight with subtle animation */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-60 transition-opacity duration-500"></div>
         
-        {/* Shimmer effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
+        {/* Subtle shimmer effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/3 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-900 ease-out"></div>
         
         {/* Background pattern for special variants */}
         {variant === 'glass' && (
-          <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/3 via-transparent to-white/3 pointer-events-none"></div>
         )}
         
         {variant === 'neon' && (
           <>
-            {/* Cyber grid pattern */}
-            <div className="absolute inset-0 opacity-5">
+            {/* Subtle cyber grid pattern */}
+            <div className="absolute inset-0 opacity-3">
               <div className="absolute inset-0" style={{
-                backgroundImage: 'linear-gradient(rgba(0,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.1) 1px, transparent 1px)',
-                backgroundSize: '20px 20px'
+                backgroundImage: 'linear-gradient(rgba(0,228,228,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,228,228,0.1) 1px, transparent 1px)',
+                backgroundSize: '25px 25px'
               }}></div>
             </div>
-            {/* Floating particles */}
+            {/* Subtle floating particles */}
             <div className="absolute inset-0 pointer-events-none">
-              {[...Array(3)].map((_, i) => (
+              {[...Array(2)].map((_, i) => (
                 <div
                   key={i}
-                  className="absolute w-1 h-1 bg-cyan-400 rounded-full opacity-40 animate-bounce"
+                  className="absolute w-0.5 h-0.5 bg-cyan-300/50 rounded-full opacity-30"
                   style={{
-                    left: `${10 + i * 40}%`,
-                    top: `${20 + (i % 2) * 60}%`,
-                    animationDelay: `${i * 0.5}s`,
-                    animationDuration: '3s'
+                    left: `${20 + i * 60}%`,
+                    top: `${30 + (i % 2) * 40}%`,
+                    animationDelay: `${i * 0.6}s`,
                   }}
                 />
               ))}
@@ -89,7 +88,7 @@ const Card = forwardRef(
         )}
         
         {variant === 'floating' && (
-          <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/10 via-purple-500/10 to-primary/10 rounded-lg blur-xl opacity-0 group-hover:opacity-70 transition-opacity duration-500 -z-10"></div>
         )}
         
         {/* Content */}
@@ -107,7 +106,7 @@ const CardHeader = forwardRef(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex flex-col space-y-2 p-6', className)}
+      className={cn('flex flex-col space-y-1.5 p-8', className)}
       {...props}
     />
   )
@@ -118,7 +117,7 @@ const CardTitle = forwardRef(
   ({ className, children, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('font-bold leading-none tracking-tight text-lg gradient-text', className)}
+      className={cn('font-semibold leading-none tracking-tight text-lg text-foreground', className)}
       {...props}
     >
       {children}
@@ -131,7 +130,7 @@ const CardDescription = forwardRef(
   ({ className, ...props }, ref) => (
     <p
       ref={ref}
-      className={cn('text-sm text-muted-foreground leading-relaxed', className)}
+      className={cn('text-sm text-muted-foreground/80 leading-relaxed', className)}
       {...props}
     />
   )
@@ -140,7 +139,7 @@ CardDescription.displayName = 'CardDescription'
 
 const CardContent = forwardRef(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+    <div ref={ref} className={cn('p-8 pt-0', className)} {...props} />
   )
 )
 CardContent.displayName = 'CardContent'
@@ -149,7 +148,7 @@ const CardFooter = forwardRef(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex items-center p-6 pt-0', className)}
+      className={cn('flex items-center p-8 pt-0', className)}
       {...props}
     />
   )

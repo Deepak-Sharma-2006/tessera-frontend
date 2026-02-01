@@ -7,8 +7,10 @@ import { Textarea } from './ui/textarea.jsx';
 import { getEvents, createTeamPost, createEvent, trackEventRegistration } from "@/lib/api.js";
 import { saveScoped, loadScoped, clearScoped } from '@/lib/session.js';
 import LoadingSpinner from '@/components/animations/LoadingSpinner.jsx';
+import { useTheme } from '@/lib/theme.js';
 
 export default function EventsHub({ user, onNavigateToBeacon }) {
+  const { theme } = useTheme();
   // State for data from the API
   const [allEvents, setAllEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -497,7 +499,7 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
               {isSolo && !hasLink && (
                 <Button
                   onClick={handleDetailsClick}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                  className="w-full backdrop-blur-xl bg-gradient-to-r from-cyan-400/25 to-primary/25 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/35 hover:to-primary/35 hover:shadow-lg font-semibold"
                 >
                   📋 Details
                 </Button>
@@ -506,11 +508,10 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
               {/* ✅ Team: Show "Find Team" AND "Details". */}
               {!isSolo && (
                 <>
-                  <Button onClick={() => handleFindTeam(event)} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">🔍 Find Team</Button>
+                  <Button onClick={() => handleFindTeam(event)} className="w-full backdrop-blur-xl bg-gradient-to-r from-cyan-400/25 to-primary/25 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/35 hover:to-primary/35 hover:shadow-lg font-semibold">🔍 Find Team</Button>
                   <Button
                     onClick={handleDetailsClick}
-                    variant="outline"
-                    className="w-full"
+                    className="w-full backdrop-blur-xl bg-gradient-to-r from-cyan-400/20 to-primary/20 border border-cyan-400/35 text-cyan-100 hover:from-cyan-400/30 hover:to-primary/30 hover:shadow-lg font-semibold"
                   >
                     {hasLink ? '🔗 Registration Link' : '📋 Details'}
                   </Button>
@@ -524,63 +525,110 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">🎯 Events Hub</h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Discover hackathons, competitions, workshops, and fests to showcase your skills</p>
-      </div>
-      <div className="flex flex-wrap justify-center gap-2 p-2 bg-muted/30 rounded-xl">
+    <div className="space-y-8 py-4">
+      <div className="flex flex-wrap justify-center gap-2 p-3 bg-transparent">
         {filters.map((filter) => (
-          <button key={filter.id} onClick={() => setActiveFilter(filter.id)} className={`px-6 py-3 rounded-lg transition-all duration-200 font-medium ${activeFilter === filter.id ? 'bg-primary text-primary-foreground shadow-md transform scale-105' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
-            <div className="flex items-center space-x-2"><span>{filter.icon}</span><span>{filter.label}</span><Badge variant="outline" className="text-xs">{filter.count}</Badge></div>
+          <button 
+            key={filter.id} 
+            onClick={() => setActiveFilter(filter.id)} 
+            className={`px-6 py-3 rounded-lg transition-all duration-500 font-medium border flex items-center gap-2 backdrop-blur-xl ${activeFilter === filter.id 
+              ? theme === 'cyber'
+                ? 'bg-cyan-400/25 text-cyan-200 border-cyan-400/50 shadow-lg shadow-cyan-400/30 scale-105'
+                : 'bg-primary/25 text-primary-solid border-primary/50 shadow-lg shadow-primary/30 scale-105'
+              : theme === 'cyber'
+                ? 'text-muted-foreground/70 border-white/10 hover:bg-white/5 hover:border-white/20 hover:shadow-sm'
+                : 'text-muted-foreground/70 border-white/10 hover:bg-white/5 hover:border-white/20 hover:shadow-sm'
+            }`}
+          >
+            <span>{filter.icon}</span>
+            <span>{filter.label}</span>
+            <Badge variant="outline" className="text-xs font-bold">{filter.count}</Badge>
           </button>
         ))}
       </div>
+      
       {(isCatalyst || isDev) && (
-        <div className="flex justify-end">
-          <Button onClick={() => setShowCreateModal(true)} className="bg-gradient-to-r from-green-600 to-blue-600 hover:scale-105 transition-all">
+        <div className="flex justify-end px-2">
+          <Button 
+            onClick={() => setShowCreateModal(true)} 
+            variant="default"
+            className="font-semibold shadow-lg backdrop-blur-xl bg-gradient-to-r from-cyan-400/30 to-primary/30 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/40 hover:to-primary/40 hover:shadow-xl"
+          >
             ✨ Create Event
           </Button>
         </div>
       )}
+      
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">{renderEvents()}</div>
 
       {/* Find Team Modal */}
       {showFindTeamModal && selectedEvent && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 rounded-2xl shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card variant="glass" className="max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 shadow-2xl">
             <div className="flex items-center justify-between mb-8">
-              <div><h3 className="text-2xl font-bold">Find Team</h3><p className="text-muted-foreground">{selectedEvent.title}</p></div>
-              <Button variant="ghost" size="icon" onClick={() => setShowFindTeamModal(false)} className="rounded-full">✕</Button>
+              <div>
+                <h3 className="text-2xl font-bold tracking-tight text-foreground">Find Team</h3>
+                <p className="text-muted-foreground/70 text-sm mt-1">{selectedEvent.title}</p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setShowFindTeamModal(false)} className="rounded-full text-muted-foreground hover:text-foreground hover:bg-white/10">✕</Button>
             </div>
             {!findTeamAction ? (
               <div className="space-y-4">
-                <button onClick={() => setFindTeamAction('create')} className="w-full p-6 border-2 border-border rounded-xl hover:border-primary/30 hover:bg-primary/5 transition-all text-left group hover:shadow-md">
-                  <div className="flex items-center space-x-4 mb-3"><span className="text-3xl">✨</span><span className="text-xl font-semibold">Create Team Post</span></div>
-                  <p className="text-muted-foreground">Create a post in Buddy Beacon to attract teammates. Auto-fills event details.</p>
+                <button onClick={() => setFindTeamAction('create')} className="w-full p-6 border-2 border-white/15 rounded-lg hover:border-white/30 hover:bg-white/8 transition-all text-left group hover:shadow-md backdrop-blur-sm">
+                  <div className="flex items-center space-x-4 mb-3"><span className="text-3xl">✨</span><span className="text-lg font-semibold text-foreground">Create Team Post</span></div>
+                  <p className="text-muted-foreground/70 text-sm">Create a post in Buddy Beacon to attract teammates. Auto-fills event details.</p>
                 </button>
-                <button onClick={() => setFindTeamAction('browse')} className="w-full p-6 border-2 border-border rounded-xl hover:border-primary/30 hover:bg-primary/5 transition-all text-left group hover:shadow-md">
-                  <div className="flex items-center space-x-4 mb-3"><span className="text-3xl">🔍</span><span className="text-xl font-semibold">Browse Teams</span></div>
-                  <p className="text-muted-foreground">Browse existing team posts in Buddy Beacon for this event.</p>
+                <button onClick={() => setFindTeamAction('browse')} className="w-full p-6 border-2 border-white/15 rounded-lg hover:border-white/30 hover:bg-white/8 transition-all text-left group hover:shadow-md backdrop-blur-sm">
+                  <div className="flex items-center space-x-4 mb-3"><span className="text-3xl">🔍</span><span className="text-lg font-semibold text-foreground">Browse Teams</span></div>
+                  <p className="text-muted-foreground/70 text-sm">Browse existing team posts in Buddy Beacon for this event.</p>
                 </button>
               </div>
             ) : findTeamAction === 'create' ? (
               <div className="space-y-6">
-                <Button variant="outline" size="sm" onClick={() => setFindTeamAction(null)} className="rounded-full">← Back</Button>
-                <div className="bg-blue-50/50 p-4 rounded-xl border"><h4 className="font-semibold mb-2">Auto-filled Event Details:</h4><div className="space-y-2 text-sm"><div><strong>Event:</strong> {selectedEvent.title}</div><div><strong>Max Team Size:</strong> {selectedEvent.maxParticipants || selectedEvent.maxTeamSize || 'Not specified'} members</div><div><strong>Required Skills:</strong> {selectedEvent.requiredSkills && selectedEvent.requiredSkills.length > 0 ? selectedEvent.requiredSkills.join(', ') : 'No specific skills required'}</div></div></div>
-                <div className="bg-green-50/50 p-4 rounded-xl border"><h4 className="font-semibold mb-2">Your Profile Details (will be shown):</h4><div className="space-y-2 text-sm"><div><strong>Name:</strong> {user?.fullName || user?.name || 'Your Name'}</div><div><strong>Year:</strong> {user?.yearOfStudy || user?.year || 'Your Year'}</div><div><strong>Badges:</strong></div></div></div>
-                <div><label className="block font-semibold mb-2">Additional Skills (Optional)</label><div className="flex flex-wrap gap-2 mb-2">{teamPost.extraSkills.map((skill) => (<Badge key={skill} variant="outline" className="cursor-pointer" onClick={() => removeTeamSkill(skill)}>{skill} ✕</Badge>))}</div><div className="flex space-x-2"><Input placeholder="Add a skill..." value={teamPost.newSkill} onChange={(e) => setTeamPost(prev => ({ ...prev, newSkill: e.target.value }))} onKeyDown={(e) => e.key === 'Enter' && addTeamSkill()} /><Button variant="outline" onClick={addTeamSkill}>Add</Button></div></div>
-                <div><label className="block font-semibold mb-2">Team Post Description *</label><Textarea placeholder="Describe your project idea..." value={teamPost.description} onChange={(e) => setTeamPost(prev => ({ ...prev, description: e.target.value }))} rows={4} /></div>
-                <div className="bg-yellow-50/50 p-4 rounded-xl border"><p className="text-sm">⏰ <strong>Auto-Expiry:</strong> Your team post will expire in 24 hours and auto-create a Collab Pod if you receive applicants.</p></div>
-                <div className="flex space-x-4"><Button onClick={handleCreateTeamPost} disabled={!teamPost.description.trim()} className="flex-1">🚀 Create Team Post</Button><Button variant="outline" onClick={() => setFindTeamAction(null)}>Cancel</Button></div>
+                <Button variant="ghost" size="sm" onClick={() => setFindTeamAction(null)} className="rounded-full font-semibold">← Back</Button>
+                <div className="bg-primary/10 border border-primary/20 p-4 rounded-lg">
+                  <h4 className="font-semibold mb-2 text-foreground">Auto-filled Event Details:</h4>
+                  <div className="space-y-2 text-sm text-muted-foreground/80">
+                    <div><strong>Event:</strong> {selectedEvent.title}</div>
+                    <div><strong>Max Team Size:</strong> {selectedEvent.maxParticipants || selectedEvent.maxTeamSize || 'Not specified'} members</div>
+                    <div><strong>Required Skills:</strong> {selectedEvent.requiredSkills && selectedEvent.requiredSkills.length > 0 ? selectedEvent.requiredSkills.join(', ') : 'No specific skills required'}</div>
+                  </div>
+                </div>
+                <div className="bg-green-400/10 border border-green-400/20 p-4 rounded-lg">
+                  <h4 className="font-semibold mb-2 text-foreground">Your Profile Details (will be shown):</h4>
+                  <div className="space-y-2 text-sm text-muted-foreground/80">
+                    <div><strong>Name:</strong> {user?.fullName || user?.name || 'Your Name'}</div>
+                    <div><strong>Year:</strong> {user?.yearOfStudy || user?.year || 'Your Year'}</div>
+                    <div><strong>Badges:</strong></div>
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-semibold mb-2 text-foreground text-sm">Additional Skills (Optional)</label>
+                  <div className="flex flex-wrap gap-2 mb-3">{teamPost.extraSkills.map((skill) => (<Badge key={skill} variant="outline" className="cursor-pointer bg-primary/20 border-primary/40 text-foreground" onClick={() => removeTeamSkill(skill)}>{skill} ✕</Badge>))}</div>
+                  <div className="flex space-x-2">
+                    <Input placeholder="Add a skill..." value={teamPost.newSkill} onChange={(e) => setTeamPost(prev => ({ ...prev, newSkill: e.target.value }))} onKeyDown={(e) => e.key === 'Enter' && addTeamSkill()} className="bg-white/8 border-white/15 text-foreground placeholder:text-muted-foreground/50" />
+                    <Button variant="outline" onClick={addTeamSkill} className="font-semibold">Add</Button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-semibold mb-2 text-foreground text-sm">Team Post Description *</label>
+                  <Textarea placeholder="Describe your project idea..." value={teamPost.description} onChange={(e) => setTeamPost(prev => ({ ...prev, description: e.target.value }))} rows={4} className="bg-white/8 border-white/15 text-foreground placeholder:text-muted-foreground/50" />
+                </div>
+                <div className="bg-amber-400/10 border border-amber-400/20 p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground">⏰ <strong>Auto-Expiry:</strong> Your team post will expire in 24 hours and auto-create a Collab Pod if you receive applicants.</p>
+                </div>
+                <div className="flex space-x-4">
+                  <Button onClick={handleCreateTeamPost} disabled={!teamPost.description.trim()} variant="default" className="flex-1 font-semibold">🚀 Create Team Post</Button>
+                  <Button variant="ghost" onClick={() => setFindTeamAction(null)}>Cancel</Button>
+                </div>
               </div>
             ) : (
               <div className="space-y-6 text-center relative">
-                <Button variant="outline" size="sm" onClick={() => setFindTeamAction(null)} className="rounded-full absolute top-0 left-0">← Back</Button>
+                <Button variant="ghost" size="sm" onClick={() => setFindTeamAction(null)} className="rounded-full absolute top-0 left-0 font-semibold">← Back</Button>
                 <div className="text-6xl pt-8">🔍</div>
-                <h4 className="font-semibold text-lg">Browse Existing Teams</h4>
-                <p className="text-muted-foreground">We'll take you to the Buddy Beacon to see all team posts for {selectedEvent.title}.</p>
-                <Button onClick={handleBrowseTeams} className="w-full">🚀 Go to Buddy Beacon</Button>
+                <h4 className="font-semibold text-lg text-foreground">Browse Existing Teams</h4>
+                <p className="text-muted-foreground/70">We'll take you to the Buddy Beacon to see all team posts for {selectedEvent.title}.</p>
+                <Button onClick={handleBrowseTeams} variant="default" className="w-full font-semibold">🚀 Go to Buddy Beacon</Button>
               </div>
             )}
           </Card>
@@ -589,49 +637,57 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
 
       {/* ✅ NEW: Event Details Modal */}
       {showEventDetailsModal && selectedEvent && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 rounded-2xl shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card variant="glass" className="max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 shadow-2xl">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-bold">{selectedEvent.title}</h3>
-              <Button variant="ghost" size="icon" onClick={() => setShowEventDetailsModal(false)} className="rounded-full">✕</Button>
+              <h3 className="text-2xl font-bold tracking-tight text-foreground">{selectedEvent.title}</h3>
+              <Button variant="ghost" size="icon" onClick={() => setShowEventDetailsModal(false)} className="rounded-full text-muted-foreground hover:text-foreground hover:bg-white/10">✕</Button>
             </div>
             <div className="space-y-6">
               <div>
-                <h4 className="font-semibold mb-2">Description</h4>
-                <p className="text-muted-foreground">{selectedEvent.description}</p>
+                <h4 className="font-semibold mb-2 text-foreground">Description</h4>
+                <p className="text-muted-foreground/80">{selectedEvent.description}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold mb-2">Category</h4>
-                  <p className="text-muted-foreground">{selectedEvent.category}</p>
+                <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
+                  <h4 className="font-semibold mb-1 text-foreground text-sm">Category</h4>
+                  <p className="text-muted-foreground/80 text-sm">{selectedEvent.category}</p>
                 </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Organizer</h4>
-                  <p className="text-muted-foreground">{selectedEvent.organizer || 'Not specified'}</p>
+                <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
+                  <h4 className="font-semibold mb-1 text-foreground text-sm">Organizer</h4>
+                  <p className="text-muted-foreground/80 text-sm">{selectedEvent.organizer || 'Not specified'}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold mb-2">Date</h4>
-                  <p className="text-muted-foreground">{formatEventDate(selectedEvent.startDate || selectedEvent.dateTime)}</p>
+                <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
+                  <h4 className="font-semibold mb-1 text-foreground text-sm">Date</h4>
+                  <p className="text-muted-foreground/80 text-sm">{formatEventDate(selectedEvent.startDate || selectedEvent.dateTime)}</p>
                 </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Max Team Size</h4>
-                  <p className="text-muted-foreground">{selectedEvent.maxParticipants || selectedEvent.maxTeamSize || 'N/A'} members</p>
+                <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
+                  <h4 className="font-semibold mb-1 text-foreground text-sm">Max Team Size</h4>
+                  <p className="text-muted-foreground/80 text-sm">{selectedEvent.maxParticipants || selectedEvent.maxTeamSize || 'N/A'} members</p>
                 </div>
               </div>
               {selectedEvent.requiredSkills && selectedEvent.requiredSkills.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-2">Required Skills</h4>
+                  <h4 className="font-semibold mb-3 text-foreground text-sm">Required Skills</h4>
                   <div className="flex flex-wrap gap-2">
-                    {selectedEvent.requiredSkills.map((skill) => <Badge key={skill} variant="outline">{skill}</Badge>)}
+                    {selectedEvent.requiredSkills.map((skill) => (
+                      <Badge key={skill} variant="outline" className="bg-primary/20 border-primary/40 text-foreground font-medium">{skill}</Badge>
+                    ))}
                   </div>
                 </div>
               )}
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline" onClick={() => setShowEventDetailsModal(false)}>Close</Button>
+              <div className="flex justify-end space-x-2 pt-6 border-t border-white/10">
+                <Button variant="ghost" onClick={() => setShowEventDetailsModal(false)} className="font-semibold">Close</Button>
                 {(selectedEvent.maxParticipants > 1 || selectedEvent.maxTeamSize > 1) && (
-                  <Button onClick={() => { setShowEventDetailsModal(false); handleFindTeam(selectedEvent); }} className="bg-gradient-to-r from-blue-600 to-purple-600">🔍 Find Team</Button>
+                  <Button 
+                    onClick={() => { setShowEventDetailsModal(false); handleFindTeam(selectedEvent); }} 
+                    variant="default"
+                    className="font-semibold"
+                  >
+                    🔍 Find Team
+                  </Button>
                 )}
               </div>
             </div>
@@ -641,30 +697,88 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
 
       {/* Create Event Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 rounded-2xl shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card variant="glass" className="max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 shadow-2xl">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-bold">Create New Event</h3>
-              <Button variant="ghost" size="icon" onClick={() => setShowCreateModal(false)} className="rounded-full">✕</Button>
+              <h3 className="text-2xl font-bold tracking-tight text-foreground">Create New Event</h3>
+              <Button variant="ghost" size="icon" onClick={() => setShowCreateModal(false)} className="rounded-full text-muted-foreground hover:text-foreground hover:bg-white/10">✕</Button>
             </div>
             <div className="space-y-6">
-              <div><label className="block text-sm font-medium mb-1">Event Title *</label><Input value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} /></div>
-              <div><label className="block text-sm font-medium mb-2">Event Category *</label><div className="grid grid-cols-5 gap-2">{categoryOptions.map(cat => (<button key={cat.id} onClick={() => setNewEvent({ ...newEvent, category: cat.id })} className={`p-2 border rounded-lg flex flex-col items-center justify-center transition-colors ${newEvent.category === cat.id ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-muted'}`}><span className="text-2xl mb-1">{cat.icon}</span><span className="text-xs font-medium">{cat.label}</span></button>))}</div></div>
               <div>
-                <label className="block text-sm font-medium mb-1">Event Start Date & Time *</label>
+                <label className="block text-sm font-semibold mb-2 text-foreground tracking-wide">Event Title *</label>
+                <Input 
+                  value={newEvent.title} 
+                  onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} 
+                  className="bg-white/8 border-white/15 text-foreground placeholder:text-muted-foreground/50"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold mb-3 text-foreground tracking-wide">Event Category *</label>
+                <div className="grid grid-cols-5 gap-2">
+                  {categoryOptions.map(cat => (
+                    <button 
+                      key={cat.id} 
+                      onClick={() => setNewEvent({ ...newEvent, category: cat.id })} 
+                      className={`p-3 border rounded-lg flex flex-col items-center justify-center transition-all duration-500 ${newEvent.category === cat.id 
+                        ? 'bg-primary/20 text-primary-solid border-primary/40 shadow-md shadow-primary/20' 
+                        : 'bg-white/5 border-white/15 hover:bg-white/10 hover:border-white/25'
+                      }`}
+                    >
+                      <span className="text-2xl mb-1">{cat.icon}</span>
+                      <span className="text-xs font-semibold text-foreground">{cat.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-foreground tracking-wide">Event Start Date & Time *</label>
                 <Input
                   type="datetime-local"
                   value={newEvent.dateTime}
                   onChange={(e) => setNewEvent({ ...newEvent, dateTime: e.target.value })}
+                  className="bg-white/8 border-white/15 text-foreground"
                 />
               </div>
-              <div><label className="block text-sm font-medium mb-1">Description *</label><Textarea value={newEvent.description} onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })} /></div>
+              
               <div>
-                <label className="block text-sm font-medium mb-1">Required Skills</label>
-                <div className="flex flex-wrap gap-2 my-2">{newEvent.requiredSkills.map(skill => <Badge key={skill} variant="outline" className="cursor-pointer" onClick={() => removeEventSkill(skill)}>{skill} ✕</Badge>)}</div>
-                <div className="flex space-x-2"><Input placeholder="Add a skill..." value={newEvent.newSkill} onChange={(e) => setNewEvent({ ...newEvent, newSkill: e.target.value })} onKeyDown={e => e.key === 'Enter' && addEventSkill()} /><Button variant="outline" onClick={addEventSkill}>Add</Button></div>
+                <label className="block text-sm font-semibold mb-2 text-foreground tracking-wide">Description *</label>
+                <Textarea 
+                  value={newEvent.description} 
+                  onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })} 
+                  className="bg-white/8 border-white/15 text-foreground placeholder:text-muted-foreground/50 min-h-24"
+                />
               </div>
-              <div><label className="block text-sm font-medium mb-1">Max Team Size *</label>
+              
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-foreground tracking-wide">Required Skills</label>
+                <div className="flex flex-wrap gap-2 my-3">
+                  {newEvent.requiredSkills.map(skill => (
+                    <Badge 
+                      key={skill} 
+                      variant="outline" 
+                      className="cursor-pointer bg-primary/20 border-primary/40 text-foreground" 
+                      onClick={() => removeEventSkill(skill)}
+                    >
+                      {skill} ✕
+                    </Badge>
+                  ))}
+                </div>
+                <div className="flex space-x-2">
+                  <Input 
+                    placeholder="Add a skill..." 
+                    value={newEvent.newSkill} 
+                    onChange={(e) => setNewEvent({ ...newEvent, newSkill: e.target.value })} 
+                    onKeyDown={e => e.key === 'Enter' && addEventSkill()} 
+                    className="bg-white/8 border-white/15 text-foreground placeholder:text-muted-foreground/50"
+                  />
+                  <Button variant="outline" onClick={addEventSkill} className="font-semibold">Add</Button>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-foreground tracking-wide">Max Team Size *</label>
                 <style>{`
                   input[type=number]::-webkit-inner-spin-button,
                   input[type=number]::-webkit-outer-spin-button {
@@ -680,12 +794,10 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
                   placeholder="e.g., 4"
                   value={newEvent.maxTeamSize}
                   onChange={(e) => {
-                    // FIX 4: Allow free typing while focused - no auto-correction
                     const value = e.target.value;
                     setNewEvent({ ...newEvent, maxTeamSize: value });
                   }}
                   onBlur={(e) => {
-                    // FIX 4: Validate only when user leaves the field (onBlur)
                     const value = e.target.value;
                     if (value && Number(value) >= 1) {
                       setTeamSizeError('');
@@ -693,9 +805,9 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
                       setTeamSizeError('Max Team Size must be at least 1');
                     }
                   }}
-                  className={teamSizeError ? 'border-red-500' : ''}
+                  className={`bg-white/8 border-white/15 text-foreground placeholder:text-muted-foreground/50 ${teamSizeError ? 'border-red-500/50 bg-red-400/5' : ''}`}
                 />
-                {teamSizeError && <p className="text-red-500 text-sm mt-1">{teamSizeError}</p>}
+                {teamSizeError && <p className="text-amber-400 text-sm mt-1 font-medium">{teamSizeError}</p>}
               </div>
 
               {/* ✅ NEW: Max Teams Limit - Only show for team events (maxTeamSize > 1) */}

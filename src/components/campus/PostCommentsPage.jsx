@@ -57,18 +57,18 @@ export default function PostCommentsPage({ user }) {
     const hubName = isGlobalPost ? 'Global Hub' : 'Campus Hub'
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <Button variant="ghost" onClick={handleBack}>← Back</Button>
-                <div className="text-lg font-semibold">Replies for this post</div>
+        <div className="space-y-8 py-4">
+            <div className="flex items-center justify-between px-2">
+                <Button variant="ghost" onClick={handleBack} className="font-semibold text-muted-foreground hover:text-foreground">← Back to Feed</Button>
+                <div className="text-lg font-semibold text-foreground tracking-tight">Replies & Discussion</div>
                 <div />
             </div>
 
-            <Card className="bg-slate-800/20 border-slate-700 text-white">
-                <CardContent className="p-6">
-                    <div className="mb-2 font-semibold">{post.title}</div>
-                    {post.content && <div className="text-slate-300 mb-3">{post.content}</div>}
-                    <div className="text-sm text-slate-400">{new Date(post.createdAt).toLocaleString()}</div>
+            <Card variant="glass" className="shadow-md">
+                <CardContent className="p-8">
+                    <div className="mb-3 font-bold text-lg text-foreground tracking-tight leading-snug">{post.title}</div>
+                    {post.content && <div className="text-muted-foreground/80 mb-4 text-sm leading-relaxed">{post.content}</div>}
+                    <div className="text-xs text-muted-foreground/60 font-medium">{new Date(post.createdAt).toLocaleString()}</div>
                 </CardContent>
             </Card>
 

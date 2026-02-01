@@ -10,6 +10,7 @@ export default function CollabPodInput({
 }) {
     const [input, setInput] = useState("");
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
     const fileInputRef = useRef(null);
     const imageInputRef = useRef(null);
     const emojiPickerRef = useRef(null);
@@ -34,7 +35,7 @@ export default function CollabPodInput({
         // Clear file input to prevent double-trigger
         if (imageInputRef.current) imageInputRef.current.value = '';
         if (fileInputRef.current) fileInputRef.current.value = '';
-        document.getElementById('attachmentMenu')?.classList.add('hidden');
+        setShowAttachmentMenu(false);
         document.querySelector('input[placeholder="Type a message..."]')?.focus();
     };
 
@@ -65,10 +66,10 @@ export default function CollabPodInput({
     );
 
     return (
-        <div className="bg-slate-900 border-t border-slate-700">
+        <div className="backdrop-blur-xl bg-cyan-950/20 border-t border-cyan-400/20 shadow-lg shadow-cyan-400/5">
             {/* Attachment Preview */}
             {attachment && (
-                <div className="px-3 py-2 bg-slate-800 border-b border-slate-700 flex items-center gap-2">
+                <div className="px-3 py-2 backdrop-blur-xl bg-cyan-400/10 border-b border-cyan-400/20 flex items-center gap-2">
                     {attachment.type === 'IMAGE' && (
                         <img
                             src={attachment.previewUrl}
@@ -86,9 +87,9 @@ export default function CollabPodInput({
                     )}
                     <div className="flex-1 min-w-0">
                         <p className="text-sm text-white truncate font-medium">{attachment.name}</p>
-                        <p className="text-xs text-slate-400">{attachment.type === "IMAGE" ? "Image" : "File"} ready to send</p>
+                        <p className="text-xs text-muted-foreground/70">{attachment.type === "IMAGE" ? "Image" : "File"} ready to send</p>
                     </div>
-                    <button onClick={() => onAttachmentRemove()} className="flex-shrink-0 text-slate-400 hover:text-white">
+                    <button onClick={() => onAttachmentRemove()} className="flex-shrink-0 text-muted-foreground/70 hover:text-cyan-300 transition-colors">
                         <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                     </button>
                 </div>
@@ -96,16 +97,16 @@ export default function CollabPodInput({
 
             {/* Input Area */}
             <form onSubmit={handleSend} className="px-3 py-3 flex items-center gap-2">
-                <Button variant="ghost" size="icon" type="button" className="flex-shrink-0 text-cyan-400 hover:bg-slate-800" title="Attachments" onClick={() => document.getElementById('attachmentMenu').classList.toggle('hidden')}>
+                <Button variant="ghost" size="icon" type="button" className="flex-shrink-0 text-cyan-400 hover:bg-cyan-400/10" title="Attachments" onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}>
                     <PlusIcon />
                 </Button>
                 <div className="relative">
-                    <Button variant="ghost" size="icon" type="button" className="flex-shrink-0 text-cyan-400 hover:bg-slate-800" title="Emoji" onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+                    <Button variant="ghost" size="icon" type="button" className="flex-shrink-0 text-cyan-400 hover:bg-cyan-400/10" title="Emoji" onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
                         <EmojiIcon />
                     </Button>
                     {/* Emoji Picker Dropdown */}
                     {showEmojiPicker && (
-                        <div ref={emojiPickerRef} className="absolute bottom-12 left-0 bg-slate-800 border border-slate-700 rounded-lg p-2 grid grid-cols-6 gap-1 z-50 w-48 max-h-60 overflow-y-auto shadow-lg">
+                        <div ref={emojiPickerRef} className="absolute bottom-12 left-0 backdrop-blur-xl bg-cyan-950/30 border border-cyan-400/30 rounded-lg p-2 grid grid-cols-6 gap-1 z-50 w-48 max-h-60 overflow-y-auto shadow-lg shadow-cyan-400/10">
                             {['😀', '😂', '❤️', '🔥', '👍', '😍', '🎉', '😎', '👏', '💯', '✨', '🚀', '😴', '😤', '😱', '🤔', '😌', '🙏'].map((emoji, idx) => (
                                 <button
                                     key={idx}
@@ -115,7 +116,7 @@ export default function CollabPodInput({
                                         setShowEmojiPicker(false);
                                         document.querySelector('input[placeholder="Type a message..."]')?.focus();
                                     }}
-                                    className="text-xl hover:bg-slate-700 p-1 rounded transition cursor-pointer"
+                                    className="text-xl hover:bg-cyan-400/10 p-1 rounded transition cursor-pointer"
                                 >
                                     {emoji}
                                 </button>
@@ -125,9 +126,9 @@ export default function CollabPodInput({
                 </div>
 
                 {/* INPUT WRAPPER: flex-1 ensures it stretches */}
-                <div className="flex-1 bg-slate-800 rounded-full px-4 py-2 flex items-center min-h-[44px]">
+                <div className="flex-1 backdrop-blur-xl bg-cyan-950/20 border border-cyan-400/30 rounded-lg px-4 py-2 flex items-center min-h-[44px]">
                     <input
-                        className="w-full bg-transparent outline-none text-white placeholder-slate-400 border-none focus:ring-0 focus:outline-none"
+                        className="w-full bg-transparent outline-none text-white placeholder-muted-foreground/60 border-none focus:ring-0 focus:outline-none"
                         type="text"
                         placeholder="Type a message..."
                         value={input}
@@ -144,11 +145,12 @@ export default function CollabPodInput({
             </form>
 
             {/* Attachment Menu */}
-            <div id="attachmentMenu" className="hidden bg-slate-800 border-t border-slate-700 px-3 py-2 flex gap-3">
+            {showAttachmentMenu && (
+            <div className="backdrop-blur-xl bg-cyan-950/20 border-t border-cyan-400/20 px-3 py-2 flex gap-3">
                 <button
                     type="button"
                     onClick={() => imageInputRef.current?.click()}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-sm text-white transition"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg backdrop-blur-xl bg-cyan-400/15 hover:bg-cyan-400/25 text-sm text-white transition border border-cyan-400/30"
                 >
                     <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" fill="none" /><circle cx="9" cy="9" r="1.5" fill="currentColor" /><path d="M21 15l-5-5-5 5" stroke="currentColor" strokeWidth="2" fill="none" /></svg>
                     Photos & Videos
@@ -156,12 +158,13 @@ export default function CollabPodInput({
                 <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-sm text-white transition"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg backdrop-blur-xl bg-cyan-400/15 hover:bg-cyan-400/25 text-sm text-white transition border border-cyan-400/30"
                 >
                     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><polyline points="13 2 13 9 20 9" /></svg>
                     Document
                 </button>
             </div>
+            )}
 
             {/* Hidden File Inputs */}
             <input
