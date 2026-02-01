@@ -581,17 +581,13 @@ export default forwardRef(function InterFeed({ user }, ref) {
                   {post.type === 'POLL' ? (
                     <div className="text-slate-400">Total votes: {post.pollOptions?.reduce((s, o) => s + (o.votes?.length || 0), 0)}</div>
                   ) : (
-                    <div className="flex items-center space-x-6 text-slate-400">
-                      <button className="flex items-center gap-2 hover:text-white"><span>👍</span>{post.likes?.length || 0}</button>
-                      <button onClick={() => navigate(`/post/${post.id}/comments`, { state: { from: '/campus', sourceView: 'inter', sourceContext: 'inter-feed' } })} className="flex items-center gap-2 hover:text-white"><span>💬</span>{post.commentIds?.length || 0}</button>
-                      <button className="flex items-center gap-2 hover:text-white"><span>🔗</span>Share</button>
-                    </div>
+                    <div />
                   )}
 
                   {post.type === 'POLL' ? (
                     <div />
                   ) : (
-                    <Button variant="outline" size="sm" className="bg-slate-700/50 border-slate-600 hover:bg-slate-700">Reply</Button>
+                    <Button onClick={() => navigate(`/post/${post.id}/comments`, { state: { from: '/campus', sourceView: 'inter', sourceContext: 'inter-feed' } })} variant="outline" size="sm" className="bg-slate-700/50 border-slate-600 hover:bg-slate-700">Reply</Button>
                   )}
                 </div>
               </CardContent>
