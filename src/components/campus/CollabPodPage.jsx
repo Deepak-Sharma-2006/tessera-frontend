@@ -617,12 +617,12 @@ export default function CollabPodPage({ user, podId: propPodId, onBack }) {
                 isOpen={showTransferDialog}
                 podId={podId}
                 currentOwnerId={userId}
-                members={pod?.memberIds?.map((id, idx) => ({ id, fullName: pod?.memberNames?.[idx] || id, name: pod?.memberNames?.[idx] || id, email: '' })) || []}
-                admins={pod?.adminIds?.map((id, idx) => ({ id, fullName: pod?.adminNames?.[idx] || id, name: pod?.adminNames?.[idx] || id, email: '' })) || []}
+                members={pod?.memberIds?.map((id, idx) => ({ id, fullName: pod?.memberNames?.[idx] || id, name: pod?.memberNames?.[idx] || id, email: pod?.memberEmails?.[idx] || '' })) || []}
+                admins={pod?.adminIds?.map((id, idx) => ({ id, fullName: pod?.adminNames?.[idx] || id, name: pod?.adminNames?.[idx] || id, email: pod?.adminEmails?.[idx] || '' })) || []}
                 onClose={() => setShowTransferDialog(false)}
                 onSuccess={handleTransferSuccess}
             />
-            {/* ✅ Transfer Ownership Dialog - Also renders for COLLAB pods (same component) */}
+            {/* ✅ Transfer Ownership Dialog */}
         </div>
     );
 }

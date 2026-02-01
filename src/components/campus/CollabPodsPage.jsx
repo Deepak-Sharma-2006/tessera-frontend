@@ -138,7 +138,10 @@ export default function CollabPodsPage({ user, onEnterCollabPod, onRefreshPosts 
                         // ✅ FIXED: Allow delete if user is CREATOR OR current OWNER
                         // This preserves delete access for creators who haven't transferred ownership
                         // AND allows new owners to delete after ownership transfer
-                        const isOwner = pod.ownerId === user?.id || pod.creatorId === user?.id;
+                        // ✅ FIXED: Only the current owner can delete, not the creator
+                        // After ownership transfer, new owner gains delete access
+                        // Creator becomes member and loses delete access
+                        const isOwner = pod.ownerId === user?.id;
                         console.log(`Pod Creator: ${pod.creatorId} | Pod Owner: ${pod.ownerId} | Me: ${user?.id} | Can Delete: ${isOwner}`);
 
                         return (

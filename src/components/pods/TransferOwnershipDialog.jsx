@@ -118,7 +118,7 @@ export default function TransferOwnershipDialog({ isOpen, podId, currentOwnerId,
                                         {user.fullName || user.name || user.id}
                                     </p>
                                     <p className="text-xs text-slate-400">
-                                        {user.email || 'No email'}
+                                        {user.email && user.email.trim() ? user.email : `ID: ${user.id}`}
                                     </p>
                                 </div>
                             </label>

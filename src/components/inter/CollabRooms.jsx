@@ -73,12 +73,11 @@ export default function CollabRooms({ user, onNavigateToRoom, onEnterCollabRoom,
 
     // Filter by tab (ACTIVE or JOINED)
     if (activeTab === 'JOINED') {
-      // ✅ FIXED: Show rooms user is member of, OR rooms they created/own
-      // Previously only showed memberIds, missing owned rooms
-      filtered = filtered.filter(room => 
-        room.memberIds.includes(currentUserId) || 
-        room.ownerId === currentUserId || 
-        room.creatorId === currentUserId
+      // ✅ FIXED: Show rooms user is member of OR rooms they own
+      // Does NOT include creatorId because creator becomes member after transfer
+      filtered = filtered.filter(room =>
+        room.memberIds.includes(currentUserId) ||
+        room.ownerId === currentUserId
       )
     } else {
       // ACTIVE tab shows all rooms
@@ -121,10 +120,10 @@ export default function CollabRooms({ user, onNavigateToRoom, onEnterCollabRoom,
   }
 
   const isRoomOwner = (room) => {
-    // ✅ FIXED: Allow delete if user is CREATOR OR current OWNER
-    // This preserves delete access for creators who haven't transferred ownership
-    // AND allows new owners to delete after ownership transfer
-    return room.ownerId === currentUserId || room.creatorId === currentUserId
+    // ✅ FIXED: Only the current owner can delete, not the creator
+    // After ownership transfer, new owner gains delete access
+    // Creator becomes member and loses delete access
+    return room.ownerId === currentUserId
   }
 
   const isRoomMember = (room) => {
@@ -202,7 +201,7 @@ export default function CollabRooms({ user, onNavigateToRoom, onEnterCollabRoom,
             ? 'bg-slate-900/40 text-cyan-300'
             : 'bg-slate-800 text-slate-400'
             }`}>
-            {rooms.filter(r => r.memberIds.includes(currentUserId)).length}
+            {rooms.filter(r => r.memberIds.includes(currentUserId) || r.ownerId === currentUserId).length}
           </span>
         </button>
       </div>
