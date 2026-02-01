@@ -5,23 +5,23 @@ import { Card } from "@/components/ui/card.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
 import { Input } from "@/components/ui/input.jsx";
-import api, { 
-  getUserConversations, 
-  getMessages, 
-  sendMessage, 
+import api, {
+  getUserConversations,
+  getMessages,
+  sendMessage,
   sendCollabInvite,
   getPendingInvites,
-  respondToInvite 
+  respondToInvite
 } from '@/lib/api.js';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-const WS_URL = BASE_URL.replace(/^http/, 'ws') + '/ws-studcollab';
+const WS_URL = `${BASE_URL}/ws-studcollab`;
 
 // Hook to fetch conversations for a user
 function useConversations(userId) {
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   useEffect(() => {
     if (!userId) return;
     setLoading(true);
@@ -30,7 +30,7 @@ function useConversations(userId) {
       .catch(err => console.error("Failed to fetch conversations:", err))
       .finally(() => setLoading(false));
   }, [userId]);
-  
+
   return [conversations, setConversations, loading];
 }
 
@@ -38,7 +38,7 @@ function useConversations(userId) {
 function useMessages(conversationId) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   useEffect(() => {
     if (!conversationId) return;
     setLoading(true);
@@ -47,7 +47,7 @@ function useMessages(conversationId) {
       .catch(err => console.error("Failed to fetch messages:", err))
       .finally(() => setLoading(false));
   }, [conversationId]);
-  
+
   return [messages, setMessages, loading];
 }
 
@@ -67,7 +67,7 @@ export default function InterChat({ user }) {
   useEffect(() => {
     const sock = new SockJS(WS_URL);
     const stomp = over(sock);
-    
+
     stomp.connect({}, () => {
       console.log("WebSocket connected");
       setStompClient(stomp);
@@ -76,7 +76,7 @@ export default function InterChat({ user }) {
       console.error("WebSocket connection error:", error);
       setIsConnected(false);
     });
-    
+
     return () => {
       if (stomp.connected) {
         stomp.disconnect(() => {
@@ -90,7 +90,7 @@ export default function InterChat({ user }) {
   // Subscribe to selected conversation
   useEffect(() => {
     if (!stompClient?.connected || !selected) return;
-    
+
     const sub = stompClient.subscribe(
       `/topic/conversation.${selected.id}`,
       msg => {
@@ -103,7 +103,7 @@ export default function InterChat({ user }) {
         }
       }
     );
-    
+
     return () => sub.unsubscribe();
   }, [stompClient, selected, setMessages]);
 
@@ -126,7 +126,7 @@ export default function InterChat({ user }) {
       text: input,
       attachmentUrls: attachments.length > 0 ? attachments : null,
     };
-    
+
     try {
       stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(msg));
       setInput("");
@@ -163,11 +163,10 @@ export default function InterChat({ user }) {
                 <button
                   key={conv.id}
                   onClick={() => setSelected(conv)}
-                  className={`w-full p-3 rounded-lg text-left transition-colors ${
-                    selected?.id === conv.id
+                  className={`w-full p-3 rounded-lg text-left transition-colors ${selected?.id === conv.id
                       ? 'bg-primary/10 border-2 border-primary/20'
                       : 'hover:bg-muted/50 border-2 border-transparent'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-full flex items-center justify-center font-bold">
@@ -223,9 +222,8 @@ export default function InterChat({ user }) {
                       key={msg.id}
                       className={`flex ${msg.senderId === userId ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div className={`max-w-[70%] p-3 rounded-lg ${
-                        msg.senderId === userId ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                      }`}>
+                      <div className={`max-w-[70%] p-3 rounded-lg ${msg.senderId === userId ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                        }`}>
                         <p className="text-sm">{msg.text}</p>
                         {msg.attachmentUrls && msg.attachmentUrls.length > 0 && (
                           <div className="mt-2 flex gap-2">
@@ -236,9 +234,8 @@ export default function InterChat({ user }) {
                             ))}
                           </div>
                         )}
-                        <div className={`text-xs mt-1 ${
-                          msg.senderId === userId ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                        }`}>
+                        <div className={`text-xs mt-1 ${msg.senderId === userId ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                          }`}>
                           {new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
