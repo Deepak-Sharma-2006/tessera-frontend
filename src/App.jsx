@@ -63,6 +63,7 @@ const ProfileSetupHandler = ({ setAppUser, setInitialLoginFlowState }) => {
 const AuthenticatedApp = ({ user, setUser }) => {
   const [currentView, setCurrentView] = useState('campus');
   const [viewContext, setViewContext] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const isFirstMount = useRef(true);
 
@@ -172,13 +173,13 @@ const AuthenticatedApp = ({ user, setUser }) => {
 
   return (
     <>
-      <Navigation user={user} setUser={setUser} currentView={currentView} onViewChange={handleViewChange} />
+      <Navigation user={user} setUser={setUser} currentView={currentView} onViewChange={handleViewChange} unreadCount={unreadCount} />
       <main className="pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {currentView === 'campus' && <CampusHub user={user} eventId={viewContext?.eventId} initialView={viewContext?.initialView || 'overview'} activeFilter={viewContext?.activeFilter} />}
           {currentView === 'events' && <EventsHub user={user} onNavigateToBeacon={handleNavigateToBeacon} />}
           {currentView === 'inter' && <InterHub user={user} initialView={viewContext?.initialView || 'feed'} />}
-          {currentView === 'inbox' && <InboxPage user={user} />}
+          {currentView === 'inbox' && <InboxPage user={user} onUnreadCountChange={setUnreadCount} />}
           {currentView === 'badges' && <BadgeCenter user={user} setUser={setUser} />}
           {currentView === 'profile' && <ProfilePage user={user} />}
           {currentView === 'buddybeacon' && <BuddyBeacon eventId={viewContext?.eventId} />}

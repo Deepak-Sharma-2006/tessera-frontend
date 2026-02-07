@@ -3,11 +3,19 @@ import { Button } from '@/components/ui/button.jsx'
 import { Avatar } from '@/components/ui/avatar.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
 
-export default function Navigation({ currentView, onViewChange, user }) {
+export default function Navigation({ currentView, onViewChange, user, unreadCount = 0 }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [hoveredItem, setHoveredItem] = useState(null)
   const profileMenuRef = useRef(null)
+  
+  // ✅ TEMPORARY: Hardcode for testing
+  const testUnreadCount = 5;
+  
+  // ✅ DEBUG: Log unreadCount to verify it's being passed
+  useEffect(() => {
+    console.log('🔔 Navigation received unreadCount:', unreadCount);
+  }, [unreadCount]);
 
   const navItems = [
     {
@@ -70,7 +78,7 @@ export default function Navigation({ currentView, onViewChange, user }) {
 
     // Cyber Neon Theme - Professional Sober-Neon aesthetic
     return `
-      group relative flex items-center space-x-2 px-6 py-2.5 rounded-lg transition-all duration-500 cursor-pointer overflow-hidden backdrop-blur-xl border font-semibold text-sm tracking-wide
+      group relative flex items-center space-x-2 px-6 py-2.5 rounded-lg transition-all duration-500 cursor-pointer overflow-visible backdrop-blur-xl border font-semibold text-sm tracking-wide
       ${isActive
         ? 'bg-cyan-400/20 text-cyan-300 border-cyan-400/40 shadow-lg shadow-cyan-400/20'
         : 'bg-white/8 text-foreground/70 border-white/15 hover:bg-cyan-400/10 hover:text-cyan-300 hover:border-cyan-400/30 hover:shadow-md'
@@ -128,7 +136,7 @@ export default function Navigation({ currentView, onViewChange, user }) {
                 {navItems.map((item, index) => (
                   <div
                     key={item.id}
-                    className="relative group"
+                    className="relative group overflow-visible"
                     onMouseEnter={() => setHoveredItem(item.id)}
                     onMouseLeave={() => setHoveredItem(null)}
                   >
@@ -146,6 +154,13 @@ export default function Navigation({ currentView, onViewChange, user }) {
                       <span className="font-semibold relative z-10 text-sm tracking-wide">
                         {item.label}
                       </span>
+
+                      {/* Red dot badge for unread Inbox notifications */}
+                      {item.id === 'inbox' && testUnreadCount > 0 && (
+                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full animate-pulse shadow-2xl shadow-red-500 flex items-center justify-center z-50 border-2 border-white">
+                          <span className="text-white text-xs font-bold">{testUnreadCount > 9 ? '9+' : testUnreadCount}</span>
+                        </div>
+                      )}
 
                       {/* Active indicator */}
                       {currentView === item.id && (
@@ -347,7 +362,12 @@ export default function Navigation({ currentView, onViewChange, user }) {
                       {item.description}
                     </div>
                   </div>
-                  {currentView === item.id && (
+                  {item.id === 'inbox' && testUnreadCount > 0 && (
+                    <div className="w-6 h-6 bg-red-500 rounded-full animate-pulse shadow-2xl shadow-red-500 flex items-center justify-center relative z-50 border-2 border-white">
+                      <span className="text-white text-xs font-bold">{testUnreadCount > 9 ? '9+' : testUnreadCount}</span>
+                    </div>
+                  )}
+                  {currentView === item.id && item.id !== 'inbox' && (
                     <div className="text-xl animate-bounce relative z-10">
                       ✨
                     </div>

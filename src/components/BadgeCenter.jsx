@@ -4,6 +4,9 @@ import { Button } from './ui/button.jsx'
 import { Badge } from './ui/badge.jsx'
 import { Avatar } from './ui/avatar.jsx'
 import axios from 'axios'
+import api from '@/lib/api.js'
+import SockJS from 'sockjs-client'
+import * as Stomp from '@stomp/stompjs'
 
 const powerFiveBadges = [
   { id: 'founding-dev', name: 'Founding Dev', icon: '💻', tier: 'Legendary', color: 'from-yellow-500 to-orange-600', description: 'System Architect', progress: { current: 0, total: 1 }, isUnlocked: false, isActive: false, perks: ['Developer access'] },
@@ -259,6 +262,9 @@ const penaltyBadges = [
 export default function BadgeCenter({ user, setUser }) {
   const [activeTab, setActiveTab] = useState('all')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [selectedBadge, setSelectedBadge] = useState(null)
+  const [showFeaturedBadgeModal, setShowFeaturedBadgeModal] = useState(false)
+  const [featuredBadgesLoading, setFeaturedBadgesLoading] = useState(false)
 
   // ✅ Sync badges on mount to ensure isDev and role flags unlock badges immediately
   useEffect(() => {
@@ -274,7 +280,61 @@ export default function BadgeCenter({ user, setUser }) {
         .catch(err => console.log('Badge sync completed or error:', err.message))
     }
   }, [user?._id, setUser])
-  const [selectedBadge, setSelectedBadge] = useState(null)
+
+  // ✅ WebSocket listener for real-time badge unlocks
+  useEffect(() => {
+    if (!user?._id) return;
+
+    try {
+      const socket = new SockJS('http://localhost:8080/ws');
+      const stompClient = new Stomp.Client({
+        webSocketFactory: () => socket,
+        debug: (str) => console.log('[STOMP Debug]', str),
+        onConnect: () => {
+          console.log('✓ WebSocket connected');
+          
+          // Subscribe to badge unlock messages
+          stompClient.subscribe(
+            `/user/${user._id}/queue/badge-unlock`,
+            (message) => {
+              try {
+                const badgeUnlock = JSON.parse(message.body);
+                console.log('🎉 Badge unlocked via WebSocket:', badgeUnlock);
+                
+                // Update user state with new badge
+                setUser(prevUser => {
+                  if (prevUser.badges && !prevUser.badges.includes(badgeUnlock.badgeName)) {
+                    return {
+                      ...prevUser,
+                      badges: [...prevUser.badges, badgeUnlock.badgeName]
+                    };
+                  }
+                  return prevUser;
+                });
+              } catch (err) {
+                console.error('Error parsing badge unlock message:', err);
+              }
+            }
+          );
+          
+          console.log('✓ WebSocket badge unlock listener subscribed to /user/' + user._id + '/queue/badge-unlock');
+        },
+        onStompError: (frame) => {
+          console.warn('⚠️ STOMP error:', frame);
+        }
+      });
+
+      stompClient.activate();
+
+      return () => {
+        if (stompClient && stompClient.isActive) {
+          stompClient.deactivate();
+        }
+      };
+    } catch (err) {
+      console.warn('WebSocket setup failed:', err.message);
+    }
+  }, [user?._id, setUser])
 
   // ✅ STRICT DATA-DRIVEN BADGE UNLOCK LOGIC (100% from MongoDB Atlas)
   // Update Power Five badges with dynamic unlock status based on REAL user.badges array only
@@ -391,7 +451,14 @@ export default function BadgeCenter({ user, setUser }) {
   }
 
   const getActiveBadges = () => {
-    const regularBadges = allBadges.filter(badge => badge.isActive && badge.isUnlocked)
+    // ✅ SYNC WITH SERVER: Check user.featuredBadges from server, not just isActive flag
+    const featuredBadgeIds = user?.featuredBadges || []
+    
+    // Get badges that are featured according to server
+    const featuredBadges = allBadges.filter(badge => 
+      featuredBadgeIds.some(id => id.toLowerCase() === badge.id.toLowerCase() || id.toLowerCase() === badge.name.toLowerCase())
+    )
+    
     const specialBadges = []
     
     // Always include moderator badge if user has it
@@ -409,9 +476,8 @@ export default function BadgeCenter({ user, setUser }) {
     const activePenaltyBadges = penaltyBadges.filter(badge => badge.isUnlocked && badge.isActive)
     specialBadges.push(...activePenaltyBadges)
     
-    // Combine: special badges + up to remaining slots of regular badges
-    const maxRegularBadges = Math.max(0, 3 - specialBadges.length)
-    return [...specialBadges, ...regularBadges.slice(0, maxRegularBadges)]
+    // Combine: special badges + featured badges
+    return [...specialBadges, ...featuredBadges]
   }
 
   const toggleBadgeActive = (badgeId) => {
@@ -449,6 +515,71 @@ export default function BadgeCenter({ user, setUser }) {
         }
       })
     })
+  }
+
+  const handleSelectFeaturedBadge = async (badge) => {
+    if (!badge.isUnlocked) {
+      alert('You can only feature unlocked badges')
+      return
+    }
+
+    const activeBadges = getActiveBadges()
+    if (activeBadges.length >= 2) {
+      alert('You can feature a maximum of 2 badges')
+      return
+    }
+
+    setFeaturedBadgesLoading(true)
+    try {
+      console.log('📤 Sending badge to feature:', { badgeId: badge.id, badgeName: badge.name })
+      const response = await api.put(
+        `/api/users/${user.id}/profile/featured-badges`,
+        { badgeId: badge.id }
+      )
+
+      console.log('✅ Feature badge successful:', response.data)
+      
+      // ✅ IMMEDIATE STATE UPDATE: Update badge and user state
+      badge.isActive = true
+      setUser(response.data)
+      setShowFeaturedBadgeModal(false)
+      
+      console.log('✅ Featured badges now:', response.data.featuredBadges)
+      alert('✓ Badge featured successfully!')
+    } catch (error) {
+      console.error('❌ Failed to feature badge:', error)
+      const errorMessage = error.response?.data || error.message || 'Unknown error'
+      console.error('Error details:', errorMessage)
+      alert('❌ Failed to feature badge: ' + errorMessage)
+    } finally {
+      setFeaturedBadgesLoading(false)
+    }
+  }
+
+  // Remove a badge from featured showcase
+  const handleRemoveFeaturedBadge = async (badgeId) => {
+    setFeaturedBadgesLoading(true)
+    try {
+      console.log('🗑️ Removing badge from featured:', badgeId)
+      const response = await api.delete(
+        `/api/users/${user.id}/profile/featured-badges/${badgeId}`
+      )
+
+      console.log('✅ Badge removed successfully:', response.data)
+      
+      // ✅ IMMEDIATE STATE UPDATE: Update user state with new featured badges list
+      setUser(response.data)
+      
+      console.log('✅ Featured badges now:', response.data.featuredBadges)
+      alert('✓ Badge removed from featured showcase!')
+    } catch (error) {
+      console.error('❌ Failed to remove badge:', error)
+      const errorMessage = error.response?.data || error.message || 'Unknown error'
+      console.error('Error details:', errorMessage)
+      alert('❌ Failed to remove badge: ' + errorMessage)
+    } finally {
+      setFeaturedBadgesLoading(false)
+    }
   }
 
   const getRemainingTime = (expiresAt) => {
@@ -495,12 +626,12 @@ export default function BadgeCenter({ user, setUser }) {
 
       {/* Active Badges Strip */}
       <div className="component-profile-badge-strip backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 via-deep-obsidian to-cyan-950/20 p-6 rounded-2xl border border-cyan-400/30 shadow-lg shadow-cyan-400/10">
-        <h3 className="font-semibold text-lg mb-4 text-center text-cyan-300">Featured Badges (Displayed on Profile)</h3>
+        <h3 className="font-semibold text-lg mb-4 text-center text-cyan-300">Featured Badges (Displayed on Public Profile)</h3>
         <div className="flex justify-center space-x-4">
           {getActiveBadges().map((badge) => (
             <div 
               key={badge.id} 
-              className={`flex flex-col items-center p-4 rounded-xl border-2 backdrop-blur-xl transition-all relative ${
+              className={`flex flex-col items-center p-4 rounded-xl border-2 backdrop-blur-xl transition-all relative group ${
                 badge.tier === 'Legendary' || badge.tier === 'Elite' ? 'border-cyan-400/50 bg-cyan-400/15 shadow-lg shadow-cyan-400/20' : 
                 badge.isPenaltyBadge ? 'border-magenta-400/50 bg-magenta-400/15 shadow-lg shadow-magenta-400/20' : 
                 badge.isModeratorBadge ? 'border-cyan-400/50 bg-cyan-400/15 shadow-lg shadow-cyan-400/20' :
@@ -512,6 +643,18 @@ export default function BadgeCenter({ user, setUser }) {
                 <div className="absolute -top-2 -right-2 w-5 h-5 bg-magenta-500 rounded-full flex items-center justify-center shadow-lg shadow-magenta-500/50">
                   <span className="text-white text-xs">🔒</span>
                 </div>
+              )}
+
+              {/* Remove Badge Button - Only for removable badges */}
+              {!badge.cannotBeHidden && !badge.isPenaltyBadge && !badge.isModeratorBadge && (
+                <button
+                  onClick={() => handleRemoveFeaturedBadge(badge.id)}
+                  className="absolute -top-3 -right-3 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-red-600"
+                  title="Remove from featured"
+                  disabled={featuredBadgesLoading}
+                >
+                  <span className="text-white text-sm font-bold">−</span>
+                </button>
               )}
               
               <div className={`text-3xl mb-2 ${badge.tier === 'Legendary' || badge.tier === 'Elite' ? 'animate-pulse' : ''} ${badge.isPenaltyBadge ? 'opacity-80' : ''}`}>
@@ -530,10 +673,13 @@ export default function BadgeCenter({ user, setUser }) {
               )}
             </div>
           ))}
-          {getActiveBadges().length < 3 && (
-            <div className="flex flex-col items-center p-4 rounded-xl border-2 border-dashed border-cyan-400/30 bg-cyan-950/10 backdrop-blur-xl">
-              <div className="text-3xl mb-2 text-cyan-400/60">➕</div>
-              <span className="text-sm text-cyan-300/70 text-center">Empty Slot</span>
+          {getActiveBadges().length < 2 && (
+            <div 
+              onClick={() => setShowFeaturedBadgeModal(true)}
+              className="flex flex-col items-center p-4 rounded-xl border-2 border-dashed border-cyan-400/30 bg-cyan-950/10 backdrop-blur-xl cursor-pointer hover:border-cyan-400/60 hover:bg-cyan-950/20 transition-all"
+            >
+              <div className="text-3xl mb-2 text-cyan-400/60 hover:text-cyan-400">➕</div>
+              <span className="text-sm text-cyan-300/70 text-center hover:text-cyan-300 transition-colors">Empty Slot</span>
             </div>
           )}
         </div>
@@ -579,21 +725,6 @@ export default function BadgeCenter({ user, setUser }) {
                     </div>
                   </div>
                 )}
-                
-                {/* Toggle active button for earned badges */}
-                {badge.isUnlocked && (
-                  <Button
-                    size="sm"
-                    variant={badge.isActive ? "default" : "outline"}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      toggleBadgeActive(badge.id)
-                    }}
-                    className="w-full"
-                  >
-                    {badge.isActive ? 'Featured' : 'Add to Profile'}
-                  </Button>
-                )}
               </div>
             </Card>
           ))}
@@ -629,6 +760,55 @@ export default function BadgeCenter({ user, setUser }) {
               <Button onClick={() => setSelectedBadge(null)} className="w-full">
                 Close
               </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Featured Badge Selection Modal */}
+      {showFeaturedBadgeModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <Card className="max-w-2xl w-full p-8 rounded-2xl shadow-2xl border-cyan-400/30">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-cyan-300">Select Badge to Feature</h2>
+                <button 
+                  onClick={() => setShowFeaturedBadgeModal(false)}
+                  className="text-gray-400 hover:text-gray-200 text-2xl"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <p className="text-sm text-gray-400">
+                Choose an unlocked badge to display on your public profile. (Max 2 slots)
+              </p>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                {earnedBadges
+                  .filter(badge => !badge.isActive) // Only show non-featured badges
+                  .map((badge) => (
+                    <div
+                      key={badge.id}
+                      onClick={() => handleSelectFeaturedBadge(badge)}
+                      className="p-4 rounded-lg border-2 border-cyan-400/30 bg-cyan-950/20 hover:bg-cyan-950/40 hover:border-cyan-400/60 cursor-pointer transition-all transform hover:scale-105"
+                    >
+                      <div className="flex flex-col items-center space-y-2">
+                        <div className="text-4xl">{badge.icon}</div>
+                        <h3 className="text-sm font-semibold text-center text-cyan-300">{badge.name}</h3>
+                        <Badge className={`${getTierColor(badge.tier)} text-xs`}>
+                          {getTierStars(badge.tier)}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+
+              {earnedBadges.filter(badge => !badge.isActive).length === 0 && (
+                <div className="text-center py-8 text-gray-400">
+                  <p>No more badges available to feature</p>
+                </div>
+              )}
             </div>
           </Card>
         </div>

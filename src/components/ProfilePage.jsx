@@ -189,13 +189,56 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
     }))
   }
 
+  // Badge icon mapping
   const badgeIcons = {
     'Skill Sage': '🧠',
     'Campus Catalyst': '📢',
-    'Pod Pioneer': '🚀',
+    'Pod Pioneer': '🌱',
     'Bridge Builder': '🌉',
     'Founding Dev': '💻',
-    'Profile Pioneer': '👤'
+    'Profile Pioneer': '👤',
+    'skill-sage': '🧠',
+    'campus-catalyst': '📢',
+    'pod-pioneer': '🌱',
+    'bridge-builder': '🌉',
+    'founding-dev': '💻',
+    'profile-pioneer': '👤'
+  }
+
+  // Badge metadata including tier and colors
+  const badgeMetadata = {
+    'founding-dev': { name: 'Founding Dev', icon: '💻', tier: 'Legendary', stars: '★★★★★' },
+    'campus-catalyst': { name: 'Campus Catalyst', icon: '📢', tier: 'Epic', stars: '★★★★' },
+    'pod-pioneer': { name: 'Pod Pioneer', icon: '🌱', tier: 'Common', stars: '★' },
+    'bridge-builder': { name: 'Bridge Builder', icon: '🌉', tier: 'Uncommon', stars: '★★' },
+    'skill-sage': { name: 'Skill Sage', icon: '🧠', tier: 'Rare', stars: '★★★' },
+    'Founding Dev': { name: 'Founding Dev', icon: '💻', tier: 'Legendary', stars: '★★★★★' },
+    'Campus Catalyst': { name: 'Campus Catalyst', icon: '📢', tier: 'Epic', stars: '★★★★' },
+    'Pod Pioneer': { name: 'Pod Pioneer', icon: '🌱', tier: 'Common', stars: '★' },
+    'Bridge Builder': { name: 'Bridge Builder', icon: '🌉', tier: 'Uncommon', stars: '★★' },
+    'Skill Sage': { name: 'Skill Sage', icon: '🧠', tier: 'Rare', stars: '★★★' }
+  }
+
+  // Get badge info by ID or name
+  const getBadgeInfo = (badgeIdOrName) => {
+    return badgeMetadata[badgeIdOrName] || {
+      name: badgeIdOrName || 'Unknown Badge',
+      icon: badgeIcons[badgeIdOrName] || '🏆',
+      tier: 'Common',
+      stars: '★'
+    }
+  }
+
+  // Get tier color for star badge
+  const getTierColor = (tier) => {
+    const colors = {
+      'Common': 'bg-gray-100 text-gray-600',
+      'Uncommon': 'bg-green-100 text-green-600',
+      'Rare': 'bg-blue-100 text-blue-600',
+      'Epic': 'bg-purple-100 text-purple-600',
+      'Legendary': 'bg-yellow-100 text-yellow-600'
+    }
+    return colors[tier] || 'bg-gray-100 text-gray-600'
   }
 
   // Loading check: prevent UI from showing hardcoded defaults while fetching data
@@ -243,29 +286,45 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                 </div>
               </div>
 
-              {/* Public Badges Section */}
-              {profileOwner?.displayedBadges && profileOwner.displayedBadges.length > 0 && (
+              {/* Public Featured Badges Section - Synced with Badge Center */}
+              {profileOwner?.featuredBadges && profileOwner.featuredBadges.length > 0 && (
                 <div>
-                  <h3 className="text-2xl font-bold text-cyan-300 mb-8">🏆 Featured Achievements</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                    {profileOwner.displayedBadges.map((badge, idx) => (
-                      <div key={idx} className="flex flex-col items-center group">
-                        <div className="w-24 h-24 bg-gradient-to-br from-cyan-400 to-cyan-300 rounded-3xl flex items-center justify-center text-5xl transition-all group-hover:scale-125 group-hover:shadow-2xl group-hover:shadow-cyan-400/50 border-2 border-cyan-400/60 shadow-lg">
-                          {badgeIcons[badge] || '🏅'}
+                  <h3 className="text-2xl font-bold text-cyan-300 mb-8">🏆 Featured Badges</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {profileOwner.featuredBadges.map((badgeId, idx) => {
+                      const badgeInfo = getBadgeInfo(badgeId)
+                      return (
+                        <div key={idx} className="flex flex-col items-center group">
+                          {/* Badge Icon Container - Neon Cyan Glow */}
+                          <div className="w-28 h-28 bg-gradient-to-br from-cyan-400 to-cyan-300 rounded-3xl flex items-center justify-center text-6xl transition-all group-hover:scale-110 group-hover:shadow-2xl group-hover:shadow-cyan-400/60 border-2 border-cyan-400/80 shadow-lg shadow-cyan-400/30">
+                            {badgeInfo.icon}
+                          </div>
+                          
+                          {/* Star Rating Badge - Matches Badge Center tier colors */}
+                          <div className={`mt-3 px-3 py-1 rounded-full text-xs font-bold ${getTierColor(badgeInfo.tier)}`}>
+                            {badgeInfo.stars}
+                          </div>
+                          
+                          {/* Badge Name - Consistent typography */}
+                          <span className="text-base mt-4 font-bold text-center max-w-32 text-cyan-200 group-hover:text-cyan-100 transition line-clamp-2">
+                            {badgeInfo.name}
+                          </span>
+                          
+                          {/* Tier Label - Additional metadata */}
+                          <span className="text-xs text-cyan-300/70 mt-1 font-semibold">
+                            {badgeInfo.tier}
+                          </span>
                         </div>
-                        <span className="text-sm mt-4 font-bold text-center max-w-24 text-cyan-200 group-hover:text-cyan-100 transition line-clamp-2">
-                          {badge}
-                        </span>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               )}
 
-              {(!profileOwner?.displayedBadges || profileOwner.displayedBadges.length === 0) && (
+              {(!profileOwner?.featuredBadges || profileOwner.featuredBadges.length === 0) && (
                 <div className="text-center py-16">
                   <p className="text-gray-400 text-lg">🎯 No featured badges yet</p>
-                  <p className="text-gray-500 text-sm mt-2">Earn badges by completing achievements and feature them on your profile!</p>
+                  <p className="text-gray-500 text-sm mt-2">Earn badges by completing achievements and feature them on your public profile!</p>
                 </div>
               )}
             </Card>

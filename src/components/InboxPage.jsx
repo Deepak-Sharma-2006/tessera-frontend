@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { fetchMyInbox, markInboxAsRead, deleteInboxItem, deleteInboxItemsBulk, clearInboxByType, clearAllInbox } from '@/lib/api.js';
 import { Button } from '@/components/ui/button.jsx';
 import LoadingSpinner from '@/components/animations/LoadingSpinner.jsx';
 import api from '@/lib/api.js';
+import SockJS from 'sockjs-client';
+import { over } from 'stompjs';
 
 /**
  * ✅ INBOX FEATURE: Main inbox page with filtering, selection, bulk delete, and PENDING INVITES
@@ -17,7 +19,7 @@ import api from '@/lib/api.js';
  * 
  * Stage 4 & 5 Frontend Implementation + Global Hub Integration
  */
-export default function InboxPage({ user }) {
+export default function InboxPage({ user, onUnreadCountChange }) {
     const [inboxItems, setInboxItems] = useState([]);
     const [pendingInvites, setPendingInvites] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -26,6 +28,11 @@ export default function InboxPage({ user }) {
     const [deleting, setDeleting] = useState(null);
     const [respondingTo, setRespondingTo] = useState(null);
     const [inviteInitiators, setInviteInitiators] = useState({}); // Map of inviteId -> initiatorName
+
+    // ✅ NEW: WebSocket state for real-time notifications
+    const stompClientRef = useRef(null);
+    const [isConnected, setIsConnected] = useState(false);
+    const [latestNotification, setLatestNotification] = useState(null);
 
     // Filter state
     const [selectedFilter, setSelectedFilter] = useState('all');
@@ -42,6 +49,22 @@ export default function InboxPage({ user }) {
     useEffect(() => {
         loadInbox();
         loadPendingInvites();
+        setupWebSocketNotifications(); // ✅ NEW
+        
+        // ✅ CRITICAL: Reset unread count when viewing Inbox
+        console.log('📬 InboxPage mounted - resetting unread count to 0');
+        if (onUnreadCountChange) {
+            onUnreadCountChange(0);
+        }
+    }, [onUnreadCountChange]);
+
+    // ✅ NEW: Cleanup WebSocket on unmount
+    useEffect(() => {
+        return () => {
+            if (stompClientRef.current?.connected) {
+                stompClientRef.current.disconnect();
+            }
+        };
     }, []);
 
     const loadInbox = async () => {
@@ -88,6 +111,99 @@ export default function InboxPage({ user }) {
             console.error('❌ Error loading pending invites:', err);
             // Don't fail the whole page if invites fail
             setPendingInvites([]);
+        }
+    };
+
+    /**
+     * ✅ NEW: Setup WebSocket subscription for real-time notifications
+     * 
+     * Listens to /user/{userId}/queue/notifications for:
+     * - Event notifications
+     * - Pod updates
+     * - Other real-time messages
+     */
+    const setupWebSocketNotifications = () => {
+        try {
+            const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+            const WS_URL = `${BASE_URL}/ws-studcollab`;
+
+            const sock = new SockJS(WS_URL);
+            const stomp = over(sock);
+
+            stomp.connect({}, () => {
+                console.log('✅ WebSocket connected for notifications');
+                setIsConnected(true);
+                stompClientRef.current = stomp;
+
+                // Subscribe to user-specific notification queue
+                const notificationTopic = `/user/${user.id}/queue/notifications`;
+                console.log('📡 Subscribing to:', notificationTopic);
+
+                stomp.subscribe(notificationTopic, (msg) => {
+                    try {
+                        const notification = JSON.parse(msg.body);
+                        console.log('📨 New notification received:', notification);
+
+                        // Handle event notification
+                        if (notification.notificationType === 'NEW_EVENT') {
+                            handleNewEventNotification(notification);
+                        }
+
+                        // Toast notification
+                        showNotificationToast(notification);
+
+                    } catch (e) {
+                        console.error('Failed to parse notification message:', e);
+                    }
+                });
+            }, (error) => {
+                console.error('❌ WebSocket connection failed:', error);
+                setIsConnected(false);
+            });
+        } catch (err) {
+            console.error('❌ WebSocket setup error:', err);
+        }
+    };
+
+    /**
+     * ✅ NEW: Handle event notification
+     * Reload inbox to show new event notification
+     */
+    const handleNewEventNotification = (notification) => {
+        // Show the red notification banner
+        setLatestNotification(notification);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => setLatestNotification(null), 5000);
+        
+        // Increment unread count in Navigation - pass a function to setUnreadCount
+        if (onUnreadCountChange) {
+            onUnreadCountChange((prev) => (typeof prev === 'number' ? prev + 1 : 1));
+        }
+        
+        // Reload inbox to fetch the new notification from backend
+        loadInbox();
+        
+        // Show a visual toast
+        console.log('🎉 New event notification:', notification.eventTitle);
+    };
+
+    /**
+     * ✅ NEW: Show a toast notification
+     * You can replace this with your actual toast library (toast, sonner, etc)
+     */
+    const showNotificationToast = (notification) => {
+        // This is a simple console notification
+        // Replace with your actual toast library
+        console.log(`🔔 ${notification.message}`);
+        
+        // Optional: Use browser notification API
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Tessera', {
+                body: notification.message,
+                icon: notification.icon || '📬',
+                tag: notification.eventId || 'notification'
+            });
         }
     };
 
@@ -278,6 +394,26 @@ export default function InboxPage({ user }) {
 
     return (
         <div className="max-w-3xl mx-auto">
+            {/* ✅ RED NOTIFICATION BANNER */}
+            {latestNotification && (
+                <div className="mb-6 p-4 bg-red-500/20 border-2 border-red-500 rounded-lg animate-pulse">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <span className="text-2xl">🔴</span>
+                            <div>
+                                <p className="text-red-300 font-bold text-sm">📬 NEW NOTIFICATION</p>
+                                <p className="text-red-200 text-xs mt-1">{latestNotification.message || `New Event: ${latestNotification.eventTitle}`}</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setLatestNotification(null)}
+                            className="text-red-400 hover:text-red-300 text-xl"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
             {/* Header with Clear button */}
             <div className="mb-8">
                 <div className="flex items-center justify-end">
