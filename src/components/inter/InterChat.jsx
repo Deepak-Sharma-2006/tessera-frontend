@@ -163,6 +163,12 @@ export default function InterChat({ user }) {
       return;
     }
 
+    // ✅ CRITICAL: Check if conversation is ACCEPTED before allowing message
+    if (selected.status && selected.status !== 'ACCEPTED') {
+      alert("❌ Cannot send message in pending invitation. Recipient must accept first.");
+      return;
+    }
+
     let attachmentUrl = null;
     let attachmentType = "NONE";
 
@@ -207,19 +213,19 @@ export default function InterChat({ user }) {
   const getOtherUserInfo = (conv) => {
     if (!conv || !conv.participantIds) return { name: "Unknown", college: "Unknown", id: null };
     const otherId = conv.participantIds.find(id => id !== userId);
-    
+
     // Get user data from cache or show loading placeholder
     const userData = userDataCache[otherId];
     if (userData) {
       // Extract domain from email for "college" display
       const domain = userData.email?.split('@')[1] || userData.college || 'Unknown';
-      return { 
-        name: userData.fullName || userData.name || 'Unknown User', 
+      return {
+        name: userData.fullName || userData.name || 'Unknown User',
         college: domain,
-        id: otherId 
+        id: otherId
       };
     }
-    
+
     // If not cached yet, show ID as placeholder
     return { name: "Loading...", college: "Unknown", id: otherId };
   };
@@ -273,8 +279,8 @@ export default function InterChat({ user }) {
                   key={conv.id}
                   onClick={() => setSelected(conv)}
                   className={`w-full p-3 rounded-xl text-left transition-all duration-200 ${selected?.id === conv.id
-                      ? 'bg-cyan-600 text-white shadow-lg'
-                      : 'bg-cyan-950/20 text-foreground border border-cyan-400/30 rounded-bl-none hover:bg-cyan-950/40 hover:border-cyan-400/50'
+                    ? 'bg-cyan-600 text-white shadow-lg'
+                    : 'bg-cyan-950/20 text-foreground border border-cyan-400/30 rounded-bl-none hover:bg-cyan-950/40 hover:border-cyan-400/50'
                     }`}
                 >
                   <div className="flex items-center space-x-3">
@@ -340,14 +346,14 @@ export default function InterChat({ user }) {
                           {!isMe && (
                             <div className="text-xs font-semibold text-cyan-400 mb-1">{getOtherUserInfo(selected).name}</div>
                           )}
-                          
+
                           {/* Image attachment */}
                           {msg.attachmentUrls && msg.attachmentUrls.length > 0 && msg.attachmentUrls[0].match(/\.(jpg|jpeg|png|gif|webp)$/i) && (
                             <div className="mb-2">
-                              <img 
-                                src={msg.attachmentUrls[0]} 
-                                alt="attachment" 
-                                className="max-w-[250px] max-h-64 rounded-lg object-cover" 
+                              <img
+                                src={msg.attachmentUrls[0]}
+                                alt="attachment"
+                                className="max-w-[250px] max-h-64 rounded-lg object-cover"
                               />
                             </div>
                           )}
@@ -406,8 +412,8 @@ export default function InterChat({ user }) {
                       <p className="text-sm text-white truncate font-medium">{attachment.name}</p>
                       <p className="text-xs text-cyan-400/70">{attachment.type === "IMAGE" ? "Image" : "File"} ready to send</p>
                     </div>
-                    <button 
-                      onClick={() => setAttachment(null)} 
+                    <button
+                      onClick={() => setAttachment(null)}
                       className="flex-shrink-0 text-cyan-400/70 hover:text-cyan-300 transition-colors"
                     >
                       <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
@@ -439,29 +445,29 @@ export default function InterChat({ user }) {
 
                 {/* Input Area with Emoji Picker */}
                 <div className="flex items-center gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    type="button" 
-                    className="flex-shrink-0 text-cyan-400 hover:bg-cyan-400/10" 
-                    title="Attachments" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    type="button"
+                    className="flex-shrink-0 text-cyan-400 hover:bg-cyan-400/10"
+                    title="Attachments"
                     onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
                   >
                     <PlusIcon />
                   </Button>
 
                   <div className="relative">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      type="button" 
-                      className="flex-shrink-0 text-cyan-400 hover:bg-cyan-400/10" 
-                      title="Emoji" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      type="button"
+                      className="flex-shrink-0 text-cyan-400 hover:bg-cyan-400/10"
+                      title="Emoji"
                       onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                     >
                       <EmojiIcon />
                     </Button>
-                    
+
                     {/* Emoji Picker Dropdown */}
                     {showEmojiPicker && (
                       <div className="absolute bottom-12 left-0 backdrop-blur-xl bg-cyan-950/30 border border-cyan-400/30 rounded-lg p-2 grid grid-cols-6 gap-1 z-50 w-48 max-h-60 overflow-y-auto shadow-lg shadow-cyan-400/10">
@@ -496,7 +502,7 @@ export default function InterChat({ user }) {
                     />
                   </div>
 
-                  <Button 
+                  <Button
                     type="button"
                     onClick={sendMessage}
                     disabled={!isConnected || (!input.trim() && !attachment) || uploading}
