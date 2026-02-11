@@ -273,7 +273,7 @@ export default function BuddyBeacon({ user }) {
                                                             onClick={() => handleAccept(applicant._id || applicant.applicantId, post.id)}
                                                             variant="default"
                                                             size="sm"
-                                                            className="text-xs rounded-md px-2 py-0.5 h-auto"
+                                                            className="text-xs rounded-md px-2 py-0.5 h-auto min-h-[44px]"
                                                         >
                                                             ✓ Accept
                                                         </Button>
@@ -281,7 +281,7 @@ export default function BuddyBeacon({ user }) {
                                                             onClick={() => openRejectionModal(applicant._id || applicant.applicantId, post.id)}
                                                             variant="destructive"
                                                             size="sm"
-                                                            className="text-xs rounded-md px-2 py-0.5 h-auto"
+                                                            className="text-xs rounded-md px-2 py-0.5 h-auto min-h-[44px]"
                                                         >
                                                             ✕ Reject
                                                         </Button>
@@ -304,7 +304,7 @@ export default function BuddyBeacon({ user }) {
                             }}
                             disabled={buttonDisabled}
                             variant="default"
-                            className="w-full mt-4 rounded-lg"
+                            className="w-full mt-4 rounded-lg min-h-[44px]"
                         >
                             {buttonLabel}
                         </Button>
@@ -549,7 +549,7 @@ export default function BuddyBeacon({ user }) {
                                 <h3 className="text-2xl font-bold tracking-tight">Apply to Team</h3>
                                 <p className="text-muted-foreground/70 text-sm mt-1">{selectedPost.eventName}</p>
                             </div>
-                            <Button variant="ghost" size="icon" onClick={() => setShowApplicationModal(false)} className="rounded-lg">✕</Button>
+                            <Button variant="ghost" size="icon" onClick={() => setShowApplicationModal(false)} className="rounded-lg min-h-[44px] min-w-[44px]">✕</Button>
                         </div>
                         <div className="space-y-6">
                             <div className={theme === 'cyber' ? 'bg-cyan-400/10 border border-cyan-400/20 p-4 rounded-lg' : 'bg-primary/10 border border-primary/20 p-4 rounded-lg'}>
@@ -581,7 +581,7 @@ export default function BuddyBeacon({ user }) {
                                     )}
                                     <div className="flex space-x-2">
                                         <Input placeholder="Add a skill..." value={applicationData.newSkill} onChange={(e) => setApplicationData(prev => ({ ...prev, newSkill: e.target.value }))} onKeyDown={(e) => e.key === 'Enter' && addSkill()} />
-                                        <Button variant="secondary" onClick={addSkill} className="rounded-lg">Add</Button>
+                                        <Button variant="secondary" onClick={addSkill} className="rounded-lg min-h-[44px]">Add</Button>
                                     </div>
                                 </div>
                             </div>
@@ -593,10 +593,10 @@ export default function BuddyBeacon({ user }) {
                                 </div>
                             </div>
                             <div className="flex space-x-4">
-                                <Button onClick={handleSubmitApplication} disabled={!applicationData.message.trim() || (applicationData.message || '').length > MAX_MESSAGE_LENGTH} variant="default" className="flex-1 py-3 rounded-lg">
+                                <Button onClick={handleSubmitApplication} disabled={!applicationData.message.trim() || (applicationData.message || '').length > MAX_MESSAGE_LENGTH} variant="default" className="flex-1 py-3 rounded-lg min-h-[44px]">
                                     🚀 Submit Application
                                 </Button>
-                                <Button variant="ghost" onClick={() => setShowApplicationModal(false)} className="py-3 rounded-lg border border-white/20">Cancel</Button>
+                                <Button variant="ghost" onClick={() => setShowApplicationModal(false)} className="py-3 rounded-lg border border-white/20 min-h-[44px]">Cancel</Button>
                             </div>
                         </div>
                     </Card>
@@ -621,8 +621,8 @@ export default function BuddyBeacon({ user }) {
                             <Textarea value={rejectionData.note} onChange={e => setRejectionData(prev => ({ ...prev, note: e.target.value }))} rows={3} />
                         </div>
                         <div className="flex gap-4">
-                            <Button onClick={handleReject} disabled={!rejectionData.reason} variant="default" className="flex-1 rounded-lg">Reject</Button>
-                            <Button variant="ghost" onClick={() => setShowRejectionModal(false)} className="flex-1 rounded-lg border border-white/20">Cancel</Button>
+                            <Button onClick={handleReject} disabled={!rejectionData.reason} variant="default" className="flex-1 rounded-lg min-h-[44px]">Reject</Button>
+                            <Button variant="ghost" onClick={() => setShowRejectionModal(false)} className="flex-1 rounded-lg border border-white/20 min-h-[44px]">Cancel</Button>
                         </div>
                     </Card>
                 </div>

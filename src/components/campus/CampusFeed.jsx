@@ -367,7 +367,7 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
           <button
             key={filter.id}
             onClick={() => setActiveFilter(filter.id)}
-            className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-500 border flex items-center gap-2 ${activeFilter === filter.id
+            className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-500 border flex items-center gap-2 min-h-[44px] cursor-pointer focus:ring-2 focus:ring-cyan-400/50 focus:outline-none hover:-translate-y-0.5 ${activeFilter === filter.id
               ? theme === 'cyber' 
                 ? 'bg-cyan-400/15 text-cyan-300 border-cyan-400/40 shadow-md shadow-cyan-400/20 backdrop-blur-xl'
                 : 'bg-primary/20 text-primary-solid border-primary/40 shadow-md backdrop-blur-xl'
@@ -375,6 +375,7 @@ export default forwardRef(function CampusFeed({ user, initialFilter = 'ASK_HELP'
                 ? 'bg-white/5 text-muted-foreground border-white/10 hover:bg-white/10 hover:border-white/20'
                 : 'bg-white/8 text-muted-foreground border-white/15 hover:bg-white/12 hover:border-white/25'
               }`}
+            aria-pressed={activeFilter === filter.id}
           >
             {filter.label} 
             <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${activeFilter === filter.id 

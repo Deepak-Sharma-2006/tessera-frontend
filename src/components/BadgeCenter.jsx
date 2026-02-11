@@ -708,11 +708,13 @@ export default function BadgeCenter({ user, setUser }) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-3 rounded-lg transition-all duration-200 font-medium backdrop-blur-xl border ${
+            className={`px-6 py-3 rounded-lg transition-all duration-200 font-medium backdrop-blur-xl border min-h-[44px] focus:ring-2 focus:ring-cyan-400/50 focus:outline-none hover:-translate-y-0.5 ${
               activeTab === tab.id
                 ? 'bg-cyan-400/25 text-cyan-200 border-cyan-400/50 shadow-lg shadow-cyan-400/30 scale-105'
                 : 'text-muted-foreground/70 border-white/15 bg-white/8 hover:bg-white/12 hover:border-white/20'
             }`}
+            aria-pressed={activeTab === tab.id}
+            aria-label={tab.label}
           >
             <div className="flex items-center space-x-2">
               <span>{tab.icon}</span>
@@ -772,9 +774,10 @@ export default function BadgeCenter({ user, setUser }) {
                   {!badge.cannotBeHidden && !badge.isPenaltyBadge && !badge.isModeratorBadge && (
                     <button
                       onClick={() => handleRemoveFeaturedBadge(badge.id)}
-                      className="absolute -top-3 -right-3 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-red-600"
+                      className="absolute -top-3 -right-3 w-7 h-7 bg-red-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-red-600 min-h-[44px] focus:ring-2 focus:ring-red-400/50 focus:outline-none"
                       title="Remove from featured"
                       disabled={featuredBadgesLoading}
+                      aria-label={`Remove ${badge.name} from featured badges`}
                     >
                       <span className="text-white text-sm font-bold">−</span>
                     </button>
@@ -920,7 +923,7 @@ export default function BadgeCenter({ user, setUser }) {
                 </div>
               )}
               
-              <Button onClick={() => setSelectedBadge(null)} className="w-full">
+              <Button onClick={() => setSelectedBadge(null)} className="w-full min-h-[44px]">
                 Close
               </Button>
             </div>
@@ -951,10 +954,11 @@ export default function BadgeCenter({ user, setUser }) {
                 {earnedBadges
                   .filter(badge => !badge.isActive) // Only show non-featured badges
                   .map((badge) => (
-                    <div
+                    <button
                       key={badge.id}
                       onClick={() => handleSelectFeaturedBadge(badge)}
-                      className="p-4 rounded-lg border-2 border-cyan-400/30 bg-cyan-950/20 hover:bg-cyan-950/40 hover:border-cyan-400/60 cursor-pointer transition-all transform hover:scale-105"
+                      className="p-4 rounded-lg border-2 border-cyan-400/30 bg-cyan-950/20 hover:bg-cyan-950/40 hover:border-cyan-400/60 cursor-pointer transition-all transform hover:scale-105 min-h-[44px] flex flex-col items-center justify-center focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
+                      aria-label={`Select ${badge.name} as featured badge`}
                     >
                       <div className="flex flex-col items-center space-y-2">
                         <div className="text-4xl">{badge.icon}</div>
@@ -963,7 +967,7 @@ export default function BadgeCenter({ user, setUser }) {
                           {getTierStars(badge.tier)}
                         </Badge>
                       </div>
-                    </div>
+                    </button>
                   ))}
               </div>
 

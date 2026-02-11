@@ -84,7 +84,7 @@ export default function CampusHub({
 
     if (theme === 'windows1992') {
       return `
-        group relative flex items-center space-x-3 px-6 py-4 rounded-none border-2 transition-all duration-500 cursor-pointer overflow-hidden
+        group relative flex items-center space-x-3 px-6 py-4 rounded-none border-2 transition-all duration-500 cursor-pointer overflow-hidden min-h-[44px] focus:ring-2 focus:ring-cyan-400/50 focus:outline-none
         ${isActive
           ? 'bg-primary text-primary-foreground border-inset shadow-inset scale-105'
           : 'text-muted-foreground hover:text-foreground glass hover:border-primary border-outset hover:bg-muted button-win95'
@@ -95,7 +95,7 @@ export default function CampusHub({
 
     // Modern theme - enhanced active state with color tint, increased opacity, and glow
     return `
-      group relative flex items-center space-x-3 px-6 py-4 rounded-lg transition-all duration-500 cursor-pointer overflow-hidden backdrop-blur-xl border
+      group relative flex items-center space-x-3 px-6 py-4 rounded-lg transition-all duration-500 cursor-pointer overflow-hidden backdrop-blur-xl border min-h-[44px] focus:ring-2 focus:ring-cyan-400/50 focus:outline-none
       ${isActive
         ? theme === 'cyber'
           ? 'bg-cyan-400/25 text-cyan-200 border-cyan-400/50 shadow-lg shadow-cyan-400/30 scale-105'
@@ -104,7 +104,7 @@ export default function CampusHub({
           ? 'text-muted-foreground/70 border-white/10 hover:bg-white/5 hover:border-white/20 hover:shadow-sm'
           : 'text-muted-foreground/70 border-white/10 hover:bg-white/5 hover:border-white/20 hover:shadow-sm'
       }
-      press-effect
+      press-effect hover:-translate-y-0.5
     `;
   };
 
@@ -119,6 +119,8 @@ export default function CampusHub({
             onClick={() => setActiveView(item.id)}
             className={getNavItemStyles(item.id)}
             style={{ animationDelay: `${index * 100}ms` }}
+            aria-pressed={activeView === item.id}
+            aria-label={item.label}
           >
             {/* Button background shimmer (not in windows1992) */}
             {theme !== 'windows1992' && (

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { fetchMyInbox, markInboxAsRead, deleteInboxItem, deleteInboxItemsBulk, clearInboxByType, clearAllInbox } from '@/lib/api.js';
+import { fetchMyInbox, markInboxAsRead, deleteInboxItem, deleteInboxItemsBulk } from '@/lib/api.js';
 import { Button } from '@/components/ui/button.jsx';
 import LoadingSpinner from '@/components/animations/LoadingSpinner.jsx';
 import api from '@/lib/api.js';
@@ -40,10 +40,6 @@ export default function InboxPage({ user, onUnreadCountChange }) {
     // Selection mode state
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedItems, setSelectedItems] = useState(new Set());
-
-    // Clear options modal state
-    const [showClearModal, setShowClearModal] = useState(false);
-    const [isClearing, setIsClearing] = useState(null);
 
     // Fetch inbox items and pending invites on mount
     useEffect(() => {
@@ -319,37 +315,7 @@ export default function InboxPage({ user, onUnreadCountChange }) {
         }
     };
 
-    // Handle clear by type
-    const handleClearByType = async (type) => {
-        setIsClearing(type);
-        try {
-            await clearInboxByType(user.id, type);
-            // Reload inbox after clearing
-            await loadInbox();
-            setSelectedItems(new Set());
-            setShowClearModal(false);
-        } catch (err) {
-            console.error('❌ Error clearing inbox by type:', err);
-        } finally {
-            setIsClearing(null);
-        }
-    };
 
-    // Handle clear all
-    const handleClearAll = async () => {
-        setIsClearing('all');
-        try {
-            await clearAllInbox(user.id);
-            // Reload inbox after clearing
-            await loadInbox();
-            setSelectedItems(new Set());
-            setShowClearModal(false);
-        } catch (err) {
-            console.error('❌ Error clearing all inbox:', err);
-        } finally {
-            setIsClearing(null);
-        }
-    };
 
     // Get styling based on notification type and severity
     const getNotificationStyles = (type, severity) => {
@@ -414,58 +380,6 @@ export default function InboxPage({ user, onUnreadCountChange }) {
                     </div>
                 </div>
             )}
-            {/* Header with Clear button */}
-            <div className="mb-8">
-                <div className="flex items-center justify-end">
-                    <div className="relative">
-                        <button
-                            onClick={() => setShowClearModal(!showClearModal)}
-                            className="px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border flex items-center justify-center gap-2 bg-slate-900/50 text-slate-400 border-slate-700 hover:border-slate-500 hover:text-white hover:bg-slate-800/50"
-                        >
-                            <span>🗑️</span>
-                            <span>Clear</span>
-                            <span className={`transition-transform duration-300 ${showClearModal ? 'rotate-180' : ''}`}>▼</span>
-                        </button>
-
-                        {/* Clear Options Modal - Themed Dropdown */}
-                        {showClearModal && (
-                            <div className="absolute right-0 mt-3 w-64 bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl z-50 overflow-hidden">
-                                <div className="p-4 space-y-2">
-                                    <p className="text-xs text-slate-400 font-semibold mb-4 px-2">
-                                        🧹 CLEAR OPTIONS
-                                    </p>
-
-                                    <button
-                                        onClick={() => handleClearByType('APPLICATION_REJECTION')}
-                                        disabled={isClearing !== null}
-                                        className="w-full justify-start text-left bg-gradient-to-r from-amber-600/20 to-yellow-600/20 hover:from-amber-600/30 hover:to-yellow-600/30 text-amber-300 text-sm py-3 px-4 rounded-xl transition-all duration-200 border border-amber-500/20 hover:border-amber-500/40 disabled:opacity-50 font-medium"
-                                    >
-                                        {isClearing === 'APPLICATION_REJECTION' ? '⏳' : '✓'} Clear All Rejections
-                                    </button>
-
-                                    <button
-                                        onClick={() => handleClearByType('POD_BAN')}
-                                        disabled={isClearing !== null}
-                                        className="w-full justify-start text-left bg-gradient-to-r from-red-600/20 to-rose-600/20 hover:from-red-600/30 hover:to-rose-600/30 text-red-300 text-sm py-3 px-4 rounded-xl transition-all duration-200 border border-red-500/20 hover:border-red-500/40 disabled:opacity-50 font-medium"
-                                    >
-                                        {isClearing === 'POD_BAN' ? '⏳' : '✓'} Clear All Bans
-                                    </button>
-
-                                    <div className="border-t border-slate-700/50 my-2"></div>
-
-                                    <button
-                                        onClick={handleClearAll}
-                                        disabled={isClearing !== null}
-                                        className="w-full justify-start text-left bg-gradient-to-r from-red-700/20 to-red-600/20 hover:from-red-700/40 hover:to-red-600/40 text-red-400 text-sm py-3 px-4 rounded-xl transition-all duration-200 border border-red-600/20 hover:border-red-600/40 disabled:opacity-50 font-semibold"
-                                    >
-                                        {isClearing === 'all' ? '⏳' : '⚠️'} Delete All Messages
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
 
             {/* ========== INCOMING REQUESTS SECTION ========== */}
             {pendingInvites.length > 0 && (

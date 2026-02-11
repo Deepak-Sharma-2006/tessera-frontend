@@ -28,22 +28,28 @@ const Input = React.forwardRef(
         <input
           type={type}
           className={cn(
-            // Base styles - professional glassmorphism
-            "flex w-full rounded-lg border text-sm transition-all duration-500 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+            // Base styles - professional glassmorphism with improved touch targets
+            "flex w-full rounded-lg border text-sm transition-all duration-500 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 min-h-[44px] px-3 py-2.5",
             
             // Variants - professional sober aesthetic
             {
-              // Glass variant - default glassmorphism
-              'backdrop-blur-xl bg-white/8 border-white/15 text-foreground hover:bg-white/12 hover:border-white/20 focus-visible:bg-white/12 focus-visible:border-white/30 focus-visible:shadow-md': variant === 'glass' || variant === 'default',
+              // Glass variant - default glassmorphism with enhanced focus
+              'backdrop-blur-xl bg-white/8 border-white/15 text-foreground hover:bg-white/12 hover:border-white/20 focus-visible:bg-white/12 focus-visible:border-white/30 focus-visible:shadow-md focus-visible:ring-2 focus-visible:ring-cyan-400/50': variant === 'glass' || variant === 'default',
               
-              // Outline variant - strong border
-              'bg-white/5 border-white/20 text-foreground hover:bg-white/8 hover:border-white/25 focus-visible:bg-white/12 focus-visible:border-white/30 focus-visible:shadow-md': variant === 'outline',
+              // Outline variant - strong border with better feedback
+              'bg-white/5 border-white/20 text-foreground hover:bg-white/8 hover:border-white/25 focus-visible:bg-white/12 focus-visible:border-white/30 focus-visible:shadow-md focus-visible:ring-2 focus-visible:ring-cyan-400/50': variant === 'outline',
               
-              // Filled variant - heavier background
-              'backdrop-blur-sm bg-white/10 border-white/10 text-foreground hover:bg-white/15 hover:border-white/20 focus-visible:bg-white/15 focus-visible:border-white/30 focus-visible:shadow-md': variant === 'filled',
+              // Filled variant - heavier background with clear focus
+              'backdrop-blur-sm bg-white/10 border-white/10 text-foreground hover:bg-white/15 hover:border-white/20 focus-visible:bg-white/15 focus-visible:border-white/30 focus-visible:shadow-md focus-visible:ring-2 focus-visible:ring-cyan-400/50': variant === 'filled',
               
-              // Ghost variant - minimal styling
-              'bg-transparent border-transparent text-foreground hover:bg-white/5 hover:border-white/10 focus-visible:bg-white/8 focus-visible:border-white/20': variant === 'ghost',
+              // Ghost variant - minimal styling with accessible focus
+              'bg-transparent border-transparent text-foreground hover:bg-white/5 hover:border-white/10 focus-visible:bg-white/8 focus-visible:border-white/20 focus-visible:ring-2 focus-visible:ring-cyan-400/50': variant === 'ghost',
+              
+              // Error state styling
+              'border-red-500/50 bg-red-500/5 hover:border-red-500/70 focus-visible:border-red-500 focus-visible:ring-red-500/50': error,
+              
+              // Success state styling
+              'border-green-500/50 bg-green-500/5 hover:border-green-500/70 focus-visible:border-green-500 focus-visible:ring-green-500/50': success,
             },
             
             // Sizes with better proportions

@@ -4,8 +4,8 @@ import { cva } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  // Base styles with professional polish
-  'inline-flex items-center justify-center whitespace-nowrap rounded-lg font-semibold transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 relative overflow-hidden group press-effect hover-lift tracking-wide',
+  // Base styles with professional polish - improved UX with better touch targets
+  'inline-flex items-center justify-center whitespace-nowrap rounded-lg font-semibold transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group press-effect hover-lift tracking-wide cursor-pointer min-h-[44px]',
   {
     variants: {
       variant: {
@@ -37,11 +37,11 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline hover:text-primary/80',
       },
       size: {
-        sm: 'h-9 px-4 py-1 text-sm',
-        default: 'h-11 px-8 py-2 text-sm',
-        lg: 'h-13 px-10 py-3 text-base',
-        xl: 'h-15 px-12 py-4 text-lg',
-        icon: 'h-11 w-11',
+        sm: 'h-9 px-4 py-1 text-sm min-w-[44px]',
+        default: 'h-11 px-8 py-2 text-sm min-w-[44px]',
+        lg: 'h-13 px-10 py-3 text-base min-w-[48px]',
+        xl: 'h-15 px-12 py-4 text-lg min-w-[52px]',
+        icon: 'h-11 w-11 min-w-[44px] min-h-[44px]',
       },
     },
     defaultVariants: {

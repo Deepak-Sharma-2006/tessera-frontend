@@ -304,7 +304,7 @@ export default forwardRef(function InterFeed({ user }, ref) {
     <div className="space-y-8">
       {/* Create Post Button */}
       <div className="flex justify-center">
-        <Button onClick={() => setShowCreatePost(true)} className="bg-gradient-to-r from-cyan-400/30 to-primary/30 border border-cyan-400/40 text-cyan-200 px-8 py-3 rounded-lg shadow-lg shadow-cyan-400/20 hover:from-cyan-400/40 hover:to-primary/40 hover:shadow-lg hover:shadow-cyan-400/30 transition-all duration-500 font-semibold hover:-translate-y-1">
+        <Button onClick={() => setShowCreatePost(true)} className="bg-gradient-to-r from-cyan-400/30 to-primary/30 border border-cyan-400/40 text-cyan-200 px-8 py-3 rounded-lg shadow-lg shadow-cyan-400/20 hover:from-cyan-400/40 hover:to-primary/40 hover:shadow-lg hover:shadow-cyan-400/30 transition-all duration-500 font-semibold hover:-translate-y-1 min-h-[44px]">
           ✨ Create Post
         </Button>
       </div>
@@ -315,9 +315,11 @@ export default forwardRef(function InterFeed({ user }, ref) {
           <button
             key={filter.id}
             onClick={() => setActiveFilter(filter.id)}
-            className={`px-6 py-3 rounded-lg transition-all duration-500 font-medium hover:-translate-y-1 backdrop-blur-xl border flex items-center gap-2 ${activeFilter === filter.id
+            className={`px-6 py-3 rounded-lg transition-all duration-500 font-medium hover:-translate-y-1 backdrop-blur-xl border flex items-center gap-2 min-h-[44px] focus:ring-2 focus:ring-cyan-400/50 focus:outline-none ${activeFilter === filter.id
               ? 'bg-cyan-400/25 text-cyan-200 border-cyan-400/50 shadow-lg shadow-cyan-400/30 scale-105'
-              : 'text-muted-foreground/70 border-white/10 hover:bg-white/5 hover:border-white/20'}\n              `}
+              : 'text-muted-foreground/70 border-white/10 hover:bg-white/5 hover:border-white/20'}`}
+            aria-pressed={activeFilter === filter.id}
+            aria-label={filter.label}
           >
             <span>{filter.label}</span>
             <Badge variant="outline" className="text-xs">{filter.count}</Badge>
@@ -331,7 +333,7 @@ export default forwardRef(function InterFeed({ user }, ref) {
           <Card variant="glass" className="max-w-2xl w-full p-8 shadow-lg rounded-lg">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold tracking-tight">Create New Post</h3>
-              <Button variant="ghost" size="sm" onClick={() => setShowCreatePost(false)} className="rounded-lg hover:-translate-y-1 duration-500">✕</Button>
+              <Button variant="ghost" size="sm" onClick={() => setShowCreatePost(false)} className="rounded-lg hover:-translate-y-1 duration-500 min-h-[44px] min-w-[44px]">✕</Button>
             </div>
             <div className="space-y-4">
               <div>
@@ -373,10 +375,10 @@ export default forwardRef(function InterFeed({ user }, ref) {
                     {pollOptions.map((option, index) => (
                       <div key={index} className="flex items-center gap-2">
                         <Input placeholder={`Option ${index + 1}`} value={option} onChange={(e) => handlePollOptionChange(index, e.target.value)} />
-                        {pollOptions.length > 2 && <Button variant="ghost" size="sm" onClick={() => removePollOption(index)} className="hover:bg-red-500/10 rounded-lg">✕</Button>}
+                        {pollOptions.length > 2 && <Button variant="ghost" size="sm" onClick={() => removePollOption(index)} className="hover:bg-red-500/10 rounded-lg min-h-[44px] min-w-[44px]">✕</Button>}
                       </div>
                     ))}
-                    {pollOptions.length < 5 && <Button variant="secondary" size="sm" onClick={addPollOption} className="rounded-lg">+ Add Option</Button>}
+                    {pollOptions.length < 5 && <Button variant="secondary" size="sm" onClick={addPollOption} className="rounded-lg min-h-[44px]">+ Add Option</Button>}
                   </div>
                 </div>
               )}
@@ -407,7 +409,7 @@ export default forwardRef(function InterFeed({ user }, ref) {
                       variant="secondary"
                       size="sm"
                       onClick={addSkillTag}
-                      className="rounded-lg"
+                      className="rounded-lg min-h-[44px]"
                     >
                       Add
                     </Button>
@@ -416,8 +418,8 @@ export default forwardRef(function InterFeed({ user }, ref) {
               )}
 
               <div className="flex justify-end gap-2 pt-4">
-                <Button variant="ghost" onClick={() => setShowCreatePost(false)} className="hover:bg-white/10 rounded-lg border border-white/20">Cancel</Button>
-                <Button onClick={handleCreatePost} variant="default" className="rounded-lg">Create Post</Button>
+                <Button variant="ghost" onClick={() => setShowCreatePost(false)} className="hover:bg-white/10 rounded-lg border border-white/20 min-h-[44px]">Cancel</Button>
+                <Button onClick={handleCreatePost} variant="default" className="rounded-lg min-h-[44px]">Create Post</Button>
               </div>
             </div>
           </Card>

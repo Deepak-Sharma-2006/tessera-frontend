@@ -390,7 +390,7 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
             <div className="flex gap-4 justify-center">
               <Button
                 onClick={() => setShowPublicProfile(false)}
-                className="backdrop-blur-xl bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 hover:bg-cyan-400/30 font-semibold px-8 py-3 rounded-lg transition-all hover:shadow-lg hover:shadow-cyan-400/20"
+                className="backdrop-blur-xl bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 hover:bg-cyan-400/30 font-semibold px-8 py-3 rounded-lg transition-all hover:shadow-lg hover:shadow-cyan-400/20 min-h-[44px]"
               >
                 ← Back to Full Profile
               </Button>
@@ -480,14 +480,14 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                         <Button
                           onClick={handleSave}
                           disabled={loading}
-                          className="bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 hover:from-cyan-400/35 hover:to-cyan-400/30 border border-cyan-400/40 text-cyan-200 font-semibold rounded-lg px-6 py-2 shadow-lg shadow-cyan-400/20 hover:-translate-y-1 duration-500"
+                          className="bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 hover:from-cyan-400/35 hover:to-cyan-400/30 border border-cyan-400/40 text-cyan-200 font-semibold rounded-lg px-6 py-2 shadow-lg shadow-cyan-400/20 hover:-translate-y-1 duration-500 min-h-[44px]"
                         >
                           {loading ? 'Saving...' : '✓ Save'}
                         </Button>
                         <Button
                           onClick={() => setIsEditing(false)}
                           variant="outline"
-                          className="border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 rounded-lg px-6 py-2"
+                          className="border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 rounded-lg px-6 py-2 min-h-[44px]"
                         >
                           Cancel
                         </Button>
@@ -496,13 +496,13 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                       <div className="flex flex-col gap-2">
                         <Button
                           onClick={() => setIsEditing(true)}
-                          className="bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 hover:from-cyan-400/35 hover:to-cyan-400/30 border border-cyan-400/40 text-cyan-200 font-semibold rounded-lg px-6 py-2 shadow-lg shadow-cyan-400/20 hover:-translate-y-1 duration-500"
+                          className="bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 hover:from-cyan-400/35 hover:to-cyan-400/30 border border-cyan-400/40 text-cyan-200 font-semibold rounded-lg px-6 py-2 shadow-lg shadow-cyan-400/20 hover:-translate-y-1 duration-500 min-h-[44px]"
                         >
                           ✏️ Edit Profile
                         </Button>
                         <Button
                           onClick={() => setShowPublicProfile(true)}
-                          className="bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 hover:from-cyan-400/35 hover:to-cyan-400/30 border border-cyan-400/40 text-cyan-200 font-semibold rounded-lg px-6 py-2 shadow-lg shadow-cyan-400/20 hover:-translate-y-1 duration-500"
+                          className="bg-gradient-to-r from-cyan-400/25 to-cyan-400/20 hover:from-cyan-400/35 hover:to-cyan-400/30 border border-cyan-400/40 text-cyan-200 font-semibold rounded-lg px-6 py-2 shadow-lg shadow-cyan-400/20 hover:-translate-y-1 duration-500 min-h-[44px]"
                         >
                           👁️ Public Profile
                         </Button>
@@ -514,13 +514,13 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                     <Button
                       onClick={handleEndorse}
                       disabled={loading}
-                      className="bg-gradient-to-r from-magenta-400/25 to-magenta-400/20 hover:from-magenta-400/35 hover:to-magenta-400/30 border border-magenta-400/40 text-magenta-200 font-semibold rounded-lg px-6 py-2 shadow-lg shadow-magenta-400/20 hover:-translate-y-1 duration-500"
+                      className="bg-gradient-to-r from-magenta-400/25 to-magenta-400/20 hover:from-magenta-400/35 hover:to-magenta-400/30 border border-magenta-400/40 text-magenta-200 font-semibold rounded-lg px-6 py-2 shadow-lg shadow-magenta-400/20 hover:-translate-y-1 duration-500 min-h-[44px]"
                     >
                       {loading ? 'Endorsing...' : '🌟 Endorse'}
                     </Button>
                     <Button
                       variant="outline"
-                      className="border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 rounded-lg px-6 py-2"
+                      className="border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 rounded-lg px-6 py-2 min-h-[44px]"
                     >
                       👁️ Profile
                     </Button>
@@ -576,14 +576,14 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                       setSelectedBadges(profileOwner?.displayedBadges || [])
                     }}
                     variant="outline"
-                    className="border-orange-500/30 text-orange-300 hover:bg-orange-500/10 rounded-lg px-6 py-2"
+                    className="border-orange-500/30 text-orange-300 hover:bg-orange-500/10 rounded-lg px-6 py-2 min-h-[44px]"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleSaveBadges}
                     disabled={loading}
-                    className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold px-8 py-2 rounded-lg transition-all hover:shadow-lg"
+                    className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold px-8 py-2 rounded-lg transition-all hover:shadow-lg min-h-[44px]"
                   >
                     {loading ? 'Saving...' : '✓ Save Featured Badges'}
                   </Button>
@@ -621,13 +621,13 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                         variant="outline"
                         size="sm"
                         onClick={() => removeSkill(index)}
-                        className="text-cyan-300 border-cyan-400/40 hover:bg-cyan-400/10"
+                        className="text-cyan-300 border-cyan-400/40 hover:bg-cyan-400/10 min-h-[44px]"
                       >
                         Remove
                       </Button>
                     </div>
                   ))}
-                  <Button variant="outline" onClick={addSkill} className="w-full text-xs border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10">
+                  <Button variant="outline" onClick={addSkill} className="w-full text-xs border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 min-h-[44px]">
                     + Add Skill
                   </Button>
                 </div>

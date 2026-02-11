@@ -83,7 +83,8 @@ export default function ReportModal({ isOpen, onClose, reportedUserId, reportedU
               <select
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="w-full bg-[#0f111a] text-white p-3 rounded-lg border border-gray-700 focus:border-cyan-500 focus:outline-none transition"
+                aria-label="Reason for report"
+                className="w-full bg-[#0f111a] text-white p-3 rounded-lg border border-gray-700 hover:border-gray-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none transition cursor-pointer min-h-[44px]"
               >
                 <option value="">Select a reason...</option>
                 <option value="spam">Spamming Hub</option>
@@ -100,7 +101,8 @@ export default function ReportModal({ isOpen, onClose, reportedUserId, reportedU
                 value={details}
                 onChange={(e) => setDetails(e.target.value)}
                 placeholder="Provide more context about this report..."
-                className="w-full bg-[#0f111a] text-white p-3 rounded-lg border border-gray-700 focus:border-cyan-500 focus:outline-none transition h-24 resize-none"
+                aria-label="Report details"
+                className="w-full bg-[#0f111a] text-white p-3 rounded-lg border border-gray-700 hover:border-gray-600 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none transition h-24 resize-none"
               />
             </div>
 
@@ -113,16 +115,24 @@ export default function ReportModal({ isOpen, onClose, reportedUserId, reportedU
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="px-4 py-2 text-gray-400 hover:text-gray-200 transition disabled:opacity-50"
+                className="px-6 py-2.5 text-gray-400 hover:text-gray-200 hover:bg-white/5 transition disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium min-h-[44px] cursor-pointer focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading || !reason}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 flex items-center gap-2"
+                className="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 hover:shadow-lg hover:shadow-red-600/50 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center gap-2 min-h-[44px] focus:ring-2 focus:ring-red-400/50 focus:outline-none"
+                aria-busy={loading}
               >
-                {loading ? "Submitting..." : "Submit Report"}
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Report"
+                )}
               </button>
             </div>
           </form>

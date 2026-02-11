@@ -486,7 +486,7 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
                 <Button
                   onClick={handleRegisterClick}
                   disabled={registeredEvents.has(event.id)}
-                  className={`w-full text-white ${registeredEvents.has(event.id)
+                  className={`w-full min-h-[44px] text-white ${registeredEvents.has(event.id)
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
                     }`}
@@ -499,7 +499,7 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
               {isSolo && !hasLink && (
                 <Button
                   onClick={handleDetailsClick}
-                  className="w-full backdrop-blur-xl bg-gradient-to-r from-cyan-400/25 to-primary/25 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/35 hover:to-primary/35 hover:shadow-lg font-semibold"
+                  className="w-full min-h-[44px] backdrop-blur-xl bg-gradient-to-r from-cyan-400/25 to-primary/25 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/35 hover:to-primary/35 hover:shadow-lg font-semibold"
                 >
                   📋 Details
                 </Button>
@@ -508,10 +508,15 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
               {/* ✅ Team: Show "Find Team" AND "Details". */}
               {!isSolo && (
                 <>
-                  <Button onClick={() => handleFindTeam(event)} className="w-full backdrop-blur-xl bg-gradient-to-r from-cyan-400/25 to-primary/25 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/35 hover:to-primary/35 hover:shadow-lg font-semibold">🔍 Find Team</Button>
+                  <Button 
+                    onClick={() => handleFindTeam(event)} 
+                    className="w-full min-h-[44px] backdrop-blur-xl bg-gradient-to-r from-cyan-400/25 to-primary/25 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/35 hover:to-primary/35 hover:shadow-lg font-semibold"
+                  >
+                    🔍 Find Team
+                  </Button>
                   <Button
                     onClick={handleDetailsClick}
-                    className="w-full backdrop-blur-xl bg-gradient-to-r from-cyan-400/20 to-primary/20 border border-cyan-400/35 text-cyan-100 hover:from-cyan-400/30 hover:to-primary/30 hover:shadow-lg font-semibold"
+                    className="w-full min-h-[44px] backdrop-blur-xl bg-gradient-to-r from-cyan-400/20 to-primary/20 border border-cyan-400/35 text-cyan-100 hover:from-cyan-400/30 hover:to-primary/30 hover:shadow-lg font-semibold"
                   >
                     {hasLink ? '🔗 Registration Link' : '📋 Details'}
                   </Button>
@@ -531,7 +536,7 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
           <button 
             key={filter.id} 
             onClick={() => setActiveFilter(filter.id)} 
-            className={`px-6 py-3 rounded-lg transition-all duration-500 font-medium border flex items-center gap-2 backdrop-blur-xl ${activeFilter === filter.id 
+            className={`px-6 py-3 rounded-lg transition-all duration-500 font-medium border flex items-center gap-2 backdrop-blur-xl min-h-[44px] focus:ring-2 focus:ring-cyan-400/50 focus:outline-none hover:-translate-y-0.5 ${activeFilter === filter.id 
               ? theme === 'cyber'
                 ? 'bg-cyan-400/25 text-cyan-200 border-cyan-400/50 shadow-lg shadow-cyan-400/30 scale-105'
                 : 'bg-primary/25 text-primary-solid border-primary/50 shadow-lg shadow-primary/30 scale-105'
@@ -539,6 +544,8 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
                 ? 'text-muted-foreground/70 border-white/10 hover:bg-white/5 hover:border-white/20 hover:shadow-sm'
                 : 'text-muted-foreground/70 border-white/10 hover:bg-white/5 hover:border-white/20 hover:shadow-sm'
             }`}
+            aria-pressed={activeFilter === filter.id}
+            aria-label={filter.label}
           >
             <span>{filter.icon}</span>
             <span>{filter.label}</span>
@@ -552,7 +559,7 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
           <Button 
             onClick={() => setShowCreateModal(true)} 
             variant="default"
-            className="font-semibold shadow-lg backdrop-blur-xl bg-gradient-to-r from-cyan-400/30 to-primary/30 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/40 hover:to-primary/40 hover:shadow-xl"
+            className="font-semibold shadow-lg backdrop-blur-xl bg-gradient-to-r from-cyan-400/30 to-primary/30 border border-cyan-400/40 text-cyan-200 hover:from-cyan-400/40 hover:to-primary/40 hover:shadow-xl min-h-[44px]"
           >
             ✨ Create Event
           </Button>
@@ -574,18 +581,18 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
             </div>
             {!findTeamAction ? (
               <div className="space-y-4">
-                <button onClick={() => setFindTeamAction('create')} className="w-full p-6 border-2 border-white/15 rounded-lg hover:border-white/30 hover:bg-white/8 transition-all text-left group hover:shadow-md backdrop-blur-sm">
+                <button onClick={() => setFindTeamAction('create')} className="w-full p-6 border-2 border-white/15 rounded-lg hover:border-white/30 hover:bg-white/8 transition-all text-left group hover:shadow-md backdrop-blur-sm min-h-[44px] flex items-center">
                   <div className="flex items-center space-x-4 mb-3"><span className="text-3xl">✨</span><span className="text-lg font-semibold text-foreground">Create Team Post</span></div>
                   <p className="text-muted-foreground/70 text-sm">Create a post in Buddy Beacon to attract teammates. Auto-fills event details.</p>
                 </button>
-                <button onClick={() => setFindTeamAction('browse')} className="w-full p-6 border-2 border-white/15 rounded-lg hover:border-white/30 hover:bg-white/8 transition-all text-left group hover:shadow-md backdrop-blur-sm">
+                <button onClick={() => setFindTeamAction('browse')} className="w-full p-6 border-2 border-white/15 rounded-lg hover:border-white/30 hover:bg-white/8 transition-all text-left group hover:shadow-md backdrop-blur-sm min-h-[44px] flex items-center">
                   <div className="flex items-center space-x-4 mb-3"><span className="text-3xl">🔍</span><span className="text-lg font-semibold text-foreground">Browse Teams</span></div>
                   <p className="text-muted-foreground/70 text-sm">Browse existing team posts in Buddy Beacon for this event.</p>
                 </button>
               </div>
             ) : findTeamAction === 'create' ? (
               <div className="space-y-6">
-                <Button variant="ghost" size="sm" onClick={() => setFindTeamAction(null)} className="rounded-full font-semibold">← Back</Button>
+                <Button variant="ghost" size="sm" onClick={() => setFindTeamAction(null)} className="rounded-full font-semibold min-h-[44px]">← Back</Button>
                 <div className="bg-primary/10 border border-primary/20 p-4 rounded-lg">
                   <h4 className="font-semibold mb-2 text-foreground">Auto-filled Event Details:</h4>
                   <div className="space-y-2 text-sm text-muted-foreground/80">
@@ -618,17 +625,17 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
                   <p className="text-sm text-muted-foreground">⏰ <strong>Auto-Expiry:</strong> Your team post will expire in 24 hours and auto-create a Collab Pod if you receive applicants.</p>
                 </div>
                 <div className="flex space-x-4">
-                  <Button onClick={handleCreateTeamPost} disabled={!teamPost.description.trim()} variant="default" className="flex-1 font-semibold">🚀 Create Team Post</Button>
-                  <Button variant="ghost" onClick={() => setFindTeamAction(null)}>Cancel</Button>
+                  <Button onClick={handleCreateTeamPost} disabled={!teamPost.description.trim()} variant="default" className="flex-1 font-semibold min-h-[44px]">🚀 Create Team Post</Button>
+                  <Button variant="ghost" onClick={() => setFindTeamAction(null)} className="min-h-[44px]">Cancel</Button>
                 </div>
               </div>
             ) : (
               <div className="space-y-6 text-center relative">
-                <Button variant="ghost" size="sm" onClick={() => setFindTeamAction(null)} className="rounded-full absolute top-0 left-0 font-semibold">← Back</Button>
+                <Button variant="ghost" size="sm" onClick={() => setFindTeamAction(null)} className="rounded-full absolute top-0 left-0 font-semibold min-h-[44px]">← Back</Button>
                 <div className="text-6xl pt-8">🔍</div>
                 <h4 className="font-semibold text-lg text-foreground">Browse Existing Teams</h4>
                 <p className="text-muted-foreground/70">We'll take you to the Buddy Beacon to see all team posts for {selectedEvent.title}.</p>
-                <Button onClick={handleBrowseTeams} variant="default" className="w-full font-semibold">🚀 Go to Buddy Beacon</Button>
+                <Button onClick={handleBrowseTeams} variant="default" className="w-full font-semibold min-h-[44px]">🚀 Go to Buddy Beacon</Button>
               </div>
             )}
           </Card>
@@ -679,12 +686,12 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
                 </div>
               )}
               <div className="flex justify-end space-x-2 pt-6 border-t border-white/10">
-                <Button variant="ghost" onClick={() => setShowEventDetailsModal(false)} className="font-semibold">Close</Button>
+                <Button variant="ghost" onClick={() => setShowEventDetailsModal(false)} className="font-semibold min-h-[44px]">Close</Button>
                 {(selectedEvent.maxParticipants > 1 || selectedEvent.maxTeamSize > 1) && (
                   <Button 
                     onClick={() => { setShowEventDetailsModal(false); handleFindTeam(selectedEvent); }} 
                     variant="default"
-                    className="font-semibold"
+                    className="font-semibold min-h-[44px]"
                   >
                     🔍 Find Team
                   </Button>
@@ -847,7 +854,7 @@ export default function EventsHub({ user, onNavigateToBeacon }) {
                   <p className="text-xs text-muted-foreground mt-1">⏰ Users must register by this date to participate</p>
                 </div>
               )}
-              <div className="flex justify-end space-x-2 pt-4"><Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button><Button onClick={handleCreateEventSubmit} disabled={isSubmitting || !!teamSizeError}>{isSubmitting ? 'Creating...' : '🚀 Create Event'}</Button></div>
+              <div className="flex justify-end space-x-2 pt-4"><Button variant="outline" onClick={() => setShowCreateModal(false)} className="min-h-[44px]">Cancel</Button><Button onClick={handleCreateEventSubmit} disabled={isSubmitting || !!teamSizeError} className="min-h-[44px]">{isSubmitting ? 'Creating...' : '🚀 Create Event'}</Button></div>
             </div>
           </Card>
         </div>

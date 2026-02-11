@@ -78,12 +78,12 @@ export default function Navigation({ currentView, onViewChange, user, unreadCoun
 
     // Cyber Neon Theme - Professional Sober-Neon aesthetic
     return `
-      group relative flex items-center space-x-2 px-6 py-2.5 rounded-lg transition-all duration-500 cursor-pointer overflow-visible backdrop-blur-xl border font-semibold text-sm tracking-wide
+      group relative flex items-center space-x-2 px-6 py-2.5 rounded-lg transition-all duration-500 cursor-pointer overflow-visible backdrop-blur-xl border font-semibold text-sm tracking-wide min-h-[44px] sm:min-h-[auto]
       ${isActive
         ? 'bg-cyan-400/20 text-cyan-300 border-cyan-400/40 shadow-lg shadow-cyan-400/20'
         : 'bg-white/8 text-foreground/70 border-white/15 hover:bg-cyan-400/10 hover:text-cyan-300 hover:border-cyan-400/30 hover:shadow-md'
       }
-      hover:-translate-y-1 transition-transform duration-500
+      hover:-translate-y-1 transition-transform duration-500 focus:ring-2 focus:ring-cyan-400/50 focus:outline-none
     `
   }
 
@@ -190,7 +190,9 @@ export default function Navigation({ currentView, onViewChange, user, unreadCoun
                 <div className="relative" ref={profileMenuRef}>
                   <button
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
-                    className="flex items-center space-x-3 px-4 py-2 rounded-lg backdrop-blur-xl bg-white/8 border border-white/15 hover:bg-white/12 hover:border-white/25 hover:shadow-md transition-all duration-500 hover:-translate-y-1 group relative overflow-hidden"
+                    className="flex items-center space-x-3 px-4 py-2 rounded-lg backdrop-blur-xl bg-white/8 border border-white/15 hover:bg-white/12 hover:border-white/25 hover:shadow-md transition-all duration-500 hover:-translate-y-1 group relative overflow-hidden min-h-[44px] focus:ring-2 focus:ring-cyan-400/50 focus:outline-none"
+                    aria-expanded={showProfileMenu}
+                    aria-label="Profile menu"
                   >
                     {/* Button shimmer */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
