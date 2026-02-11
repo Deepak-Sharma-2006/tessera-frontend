@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
 import { Input } from "@/components/ui/input.jsx";
+import ReportModal from "@/components/ui/ReportModal.jsx";
 import api, {
   getUserConversations,
   getMessages,
@@ -69,6 +70,7 @@ export default function InterChat({ user }) {
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [attachment, setAttachment] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -314,7 +316,12 @@ export default function InterChat({ user }) {
                     <div className="text-sm text-cyan-400/70">{getOtherUserInfo(selected).college} • Active now</div>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-500/10 hover:border-red-500/30">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-red-600 hover:bg-red-500/10 hover:border-red-500/30"
+                  onClick={() => setShowReportModal(true)}
+                >
                   🚨 Report
                 </Button>
               </div>
@@ -538,6 +545,15 @@ export default function InterChat({ user }) {
           )}
         </Card>
       </div>
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        reportedUserId={selected ? (conversations.find(c => c.id === selected.id)?.participantIds?.find(id => id !== userId)) : null}
+        reportedUserName={selected ? getOtherUserInfo(selected).name : "User"}
+        currentUserId={userId}
+      />
     </div>
   );
 }

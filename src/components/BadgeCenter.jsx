@@ -3,17 +3,84 @@ import { Card } from './ui/card.jsx'
 import { Button } from './ui/button.jsx'
 import { Badge } from './ui/badge.jsx'
 import { Avatar } from './ui/avatar.jsx'
+import { XCircle } from 'lucide-react'
 import axios from 'axios'
 import api from '@/lib/api.js'
 import SockJS from 'sockjs-client'
 import * as Stomp from '@stomp/stompjs'
+import PenaltyCountdownTimer from './ui/PenaltyCountdownTimer.jsx'
 
 const powerFiveBadges = [
-  { id: 'founding-dev', name: 'Founding Dev', icon: '💻', tier: 'Legendary', color: 'from-yellow-500 to-orange-600', description: 'System Architect', progress: { current: 0, total: 1 }, isUnlocked: false, isActive: false, perks: ['Developer access'] },
-  { id: 'campus-catalyst', name: 'Campus Catalyst', icon: '📢', tier: 'Epic', color: 'from-blue-500 to-purple-600', description: 'Verified College Head', progress: { current: 1, total: 1 }, isUnlocked: false, isActive: false, perks: ['Event creation access'] },
-  { id: 'pod-pioneer', name: 'Pod Pioneer', icon: '🌱', tier: 'Common', color: 'from-green-500 to-emerald-600', description: 'First Pod Entry', progress: { current: 0, total: 1 }, isUnlocked: false, isActive: false, perks: ['Pod history tracking'] },
-  { id: 'bridge-builder', name: 'Bridge Builder', icon: '🌉', tier: 'Uncommon', color: 'from-cyan-500 to-blue-500', description: 'Inter-college collab', progress: { current: 0, total: 1 }, isUnlocked: false, isActive: false, perks: ['Cross-campus features'] },
-  { id: 'skill-sage', name: 'Skill Sage', icon: '🧠', tier: 'Rare', color: 'from-pink-500 to-rose-600', description: '3+ endorsements', progress: { current: 0, total: 3 }, isUnlocked: false, isActive: false, perks: ['Skill showcase boost'] }
+  { 
+    id: 'founding-dev', 
+    name: 'Founding Dev', 
+    icon: '💻', 
+    tier: 'Legendary', 
+    color: 'from-yellow-500 to-orange-600', 
+    description: 'System Architect', 
+    requirement: 'isDev flag = true', 
+    progress: { current: 0, total: 1 }, 
+    isUnlocked: false, 
+    isActive: false, 
+    perks: ['Developer access', 'Event creation privileges'],
+    unlockedBy: 'Developer status granted by admin'
+  },
+  { 
+    id: 'campus-catalyst', 
+    name: 'Campus Catalyst', 
+    icon: '📢', 
+    tier: 'Epic', 
+    color: 'from-blue-500 to-purple-600', 
+    description: 'Verified College Head', 
+    requirement: 'role = COLLEGE_HEAD',
+    progress: { current: 1, total: 1 }, 
+    isUnlocked: false, 
+    isActive: false, 
+    perks: ['Event creation access', 'College leadership'],
+    unlockedBy: 'Promoted to College Head role'
+  },
+  { 
+    id: 'pod-pioneer', 
+    name: 'Pod Pioneer', 
+    icon: '🌱', 
+    tier: 'Uncommon', 
+    color: 'from-green-500 to-emerald-600', 
+    description: 'First Pod Entry', 
+    requirement: 'Join your first pod',
+    progress: { current: 0, total: 1 }, 
+    isUnlocked: false, 
+    isActive: false, 
+    perks: ['Pod history tracking', 'Collaboration access'],
+    unlockedBy: 'Join your first collaboration pod'
+  },
+  { 
+    id: 'bridge-builder', 
+    name: 'Bridge Builder', 
+    icon: '🌉', 
+    tier: 'Rare', 
+    color: 'from-cyan-500 to-blue-500', 
+    description: 'Inter-college Collaborator', 
+    requirement: 'Message across colleges',
+    progress: { current: 0, total: 1 }, 
+    isUnlocked: false, 
+    isActive: false, 
+    perks: ['Cross-campus features', 'Inter-college access'],
+    unlockedBy: 'Send your first inter-college message'
+  },
+  { 
+    id: 'skill-sage', 
+    name: 'Skill Sage', 
+    icon: '🧠', 
+    tier: 'Rare', 
+    color: 'from-pink-500 to-rose-600', 
+    description: '3+ Endorsements', 
+    requirement: 'Get 3+ endorsements (current: X/3)',
+    progress: { current: 0, total: 3 }, 
+    isUnlocked: false, 
+    isActive: false, 
+    perks: ['Skill showcase boost', 'Expert recognition'],
+    unlockedBy: 'Receive 3 endorsements from peers'
+  }
 ];
 
 // MVP Power Five badges
@@ -172,15 +239,15 @@ const penaltyBadges = [
     id: 'spammer',
     name: 'Spam Alert',
     icon: '🚫',
-    tier: 'Warning',
-    nextTier: 'Minor',
-    description: 'Issued for spam or repetitive content',
+    tier: 'Penalty',
+    description: 'Active community penalty - 24hr lockout',
     progress: { current: 1, total: 1 },
-    isUnlocked: true,
-    isActive: true,
+    isUnlocked: false,  // ✅ Dynamically set based on user.penaltyExpiry
+    isActive: false,    // ✅ Dynamically set based on user.penaltyExpiry
     perks: [],
     cannotBeHidden: true,
-    duration: '3 days',
+    isPenaltyBadge: true,
+    duration: '24 hours',
     expiresAt: '2024-02-18',
     isPenaltyBadge: true,
     offense: 'Excessive posting in multiple channels',
@@ -339,39 +406,69 @@ export default function BadgeCenter({ user, setUser }) {
   // ✅ STRICT DATA-DRIVEN BADGE UNLOCK LOGIC (100% from MongoDB Atlas)
   // Update Power Five badges with dynamic unlock status based on REAL user.badges array only
   
-  // 1. FOUNDING DEV: Unlock ONLY if in user.badges array
+  // ✅ AUDIT LOG: Check each badge unlock requirement
+  console.log('\n🔍 BADGE UNLOCK AUDIT:');
+  console.log('  User Badges:', user?.badges || []);
+  console.log('  isDev:', user?.isDev);
+  console.log('  Role:', user?.role);
+  console.log('  Posts:', user?.postsCount);
+  console.log('  Endorsements:', user?.endorsementsCount);
+  
+  // 1. FOUNDING DEV: isDev flag = true
   powerFiveBadges[0].isUnlocked = user?.badges?.includes('Founding Dev') || false;
   powerFiveBadges[0].progress = { current: user?.badges?.includes('Founding Dev') ? 1 : 0, total: 1 };
+  if (user?.isDev) {
+    console.log('  ✅ FOUNDING DEV: isDev=true (SHOULD UNLOCK)');
+  } else {
+    console.log('  ❌ FOUNDING DEV: isDev=false (LOCKED)');
+  }
   
-  // 2. CAMPUS CATALYST: Unlock ONLY if in user.badges array
+  // 2. CAMPUS CATALYST: role = COLLEGE_HEAD
   powerFiveBadges[1].isUnlocked = user?.badges?.includes('Campus Catalyst') || false;
   powerFiveBadges[1].progress = { current: user?.badges?.includes('Campus Catalyst') ? 1 : 0, total: 1 };
+  if (user?.role === 'COLLEGE_HEAD') {
+    console.log('  ✅ CAMPUS CATALYST: role=COLLEGE_HEAD (SHOULD UNLOCK)');
+  } else {
+    console.log('  ❌ CAMPUS CATALYST: role=' + user?.role + ' (LOCKED)');
+  }
   
-  // 3. POD PIONEER: Unlock ONLY if in user.badges array
+  // 3. POD PIONEER: Unlock on first pod join (permanent)
   powerFiveBadges[2].isUnlocked = user?.badges?.includes('Pod Pioneer') || false;
   powerFiveBadges[2].progress = { current: user?.badges?.includes('Pod Pioneer') ? 1 : 0, total: 1 };
+  console.log('  ' + (powerFiveBadges[2].isUnlocked ? '✅' : '❌') + ' POD PIONEER: ' + (powerFiveBadges[2].isUnlocked ? 'UNLOCKED' : 'LOCKED - Join a pod'));
   
-  // 4. BRIDGE BUILDER: Unlock ONLY if in user.badges array
+  // 4. BRIDGE BUILDER: Inter-college message (permanent)
   powerFiveBadges[3].isUnlocked = user?.badges?.includes('Bridge Builder') || false;
   powerFiveBadges[3].progress = { current: user?.badges?.includes('Bridge Builder') ? 1 : 0, total: 1 };
+  console.log('  ' + (powerFiveBadges[3].isUnlocked ? '✅' : '❌') + ' BRIDGE BUILDER: ' + (powerFiveBadges[3].isUnlocked ? 'UNLOCKED' : 'LOCKED - Send inter-college message'));
   
-  // 5. SKILL SAGE: Unlock ONLY if in user.badges array
+  // 5. SKILL SAGE: endorsementsCount >= 3
+  const endorsementCount = user?.endorsementsCount || 0;
   powerFiveBadges[4].isUnlocked = user?.badges?.includes('Skill Sage') || false;
-  powerFiveBadges[4].progress = { 
-    current: Math.min(user?.endorsementsCount || 0, 3), 
-    total: 3 
-  };
+  powerFiveBadges[4].progress = { current: Math.min(endorsementCount, 3), total: 3 };
+  console.log('  ' + (endorsementCount >= 3 ? '✅' : '❌') + ' SKILL SAGE: ' + endorsementCount + '/3 endorsements' + (powerFiveBadges[4].isUnlocked ? ' (UNLOCKED)' : ' (LOCKED)'));
 
-  // ✅ SIGNAL GUARDIAN: ONLY if in user.badges array (no hardcoded checks)
+  // ✅ SIGNAL GUARDIAN: postsCount >= 5 requirement
+  const postCount = user?.postsCount || 0;
   moderatorBadge.isUnlocked = user?.badges?.includes('Signal Guardian') || false;
   moderatorBadge.isActive = user?.badges?.includes('Signal Guardian') || false;
+  console.log('  ' + (postCount >= 5 ? '✅' : '❌') + ' SIGNAL GUARDIAN: ' + postCount + '/5 posts' + (moderatorBadge.isUnlocked ? ' (UNLOCKED)' : ' (LOCKED)'));
+  
+  // ✅ SPAM ALERT: Dynamic penalty badge based on penaltyExpiry
+  const hasActivePenalty = user?.penaltyExpiry && new Date(user.penaltyExpiry) > new Date();
+  const reportCount = user?.reportCount || 0;
+  penaltyBadges[0].isUnlocked = hasActivePenalty;
+  penaltyBadges[0].isActive = hasActivePenalty;
+  penaltyBadges[0].isPenaltyBadge = true;
+  console.log('  ' + (hasActivePenalty ? '✅' : '❌') + ' SPAM ALERT: ' + reportCount + '/3 reports' + (hasActivePenalty ? ' (ACTIVE PENALTY)' : ' (INACTIVE)'));
+  console.log('✓ BADGE UNLOCK AUDIT COMPLETE\n');
 
   // ✅ Check user status - 100% based on REAL badges from MongoDB
   const isModerator = user?.badges?.includes('Signal Guardian') || false;
   const hasModerationBadges = user?.badges?.some(b => 
     ['Chat Warden', 'Content Guardian', 'Event Coordinator', 'Collab Supervisor', 'Community Leader'].includes(b)
   ) || false;
-  const hasPenaltyBadges = penaltyBadges.some(badge => badge.isUnlocked)
+  const hasPenaltyBadges = hasActivePenalty || penaltyBadges.some(badge => badge.isUnlocked)
 
   const allBadges = badgeCategories.flatMap(cat => cat.badges.map(badge => ({ ...badge, category: cat.name, categoryColor: cat.color })))
   const earnedBadges = allBadges.filter(badge => badge.isUnlocked)
@@ -414,21 +511,22 @@ export default function BadgeCenter({ user, setUser }) {
 
   const getTierColor = (tier) => {
     const colors = {
-      'Common': 'text-gray-600 bg-gray-100',
-      'Uncommon': 'text-green-600 bg-green-100',
-      'Rare': 'text-blue-600 bg-blue-100',
-      'Epic': 'text-purple-600 bg-purple-100',
-      'Legendary': 'text-yellow-600 bg-yellow-100',
-      'Basic': 'text-blue-600 bg-blue-100',
-      'Advanced': 'text-purple-600 bg-purple-100',
-      'Elite': 'text-yellow-600 bg-yellow-100',
-      'Warning': 'text-orange-600 bg-orange-100',
-      'Minor': 'text-red-600 bg-red-100',
-      'Major': 'text-red-700 bg-red-200',
-      'Severe': 'text-red-800 bg-red-300',
-      'Permanent': 'text-black bg-red-400'
+      'Common': 'text-gray-300 bg-gray-700/40 border border-gray-600/60',
+      'Uncommon': 'text-green-300 bg-green-900/40 border border-green-700/60',
+      'Rare': 'text-blue-300 bg-blue-900/40 border border-blue-700/60',
+      'Epic': 'text-purple-300 bg-purple-900/40 border border-purple-700/60',
+      'Legendary': 'text-yellow-300 bg-yellow-900/40 border border-yellow-700/60 shadow-lg shadow-yellow-500/30',
+      'Basic': 'text-blue-300 bg-blue-900/40 border border-blue-700/60',
+      'Advanced': 'text-purple-300 bg-purple-900/40 border border-purple-700/60',
+      'Elite': 'text-yellow-300 bg-yellow-900/40 border border-yellow-700/60 shadow-lg shadow-yellow-500/30',
+      'Warning': 'text-orange-300 bg-orange-900/40 border border-orange-700/60',
+      'Minor': 'text-red-300 bg-red-900/40 border border-red-700/60',
+      'Major': 'text-red-300 bg-red-900/60 border border-red-700/80',
+      'Severe': 'text-red-200 bg-red-950/70 border border-red-700',
+      'Permanent': 'text-red-100 bg-red-950/90 border border-red-600 shadow-lg shadow-red-500/40',
+      'Penalty': 'text-red-300 bg-red-900/40 border border-red-700/60'
     }
-    return colors[tier] || 'text-gray-600 bg-gray-100'
+    return colors[tier] || 'text-gray-300 bg-gray-700/40 border border-gray-600/60'
   }
 
   const getTierStars = (tier) => {
@@ -632,44 +730,75 @@ export default function BadgeCenter({ user, setUser }) {
             <div 
               key={badge.id} 
               className={`flex flex-col items-center p-4 rounded-xl border-2 backdrop-blur-xl transition-all relative group ${
+                badge.name === 'Spam Alert' && user?.penaltyExpiry ? 'w-32 h-32 border-red-500/50 bg-red-600/15 shadow-lg shadow-red-500/20 justify-center' :
                 badge.tier === 'Legendary' || badge.tier === 'Elite' ? 'border-cyan-400/50 bg-cyan-400/15 shadow-lg shadow-cyan-400/20' : 
-                badge.isPenaltyBadge ? 'border-magenta-400/50 bg-magenta-400/15 shadow-lg shadow-magenta-400/20' : 
+                badge.name === 'Spam Alert' ? 'border-red-500/50 bg-red-600/15 shadow-lg shadow-red-500/20' :
+                badge.isPenaltyBadge ? 'border-red-500/50 bg-red-600/15 shadow-lg shadow-red-500/20' : 
                 badge.isModeratorBadge ? 'border-cyan-400/50 bg-cyan-400/15 shadow-lg shadow-cyan-400/20' :
                 'border-cyan-400/30 bg-cyan-950/20'
               }`}
             >
-              {/* Cannot hide indicator for special badges */}
-              {(badge.cannotBeHidden || badge.id === 'signal-guardian') && (
-                <div className="absolute -top-2 -right-2 w-5 h-5 bg-magenta-500 rounded-full flex items-center justify-center shadow-lg shadow-magenta-500/50">
-                  <span className="text-white text-xs">🔒</span>
+              {/* Spam Alert Badge - Active Penalty */}
+              {badge.name === 'Spam Alert' && user?.penaltyExpiry && (
+                <div className="flex flex-col items-center justify-center w-full h-full">
+                  {/* Red Cross Icon */}
+                  <XCircle className="w-12 h-12 text-red-500 mb-2 animate-pulse drop-shadow-lg" style={{ filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))' }} />
+                  
+                  {/* Title */}
+                  <span className="font-bold text-xs text-center text-red-300 mb-2">SPAM ALERT</span>
+                  
+                  {/* Countdown Timer Centered */}
+                  <PenaltyCountdownTimer 
+                    targetDate={user.penaltyExpiry}
+                    centered={true}
+                    onExpired={() => {
+                      console.log('✅ Penalty expired, badge should be removed');
+                    }}
+                  />
                 </div>
               )}
 
-              {/* Remove Badge Button - Only for removable badges */}
-              {!badge.cannotBeHidden && !badge.isPenaltyBadge && !badge.isModeratorBadge && (
-                <button
-                  onClick={() => handleRemoveFeaturedBadge(badge.id)}
-                  className="absolute -top-3 -right-3 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-red-600"
-                  title="Remove from featured"
-                  disabled={featuredBadgesLoading}
-                >
-                  <span className="text-white text-sm font-bold">−</span>
-                </button>
-              )}
-              
-              <div className={`text-3xl mb-2 ${badge.tier === 'Legendary' || badge.tier === 'Elite' ? 'animate-pulse' : ''} ${badge.isPenaltyBadge ? 'opacity-80' : ''}`}>
-                {badge.icon}
-              </div>
-              <span className="font-medium text-sm text-center text-white">{badge.name}</span>
-              <Badge className={`${getTierColor(badge.tier)} text-xs mt-1`}>
-                {getTierStars(badge.tier)}
-              </Badge>
-              
-              {/* Duration indicator for timed badges */}
-              {badge.duration && badge.duration !== 'Permanent' && (
-                <div className="text-xs text-cyan-300 mt-1">
-                  {getRemainingTime(badge.expiresAt)}
-                </div>
+              {/* Standard Badge Display - Non-Spam Alert */}
+              {!(badge.name === 'Spam Alert' && user?.penaltyExpiry) && (
+                <>
+                  {/* Lock indicator - hide for Spam Alert with active penalty */}
+                  {(badge.cannotBeHidden || badge.id === 'signal-guardian') && (
+                    <div className="absolute -top-2 -right-2 w-5 h-5 bg-magenta-500 rounded-full flex items-center justify-center shadow-lg shadow-magenta-500/50">
+                      <span className="text-white text-xs">🔒</span>
+                    </div>
+                  )}
+
+                  {/* Remove Badge Button - Only for removable badges */}
+                  {!badge.cannotBeHidden && !badge.isPenaltyBadge && !badge.isModeratorBadge && (
+                    <button
+                      onClick={() => handleRemoveFeaturedBadge(badge.id)}
+                      className="absolute -top-3 -right-3 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-red-600"
+                      title="Remove from featured"
+                      disabled={featuredBadgesLoading}
+                    >
+                      <span className="text-white text-sm font-bold">−</span>
+                    </button>
+                  )}
+                  
+                  {/* Icon */}
+                  <div className={`text-3xl mb-2 ${badge.tier === 'Legendary' || badge.tier === 'Elite' ? 'animate-pulse' : ''} ${badge.isPenaltyBadge ? 'opacity-80' : ''}`}>
+                    {badge.icon}
+                  </div>
+                  
+                  <span className="font-medium text-sm text-center text-white">{badge.name}</span>
+                  
+                  {/* Tier Badge */}
+                  <Badge className={`${getTierColor(badge.tier)} text-xs mt-1`}>
+                    {getTierStars(badge.tier)}
+                  </Badge>
+                  
+                  {/* Duration indicator for timed badges */}
+                  {badge.duration && badge.duration !== 'Permanent' && (
+                    <div className="text-xs text-cyan-300 mt-1">
+                      {getRemainingTime(badge.expiresAt)}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ))}
@@ -685,7 +814,7 @@ export default function BadgeCenter({ user, setUser }) {
         </div>
         
         <div className="text-center mt-4 text-sm text-muted-foreground">
-          💡 Special badges (Moderator, Moderation, Penalty) are always visible and cannot be hidden
+          💡 Special badges (Moderator, Moderation, Penalty, Spam Alert) are always visible and cannot be hidden
         </div>
       </div>
 
@@ -695,31 +824,38 @@ export default function BadgeCenter({ user, setUser }) {
           {getFilteredBadges().map((badge) => (
             <Card 
               key={badge.id} 
-              className={`component-badge-card p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-2xl cursor-pointer ${
-                !badge.isUnlocked ? 'opacity-60' : ''
-              } ${badge.tier === 'Legendary' ? 'border-yellow-300 shadow-lg' : ''}`}
+              className={`component-badge-card p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-2xl cursor-pointer backdrop-blur-xl
+                ${badge.isUnlocked 
+                  ? `border-2 shadow-lg ${
+                      badge.tier === 'Legendary' ? 'border-yellow-500/60 shadow-yellow-500/20 bg-gradient-to-br from-yellow-900/20 to-orange-900/20' :
+                      badge.tier === 'Epic' ? 'border-purple-500/60 shadow-purple-500/20 bg-gradient-to-br from-purple-900/20 to-blue-900/20' :
+                      badge.tier === 'Rare' ? 'border-blue-500/60 shadow-blue-500/20 bg-gradient-to-br from-blue-900/20 to-cyan-900/20' :
+                      'border-cyan-500/40 shadow-cyan-500/10 bg-gradient-to-br from-cyan-900/10 to-slate-900/10'
+                    }`
+                  : 'border-2 border-gray-700/40 opacity-50 bg-gray-900/20 hover:opacity-70'
+                }`}
               onClick={() => setSelectedBadge(badge)}
             >
               <div className="text-center space-y-3">
-                <div className={`text-5xl ${badge.tier === 'Legendary' ? 'animate-pulse' : ''} ${!badge.isUnlocked ? 'grayscale' : ''}`}>
+                <div className={`text-5xl ${badge.tier === 'Legendary' || badge.tier === 'Epic' ? 'animate-pulse' : ''} ${!badge.isUnlocked ? 'grayscale blur-sm' : ''}`}>
                   {badge.isUnlocked ? badge.icon : '🔒'}
                 </div>
-                <h3 className="font-semibold text-lg">{badge.name}</h3>
-                <Badge className={`${getTierColor(badge.tier)} px-3 py-1 rounded-full`}>
+                <h3 className={`font-semibold text-lg ${!badge.isUnlocked ? 'text-gray-500' : 'text-white'}`}>{badge.name}</h3>
+                <Badge className={`${getTierColor(badge.tier)} px-3 py-1 rounded-full w-fit mx-auto`}>
                   {getTierStars(badge.tier)}
                 </Badge>
                 <p className="text-sm text-muted-foreground">{badge.description}</p>
                 
                 {/* Progress bar for unearned badges */}
                 {!badge.isUnlocked && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 mt-3">
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Progress</span>
-                      <span>{badge.progress.current}/{badge.progress.total}</span>
+                      <span className="font-semibold">Progress</span>
+                      <span className="font-mono">{badge.progress.current}/{badge.progress.total}</span>
                     </div>
-                    <div className="w-full bg-muted rounded-full h-2">
+                    <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden border border-gray-600">
                       <div 
-                        className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                        className="bg-gradient-to-r from-cyan-500 to-blue-500 h-3 rounded-full transition-all duration-500 shadow-lg shadow-cyan-500/50"
                         style={{ width: `${(badge.progress.current / badge.progress.total) * 100}%` }}
                       />
                     </div>
@@ -734,14 +870,41 @@ export default function BadgeCenter({ user, setUser }) {
       {/* Badge Detail Modal */}
       {selectedBadge && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <Card className="max-w-md w-full p-8 rounded-2xl shadow-2xl">
+          <Card className="max-w-md w-full p-8 rounded-2xl shadow-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-cyan-500/30">
             <div className="text-center space-y-4">
-              <div className="text-6xl">{selectedBadge.isUnlocked ? selectedBadge.icon : '🔒'}</div>
-              <h2 className="text-2xl font-bold">{selectedBadge.name}</h2>
-              <Badge className={`${getTierColor(selectedBadge.tier)} px-4 py-2 text-sm`}>
+              <div className={`text-6xl ${selectedBadge.tier === 'Legendary' || selectedBadge.tier === 'Epic' ? 'animate-pulse' : ''}`}>
+                {selectedBadge.isUnlocked ? selectedBadge.icon : '🔒'}
+              </div>
+              <h2 className="text-2xl font-bold text-white">{selectedBadge.name}</h2>
+              <Badge className={`${getTierColor(selectedBadge.tier)} px-4 py-2 text-sm mx-auto`}>
                 {getTierStars(selectedBadge.tier)} {selectedBadge.tier}
               </Badge>
               <p className="text-muted-foreground">{selectedBadge.description}</p>
+              
+              {/* Show unlock requirement for locked badges */}
+              {!selectedBadge.isUnlocked && (
+                <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-red-300 text-sm">
+                  <div className="font-semibold mb-1">🔒 Unlock Requirement:</div>
+                  <div>{selectedBadge.requirement}</div>
+                  {selectedBadge.unlockedBy && <div className="mt-2 text-xs text-red-300/70">{selectedBadge.unlockedBy}</div>}
+                </div>
+              )}
+              
+              {/* Show progress bar for evolving badges */}
+              {!selectedBadge.isUnlocked && selectedBadge.progress.total > 1 && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs text-gray-400">
+                    <span>Progress</span>
+                    <span className="font-mono font-bold">{selectedBadge.progress.current}/{selectedBadge.progress.total}</span>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden border border-gray-600">
+                    <div 
+                      className="bg-gradient-to-r from-cyan-500 to-blue-500 h-3 rounded-full transition-all duration-500 shadow-lg shadow-cyan-500/50"
+                      style={{ width: `${(selectedBadge.progress.current / selectedBadge.progress.total) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              )}
               
               {selectedBadge.perks && selectedBadge.perks.length > 0 && (
                 <div className="space-y-2">

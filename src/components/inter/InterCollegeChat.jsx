@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import SockJS from "sockjs-client";
 import { over } from "stompjs";
 import api from "@/lib/api.js";
+import ReportModal from "@/components/ui/ReportModal.jsx";
 
 const API_BASE = "/api/messages";
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
@@ -32,6 +33,7 @@ export default function InterCollegeChat({ userId }) {
   const [input, setInput] = useState("");
   const [stompClient, setStompClient] = useState(null);
   const [attachments, setAttachments] = useState([]);
+  const [showReportModal, setShowReportModal] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Connect WebSocket
@@ -144,7 +146,12 @@ export default function InterCollegeChat({ userId }) {
                   <div className="text-xs text-cyan-300">Active now</div>
                 </div>
               </div>
-              <button className="bg-red-700 text-white px-3 py-1 rounded-lg">Report</button>
+              <button 
+                className="bg-red-700 text-white px-3 py-1 rounded-lg hover:bg-red-800 transition"
+                onClick={() => setShowReportModal(true)}
+              >
+                Report
+              </button>
             </div>
             <div className="flex-1 overflow-y-auto mb-4">
               {messages.map(msg => (
@@ -201,6 +208,15 @@ export default function InterCollegeChat({ userId }) {
           </div>
         )}
       </div>
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        reportedUserId={selected ? selected.participantIds.find(id => id !== userId) : null}
+        reportedUserName={selected ? selected.participantIds.find(id => id !== userId) : "User"}
+        currentUserId={userId}
+      />
     </div>
   );
 }

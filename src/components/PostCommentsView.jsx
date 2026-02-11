@@ -3,7 +3,6 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import api from '@/lib/api.js';
 import PostCommentsPage from '@/components/campus/PostCommentsPage.jsx';
 import Navigation from '@/components/Navigation.jsx';
-import XPDisplay from '@/components/ui/XPDisplay.jsx';
 import LoadingSpinner from '@/components/animations/LoadingSpinner.jsx';
 
 /**
@@ -75,7 +74,6 @@ export default function PostCommentsView({ user, setUser }) {
     return (
         <>
             <Navigation user={user} setUser={setUser} currentView={currentView} onViewChange={handleTabNavigation} />
-            <XPDisplay user={user} />
             <main className="pb-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <PostCommentsPage user={user} />

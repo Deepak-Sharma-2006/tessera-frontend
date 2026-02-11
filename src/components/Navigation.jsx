@@ -207,7 +207,7 @@ export default function Navigation({ currentView, onViewChange, user, unreadCoun
                         {user?.fullName || user?.name || 'User'}
                       </div>
                       <div className="text-xs text-muted-foreground/70">
-                        {`${user?.collegeName || 'College'} • Level ${user?.level || 12}`}
+                        {`${user?.collegeName || 'College'}`}
                       </div>
                     </div>
 
@@ -250,9 +250,7 @@ export default function Navigation({ currentView, onViewChange, user, unreadCoun
                                   Online
                                 </span>
                               </div>
-                              <div className="text-xs text-primary font-semibold">
-                                Level {user?.level || 12}
-                              </div>
+
                             </div>
                           </div>
                         </div>

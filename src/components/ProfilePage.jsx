@@ -10,6 +10,7 @@ import { formatDate, formatJoinedDate } from '@/utils/dateFormatter.js'
 import LoadingSpinner from './animations/LoadingSpinner.jsx'
 import XPProgressBar from './ui/XPProgressBar.jsx'
 import useXpWs from '@/hooks/useXpWs.js'
+import PenaltyCountdownTimer from './ui/PenaltyCountdownTimer.jsx'
 
 export default function ProfilePage({ user, onBackToCampus, profileOwner: initialProfileOwner }) {
   const [isEditing, setIsEditing] = useState(false)
@@ -69,7 +70,22 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
     setSelectedBadges(profileOwner?.displayedBadges || [])
   }, [profileOwner])
 
-  // 📡 Real-time XP updates via WebSocket
+  // � Refresh profile when penalty expires
+  const refreshProfileData = async () => {
+    try {
+      const profileId = profileOwner?.id
+      if (profileId) {
+        const res = await api.get(`/api/users/${profileId}`)
+        setProfileOwner(res.data)
+        setFormData(res.data)
+        console.log('✅ Profile refreshed after penalty expiry')
+      }
+    } catch (err) {
+      console.error('Failed to refresh profile:', err)
+    }
+  }
+
+  // �📡 Real-time XP updates via WebSocket
   useXpWs({
     userId: profileOwner?.id,
     onXpUpdate: (updatedUser) => {
@@ -197,12 +213,14 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
     'Bridge Builder': '🌉',
     'Founding Dev': '💻',
     'Profile Pioneer': '👤',
+    'Spam Alert': '🚫',
     'skill-sage': '🧠',
     'campus-catalyst': '📢',
     'pod-pioneer': '🌱',
     'bridge-builder': '🌉',
     'founding-dev': '💻',
-    'profile-pioneer': '👤'
+    'profile-pioneer': '👤',
+    'spam-alert': '🚫'
   }
 
   // Badge metadata including tier and colors
@@ -216,7 +234,9 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
     'Campus Catalyst': { name: 'Campus Catalyst', icon: '📢', tier: 'Epic', stars: '★★★★' },
     'Pod Pioneer': { name: 'Pod Pioneer', icon: '🌱', tier: 'Common', stars: '★' },
     'Bridge Builder': { name: 'Bridge Builder', icon: '🌉', tier: 'Uncommon', stars: '★★' },
-    'Skill Sage': { name: 'Skill Sage', icon: '🧠', tier: 'Rare', stars: '★★★' }
+    'Skill Sage': { name: 'Skill Sage', icon: '🧠', tier: 'Rare', stars: '★★★' },
+    'Spam Alert': { name: 'Spam Alert', icon: '🚫', tier: 'Penalty', stars: '⚠️' },
+    'spam-alert': { name: 'Spam Alert', icon: '🚫', tier: 'Penalty', stars: '⚠️' }
   }
 
   // Get badge info by ID or name
@@ -236,7 +256,8 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
       'Uncommon': 'bg-green-100 text-green-600',
       'Rare': 'bg-blue-100 text-blue-600',
       'Epic': 'bg-purple-100 text-purple-600',
-      'Legendary': 'bg-yellow-100 text-yellow-600'
+      'Legendary': 'bg-yellow-100 text-yellow-600',
+      'Penalty': 'bg-red-500/30 text-red-400'
     }
     return colors[tier] || 'bg-gray-100 text-gray-600'
   }
@@ -286,12 +307,48 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                 </div>
               </div>
 
+              {/* 🚨 PUBLIC PENALTY BADGES SECTION - SPAM ALERT ALWAYS VISIBLE */}
+              {profileOwner?.displayedBadges && profileOwner.displayedBadges.includes('Spam Alert') && (
+                <div className="mb-12 p-6 bg-red-500/20 border-2 border-red-500 rounded-2xl">
+                  <h3 className="text-2xl font-bold text-red-400 mb-6 flex items-center gap-2">
+                    🚨 <span>Community Alert</span>
+                  </h3>
+                  <div className="flex items-center justify-center gap-6">
+                    <div className="flex flex-col items-center">
+                      <div className="w-24 h-24 bg-gradient-to-br from-red-500 to-red-400 rounded-2xl flex items-center justify-center text-5xl shadow-lg shadow-red-500/50 border-2 border-red-400/80">
+                        🚫
+                      </div>
+                      <span className="text-lg font-bold text-red-300 mt-4">Spam Alert</span>
+                      <span className="text-xs text-red-300/60 mt-1 font-semibold">Penalty Badge</span>
+                      
+                      {/* Countdown timer for penalty expiry */}
+                      {profileOwner?.penaltyExpiry && (
+                        <div className="mt-4 w-full text-center">
+                          <PenaltyCountdownTimer 
+                            targetDate={profileOwner.penaltyExpiry}
+                            onExpired={() => refreshProfileData()}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 text-red-200">
+                      <p className="text-sm font-semibold mb-2">This user has been reported for violating community guidelines.</p>
+                      <p className="text-xs text-red-300/80">Report count: <span className="font-bold text-red-400">{profileOwner?.reportCount || 0}</span>/3</p>
+                      {profileOwner?.reportCount >= 3 && (
+                        <p className="text-xs text-red-600 font-bold mt-2">⛔ Account suspended for excessive violations</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Public Featured Badges Section - Synced with Badge Center */}
               {profileOwner?.featuredBadges && profileOwner.featuredBadges.length > 0 && (
                 <div>
                   <h3 className="text-2xl font-bold text-cyan-300 mb-8">🏆 Featured Badges</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {profileOwner.featuredBadges.map((badgeId, idx) => {
+                    {profileOwner.featuredBadges.filter(badgeId => badgeId !== 'Spam Alert').map((badgeId, idx) => {
                       const badgeInfo = getBadgeInfo(badgeId)
                       return (
                         <div key={idx} className="flex flex-col items-center group">
@@ -471,26 +528,6 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                 )}
               </div>
             </div>
-          </Card>
-        </div>
-
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-cyan-400/30 backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 to-deep-obsidian p-6 text-center hover:border-cyan-400/50 transition-all hover:shadow-lg hover:shadow-cyan-400/20">
-            <p className="text-4xl font-bold text-cyan-300">15</p>
-            <p className="text-sm text-muted-foreground/70 mt-3 font-medium">Collaborations</p>
-          </Card>
-          <Card className="border-cyan-400/30 backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 to-deep-obsidian p-6 text-center hover:border-cyan-400/50 transition-all hover:shadow-lg hover:shadow-cyan-400/20">
-            <p className="text-4xl font-bold text-cyan-300">8</p>
-            <p className="text-sm text-muted-foreground/70 mt-3 font-medium">Projects</p>
-          </Card>
-          <Card className="border-magenta-400/30 backdrop-blur-xl bg-gradient-to-br from-magenta-950/20 to-deep-obsidian p-6 text-center hover:border-magenta-400/50 transition-all hover:shadow-lg hover:shadow-magenta-400/20">
-            <p className="text-4xl font-bold text-magenta-300">{profileOwner?.endorsementsCount || 0}</p>
-            <p className="text-sm text-muted-foreground/70 mt-3 font-medium">Endorsements</p>
-          </Card>
-          <Card className="border-cyan-400/30 backdrop-blur-xl bg-gradient-to-br from-cyan-950/20 to-deep-obsidian p-6 text-center hover:border-cyan-400/50 transition-all hover:shadow-lg hover:shadow-cyan-400/20">
-            <p className="text-4xl font-bold text-cyan-300">{profileOwner?.badges?.length || 0}</p>
-            <p className="text-sm text-gray-400 mt-3 font-medium">Achievements</p>
           </Card>
         </div>
 
