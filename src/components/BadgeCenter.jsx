@@ -340,41 +340,7 @@ const powerFiveBadges = [
 
 ];
 
-// MVP Power Five badges
-const mvpBadges = [
-  {
-    id: 'founding-dev',
-    name: 'Founding Dev',
-    icon: '💻',
-    tier: 'Legendary',
-    color: 'from-yellow-400 to-orange-500',
-    description: 'System Architect'
-  },
-  {
-    id: 'campus-catalyst',
-    name: 'Campus Catalyst',
-    icon: '📢',
-    tier: 'Epic',
-    color: 'from-blue-400 to-purple-600',
-    description: 'Verified Event Creator'
-  },
-  {
-    id: 'pod-pioneer',
-    name: 'Pod Pioneer',
-    icon: '🌱',
-    tier: 'Common',
-    color: 'from-green-400 to-emerald-500',
-    description: 'First Pod Entry'
-  },
-  {
-    id: 'bridge-builder',
-    name: 'Bridge Builder',
-    icon: '🌉',
-    tier: 'Uncommon',
-    color: 'from-cyan-400 to-blue-500',
-    description: 'Cross-College Link'
-  }
-];
+// MVP Power Five badges reference - kept for reference but using powerFiveBadges array instead
 
 const badgeCategories = [
   {
@@ -587,14 +553,14 @@ const penaltyBadges = [
 
 export default function BadgeCenter({ user, setUser }) {
   const [activeTab, setActiveTab] = useState('all')
-  const [selectedCategory, setSelectedCategory] = useState('all')
+  // const [selectedCategory, setSelectedCategory] = useState('all') // Unused - kept for future category filtering
   const [selectedBadge, setSelectedBadge] = useState(null)
   const [previewLevel, setPreviewLevel] = useState(null)
   const [showFeaturedBadgeModal, setShowFeaturedBadgeModal] = useState(false)
   const [featuredBadgesLoading, setFeaturedBadgesLoading] = useState(false)
   const [hardModeBadges, setHardModeBadges] = useState([])
-  const [hardModeBadgesLoading, setHardModeBadgesLoading] = useState(true)
-  const [unlockedCountdown, setUnlockedCountdown] = useState({})
+  // const [hardModeBadgesLoading, setHardModeBadgesLoading] = useState(true) // Unused - badges display from fallback immediately
+  // const [unlockedCountdown, setUnlockedCountdown] = useState({}) // Unused - may be used for penalty badge countdown in future
 
   // 20 Hard-Mode Badge Definitions (Fallback)
   // ========== HARD-MODE BADGE CONFIGURATION ==========
@@ -781,44 +747,6 @@ export default function BadgeCenter({ user, setUser }) {
       status: 'locked'
     },
     {
-      id: 'streak-seeker-lvl1',
-      badgeId: 'streak-seeker-lvl1',
-      name: 'Streak Seeker (Bronze)',
-      badgeName: 'Streak Seeker (Bronze)',
-      iconName: 'shield',
-      tier: 'Common',
-      visualStyle: 'bronze-glow',
-      category: 'devotion',
-      description: 'Evolving Badge • Log in for 7 consecutive days (Bronze)',
-      requirement: 'Maintain a 7-day login streak',
-      unlockedBy: 'Log in every single day for 7 consecutive days',
-      perks: ['Starting streaker', 'Daily habit badge'],
-      progress: { current: 0, total: 7 },
-      isUnlocked: false,
-      isEquipped: false,
-      status: 'locked',
-      evolvesTo: 'streak-seeker-lvl2'
-    },
-    {
-      id: 'streak-seeker-lvl2',
-      badgeId: 'streak-seeker-lvl2',
-      name: 'Streak Seeker (Silver)',
-      badgeName: 'Streak Seeker (Silver)',
-      iconName: 'shield',
-      tier: 'Rare',
-      visualStyle: 'silver-shimmer',
-      category: 'devotion',
-      description: 'Evolving Badge • Log in for 30 consecutive days (Silver)',
-      requirement: 'Maintain a 30-day login streak',
-      unlockedBy: 'Log in every single day for 30 consecutive days',
-      perks: ['Committed streaker', 'Monthly loyalty badge'],
-      progress: { current: 0, total: 30 },
-      isUnlocked: false,
-      isEquipped: false,
-      status: 'locked',
-      evolvesTo: 'streak-seeker-lvl3'
-    },
-    {
       id: 'streak-seeker-lvl3',
       badgeId: 'streak-seeker-lvl3',
       name: 'Streak Seeker: Iron Streak',
@@ -827,7 +755,7 @@ export default function BadgeCenter({ user, setUser }) {
       tier: 'Legendary',
       visualStyle: 'animated-fire',
       category: 'devotion',
-      description: 'Evolving Badge • Log in for 100 consecutive days (Gold)',
+      description: 'Maintain a 100 consecutive day login streak - the ultimate test of dedication',
       requirement: 'Maintain a 100-day login streak without missing a single day',
       unlockedBy: 'Log in every single day for 100 consecutive days to keep the streak alive',
       perks: ['Unstoppable streaker', 'Daily loyalty badge', 'Presence master'],
@@ -838,44 +766,6 @@ export default function BadgeCenter({ user, setUser }) {
       isMaxLevel: true
     },
     {
-      id: 'collab-master-lvl1',
-      badgeId: 'collab-master-lvl1',
-      name: 'Collab Master (Bronze)',
-      badgeName: 'Collab Master (Bronze)',
-      iconName: 'globe',
-      tier: 'Common',
-      visualStyle: 'bronze-collaboration',
-      category: 'collaboration',
-      description: 'Evolving Badge • Join 10 Collab Rooms (Bronze)',
-      requirement: 'Join and contribute to 10 unique Collab Rooms',
-      unlockedBy: 'Participate in 10 collaborative projects',
-      perks: ['Emerging collaborator', 'Team builder'],
-      progress: { current: 0, total: 10 },
-      isUnlocked: false,
-      isEquipped: false,
-      status: 'locked',
-      evolvesTo: 'collab-master-lvl2'
-    },
-    {
-      id: 'collab-master-lvl2',
-      badgeId: 'collab-master-lvl2',
-      name: 'Collab Master (Silver)',
-      badgeName: 'Collab Master (Silver)',
-      iconName: 'globe',
-      tier: 'Rare',
-      visualStyle: 'silver-collaboration',
-      category: 'collaboration',
-      description: 'Evolving Badge • Join 25 Collab Rooms (Silver)',
-      requirement: 'Join and actively contribute to 25 unique Collab Rooms',
-      unlockedBy: 'Explore and participate in 25 collaborative projects',
-      perks: ['Seasoned collaborator', 'Multi-project explorer'],
-      progress: { current: 0, total: 25 },
-      isUnlocked: false,
-      isEquipped: false,
-      status: 'locked',
-      evolvesTo: 'collab-master-lvl3'
-    },
-    {
       id: 'collab-master-lvl3',
       badgeId: 'collab-master-lvl3',
       name: 'Collab Master: Expert',
@@ -884,7 +774,7 @@ export default function BadgeCenter({ user, setUser }) {
       tier: 'Epic',
       visualStyle: 'cyan-pulse',
       category: 'collaboration',
-      description: 'Evolving Badge • Join 50 Collab Rooms (Gold)',
+      description: 'Master collaborator - join 50 collab rooms and become an expert team builder',
       requirement: 'Join and actively contribute to 50 unique Collab Rooms',
       unlockedBy: 'Explore and participate in diverse collaborative projects across the platform',
       perks: ['Collab veteran', 'Multi-project experience', 'Collaboration master glow'],
@@ -895,44 +785,6 @@ export default function BadgeCenter({ user, setUser }) {
       isMaxLevel: true
     },
     {
-      id: 'voice-of-hub-lvl1',
-      badgeId: 'voice-of-hub-lvl1',
-      name: 'Voice of the Hub (Bronze)',
-      badgeName: 'Voice of the Hub (Bronze)',
-      iconName: 'megaphone',
-      tier: 'Common',
-      visualStyle: 'bronze-voice',
-      category: 'engagement',
-      description: 'Evolving Badge • 100 total replies (Bronze)',
-      requirement: 'Accumulate 100 total replies in the Global Hub',
-      unlockedBy: 'Participate actively in Global Hub discussions',
-      perks: ['Emerging voice', 'Community participant'],
-      progress: { current: 0, total: 100 },
-      isUnlocked: false,
-      isEquipped: false,
-      status: 'locked',
-      evolvesTo: 'voice-of-hub-lvl2'
-    },
-    {
-      id: 'voice-of-hub-lvl2',
-      badgeId: 'voice-of-hub-lvl2',
-      name: 'Voice of the Hub (Silver)',
-      badgeName: 'Voice of the Hub (Silver)',
-      iconName: 'megaphone',
-      tier: 'Rare',
-      visualStyle: 'silver-voice',
-      category: 'engagement',
-      description: 'Evolving Badge • 500 total replies (Silver)',
-      requirement: 'Accumulate 500 total replies across Global Hub posts',
-      unlockedBy: 'Be an active participant in consistent Global Hub discussions',
-      perks: ['Known voice', 'Discussion regular'],
-      progress: { current: 0, total: 500 },
-      isUnlocked: false,
-      isEquipped: false,
-      status: 'locked',
-      evolvesTo: 'voice-of-hub-lvl3'
-    },
-    {
       id: 'voice-of-hub-lvl3',
       badgeId: 'voice-of-hub-lvl3',
       name: 'Voice of the Hub: The Guru',
@@ -941,7 +793,7 @@ export default function BadgeCenter({ user, setUser }) {
       tier: 'Legendary',
       visualStyle: 'solar-flare',
       category: 'engagement',
-      description: 'Evolving Badge • 1,500 total replies (Gold)',
+      description: 'Become the ultimate voice of the platform - 1,500 total replies and counting',
       requirement: 'Accumulate 1,500 total replies across all Global Hub posts',
       unlockedBy: 'Be an active voice in the community by consistently participating in Global Hub discussions',
       perks: ['Hub voice status', 'Discussion influencer', 'Solar flare distinction'],
@@ -952,44 +804,6 @@ export default function BadgeCenter({ user, setUser }) {
       isMaxLevel: true
     },
     {
-      id: 'the-oracle-lvl1',
-      badgeId: 'the-oracle-lvl1',
-      name: 'The Oracle (Bronze)',
-      badgeName: 'The Oracle (Bronze)',
-      iconName: 'lightbulb',
-      tier: 'Common',
-      visualStyle: 'bronze-oracle',
-      category: 'predictions',
-      description: 'Evolving Badge • 5 poll wins (Bronze)',
-      requirement: 'Correctly predict 5 community poll outcomes',
-      unlockedBy: 'Develop your prediction skills by getting polls right',
-      perks: ['Emerging oracle', 'Poll predictor'],
-      progress: { current: 0, total: 5 },
-      isUnlocked: false,
-      isEquipped: false,
-      status: 'locked',
-      evolvesTo: 'the-oracle-lvl2'
-    },
-    {
-      id: 'the-oracle-lvl2',
-      badgeId: 'the-oracle-lvl2',
-      name: 'The Oracle (Silver)',
-      badgeName: 'The Oracle (Silver)',
-      iconName: 'lightbulb',
-      tier: 'Rare',
-      visualStyle: 'silver-oracle',
-      category: 'predictions',
-      description: 'Evolving Badge • 15 poll wins (Silver)',
-      requirement: 'Correctly predict 15 community poll outcomes',
-      unlockedBy: 'Show consistent accuracy by predicting correct poll winners',
-      perks: ['Skilled oracle', 'Poll enthusiast'],
-      progress: { current: 0, total: 15 },
-      isUnlocked: false,
-      isEquipped: false,
-      status: 'locked',
-      evolvesTo: 'the-oracle-lvl3'
-    },
-    {
       id: 'the-oracle-lvl3',
       badgeId: 'the-oracle-lvl3',
       name: 'The Oracle: Grandmaster',
@@ -998,7 +812,7 @@ export default function BadgeCenter({ user, setUser }) {
       tier: 'Epic',
       visualStyle: 'amethyst-eye',
       category: 'predictions',
-      description: 'Evolving Badge • 50 poll wins (Gold)',
+      description: 'Master of predictions - correctly predict 50 community poll outcomes and become legendary',
       requirement: 'Correctly predict the winning outcome of 50 community Polls',
       unlockedBy: 'Develop a keen sense of the community pulse and accurately predict poll outcomes 50 times',
       perks: ['Oracle status', 'Prediction master', 'Amethyst eye vision'],
@@ -1230,7 +1044,7 @@ export default function BadgeCenter({ user, setUser }) {
       setHardModeBadges(createFallbackBadges())
       setHardModeBadgesLoading(false)
     }
-  }, [user])
+}, [user, HARD_MODE_BADGE_DEFINITIONS, createFallbackBadges, getUserId])
 
   // ✅ Sync badges on mount to ensure isDev and role flags unlock badges immediately
   useEffect(() => {
@@ -1246,7 +1060,7 @@ export default function BadgeCenter({ user, setUser }) {
         })
         .catch(err => console.log('[BadgeCenter] Badge sync completed or error:', err.message))
     }
-  }, [user, setUser])
+}, [user, setUser, getUserId])
 
   // ✅ WebSocket listener for real-time badge unlocks
   useEffect(() => {
@@ -1477,11 +1291,11 @@ export default function BadgeCenter({ user, setUser }) {
 
   const allBadges = badgeCategories.flatMap(cat => cat.badges.map(badge => ({ ...badge, category: cat.name, categoryColor: cat.color })))
   const earnedBadges = allBadges.filter(badge => badge.isUnlocked)
-  const evolvingBadges = allBadges.filter(badge => !badge.isUnlocked && badge.progress.current > 0)
+  // const evolvingBadges = allBadges.filter(badge => !badge.isUnlocked && badge.progress.current > 0) // Unused
   
   // ✅ CONSOLIDATED: Earned & Evolving from merged badges
-  const mergedEarned = mergedBadges.filter(badge => badge.isUnlocked || badge.status === 'equipped')
-  const mergedEvolving = mergedBadges.filter(badge => !badge.isUnlocked && badge.progress?.current > 0 && badge.status !== 'equipped')
+  // const mergedEarned = mergedBadges.filter(badge => badge.isUnlocked || badge.status === 'equipped') // Unused
+  // const mergedEvolving = mergedBadges.filter(badge => !badge.isUnlocked && badge.progress?.current > 0 && badge.status !== 'equipped') // Unused
 
   const tabs = [
     { id: 'all', label: 'All Badges', icon: '🏅' },
@@ -1574,7 +1388,7 @@ export default function BadgeCenter({ user, setUser }) {
   }
 
   // ✅ Get badge visual style colors (glow effects) for hard-mode badges
-  const getBadgeVisualStyle = (visualStyle) => {
+  // const getBadgeVisualStyle = (visualStyle) => { // Unused
     const styles = {
       'gold-glow': 'text-yellow-300',
       'purple-shimmer': 'text-purple-300',
@@ -1663,7 +1477,7 @@ export default function BadgeCenter({ user, setUser }) {
     return [...specialBadges, ...featuredBadges]
   }
 
-  const toggleBadgeActive = (badgeId) => {
+  // const toggleBadgeActive = (badgeId) => { // Unused
     const activeBadges = getActiveBadges()
     const badge = allBadges.find(b => b.id === badgeId)
     
@@ -1780,10 +1594,8 @@ export default function BadgeCenter({ user, setUser }) {
     return `${hours} hours remaining`
   }
 
-  const totalBadges = allBadges.length + (isModerator ? 1 : 0) + moderationBadges.length + penaltyBadges.length
-  const totalEarned = earnedBadges.length + (isModerator ? 1 : 0) + 
-    moderationBadges.filter(b => b.isUnlocked).length + 
-    penaltyBadges.filter(b => b.isUnlocked).length
+  // const totalBadges = allBadges.length + (isModerator ? 1 : 0) + moderationBadges.length + penaltyBadges.length // Unused
+  // const totalEarned = earnedBadges.length + (isModerator ? 1 : 0) + moderationBadges.filter(b => b.isUnlocked).length + penaltyBadges.filter(b => b.isUnlocked).length // Unused
 
   return (
     <div className="badge-center-ui space-y-8">

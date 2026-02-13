@@ -74,7 +74,7 @@ export default function Navigation({ currentView, onViewChange, user, unreadCoun
 
   const getNavItemStyles = (itemId) => {
     const isActive = currentView === itemId
-    const item = navItems.find(nav => nav.id === itemId)
+    // const item = navItems.find(nav => nav.id === itemId) // Unused - item styling determined by itemId directly
 
     // Cyber Neon Theme - Professional Sober-Neon aesthetic
     return `
@@ -88,6 +88,7 @@ export default function Navigation({ currentView, onViewChange, user, unreadCoun
   }
 
   return (
+    
     <>
       <nav className="sticky top-0 z-50 w-full">
         {/* Enhanced navigation bar with strong visual separation */}
