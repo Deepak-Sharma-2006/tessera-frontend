@@ -199,7 +199,6 @@ export default function Navigation({ currentView, onViewChange, user, unreadCoun
 
                     <Avatar
                       className="w-10 h-10 bg-gradient-to-br from-primary via-purple-500 to-pink-500 text-white font-medium shadow-md transition-all duration-300 relative z-10"
-                      status="online"
                     >
                       {user?.fullName?.charAt(0) || user?.name?.charAt(0) || 'U'}
                     </Avatar>
@@ -220,7 +219,7 @@ export default function Navigation({ currentView, onViewChange, user, unreadCoun
 
                   {/* Enhanced Profile Dropdown */}
                   {showProfileMenu && (
-                    <div className="absolute right-0 top-full mt-2 w-96 backdrop-blur-xl rounded-lg border border-white/15 bg-white/8 shadow-lg overflow-hidden scale-in z-50">
+                    <div className="absolute right-0 top-full mt-2 w-96 backdrop-blur-xl rounded-lg border border-white/15 bg-white/15 shadow-lg overflow-hidden scale-in z-50">
                       {/* Header */}
                       <div className="p-6 bg-gradient-to-br from-primary/20 via-purple-600/20 to-pink-600/10 border-b border-glass-border relative overflow-hidden">
                         {/* Header background pattern */}
@@ -234,7 +233,6 @@ export default function Navigation({ currentView, onViewChange, user, unreadCoun
                         <div className="flex items-center space-x-4 relative z-10">
                           <Avatar
                             className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 text-white font-medium text-2xl shadow-xl hover:shadow-neon transition-all duration-300"
-                            status="online"
                           >
                             {user?.fullName?.charAt(0) || user?.name?.charAt(0) || 'U'}
                           </Avatar>
@@ -244,15 +242,6 @@ export default function Navigation({ currentView, onViewChange, user, unreadCoun
                             </div>
                             <div className="text-sm text-muted-foreground mb-2">
                               {`${user?.collegeName || 'College'} • ${user?.year || '3rd Year'}`}
-                            </div>
-                            <div className="flex items-center space-x-3">
-                              <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-lg"></div>
-                                <span className="text-xs text-green-600 font-semibold">
-                                  Online
-                                </span>
-                              </div>
-
                             </div>
                           </div>
                         </div>

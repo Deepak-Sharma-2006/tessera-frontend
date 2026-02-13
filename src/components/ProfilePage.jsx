@@ -11,8 +11,39 @@ import LoadingSpinner from './animations/LoadingSpinner.jsx'
 import XPProgressBar from './ui/XPProgressBar.jsx'
 import useXpWs from '@/hooks/useXpWs.js'
 import PenaltyCountdownTimer from './ui/PenaltyCountdownTimer.jsx'
+import {
+  Trophy,
+  Flame,
+  Code,
+  Megaphone,
+  Sprout,
+  Brain,
+  AlertCircle,
+  Link as LinkIcon
+} from 'lucide-react'
 
 export default function ProfilePage({ user, onBackToCampus, profileOwner: initialProfileOwner }) {
+  // ✅ Icon mapping for lucide-react icons
+  const getIconComponent = (iconName) => {
+    const iconMap = {
+      'trophy': Trophy,
+      'flame': Flame,
+      'code': Code,
+      'megaphone': Megaphone,
+      'sprout': Sprout,
+      'brain': Brain,
+      'alert-circle': AlertCircle,
+      'bridge': LinkIcon,
+    }
+    return iconMap[iconName] || Trophy
+  }
+
+  // ✅ Lucide icon renderer component
+  const LucideIcon = ({ iconName, className = 'w-6 h-6' }) => {
+    const IconComponent = getIconComponent(iconName)
+    return <IconComponent className={className} />
+  }
+
   const [isEditing, setIsEditing] = useState(false)
   const [profileOwner, setProfileOwner] = useState(initialProfileOwner || user)
   const [formData, setFormData] = useState({ ...(initialProfileOwner || user) })
@@ -225,18 +256,18 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
 
   // Badge metadata including tier and colors
   const badgeMetadata = {
-    'founding-dev': { name: 'Founding Dev', icon: '💻', tier: 'Legendary', stars: '★★★★★' },
-    'campus-catalyst': { name: 'Campus Catalyst', icon: '📢', tier: 'Epic', stars: '★★★★' },
-    'pod-pioneer': { name: 'Pod Pioneer', icon: '🌱', tier: 'Common', stars: '★' },
-    'bridge-builder': { name: 'Bridge Builder', icon: '🌉', tier: 'Uncommon', stars: '★★' },
-    'skill-sage': { name: 'Skill Sage', icon: '🧠', tier: 'Rare', stars: '★★★' },
-    'Founding Dev': { name: 'Founding Dev', icon: '💻', tier: 'Legendary', stars: '★★★★★' },
-    'Campus Catalyst': { name: 'Campus Catalyst', icon: '📢', tier: 'Epic', stars: '★★★★' },
-    'Pod Pioneer': { name: 'Pod Pioneer', icon: '🌱', tier: 'Common', stars: '★' },
-    'Bridge Builder': { name: 'Bridge Builder', icon: '🌉', tier: 'Uncommon', stars: '★★' },
-    'Skill Sage': { name: 'Skill Sage', icon: '🧠', tier: 'Rare', stars: '★★★' },
-    'Spam Alert': { name: 'Spam Alert', icon: '🚫', tier: 'Penalty', stars: '⚠️' },
-    'spam-alert': { name: 'Spam Alert', icon: '🚫', tier: 'Penalty', stars: '⚠️' }
+    'founding-dev': { name: 'Founding Dev', icon: '💻', iconName: 'code', tier: 'Legendary', stars: '★★★★★' },
+    'campus-catalyst': { name: 'Campus Catalyst', icon: '📢', iconName: 'megaphone', tier: 'Epic', stars: '★★★★' },
+    'pod-pioneer': { name: 'Pod Pioneer', icon: '🌱', iconName: 'sprout', tier: 'Uncommon', stars: '★★' },
+    'bridge-builder': { name: 'Bridge Builder', icon: '🌉', iconName: 'bridge', tier: 'Rare', stars: '★★★' },
+    'skill-sage': { name: 'Skill Sage', icon: '🧠', iconName: 'brain', tier: 'Rare', stars: '★★★' },
+    'Founding Dev': { name: 'Founding Dev', icon: '💻', iconName: 'code', tier: 'Legendary', stars: '★★★★★' },
+    'Campus Catalyst': { name: 'Campus Catalyst', icon: '📢', iconName: 'megaphone', tier: 'Epic', stars: '★★★★' },
+    'Pod Pioneer': { name: 'Pod Pioneer', icon: '🌱', iconName: 'sprout', tier: 'Uncommon', stars: '★★' },
+    'Bridge Builder': { name: 'Bridge Builder', icon: '🌉', iconName: 'bridge', tier: 'Rare', stars: '★★★' },
+    'Skill Sage': { name: 'Skill Sage', icon: '🧠', iconName: 'brain', tier: 'Rare', stars: '★★★' },
+    'Spam Alert': { name: 'Spam Alert', icon: '🚫', iconName: 'alert-circle', tier: 'Penalty', stars: '⚠️' },
+    'spam-alert': { name: 'Spam Alert', icon: '🚫', iconName: 'alert-circle', tier: 'Penalty', stars: '⚠️' }
   }
 
   // Get badge info by ID or name
@@ -350,25 +381,48 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {profileOwner.featuredBadges.filter(badgeId => badgeId !== 'Spam Alert').map((badgeId, idx) => {
                       const badgeInfo = getBadgeInfo(badgeId)
+                      const tierBgColor = {
+                        'Legendary': 'bg-yellow-900/30 border-yellow-700/60 shadow-lg shadow-yellow-500/20',
+                        'Epic': 'bg-purple-900/30 border-purple-700/60',
+                        'Rare': 'bg-blue-900/30 border-blue-700/60',
+                        'Uncommon': 'bg-green-900/30 border-green-700/60',
+                        'Common': 'bg-gray-700/30 border-gray-600/60',
+                        'Penalty': 'bg-red-900/30 border-red-700/60'
+                      }
+                      const tierIconColor = {
+                        'Legendary': 'text-yellow-400',
+                        'Epic': 'text-purple-400',
+                        'Rare': 'text-blue-400',
+                        'Uncommon': 'text-green-400',
+                        'Common': 'text-gray-400',
+                        'Penalty': 'text-red-400'
+                      }
                       return (
-                        <div key={idx} className="flex flex-col items-center group">
-                          {/* Badge Icon Container - Neon Cyan Glow */}
-                          <div className="w-28 h-28 bg-gradient-to-br from-cyan-400 to-cyan-300 rounded-3xl flex items-center justify-center text-6xl transition-all group-hover:scale-110 group-hover:shadow-2xl group-hover:shadow-cyan-400/60 border-2 border-cyan-400/80 shadow-lg shadow-cyan-400/30">
-                            {badgeInfo.icon}
+                        <div key={idx} className={`flex flex-col items-center p-6 rounded-2xl backdrop-blur-xl border-2 transition-all hover:scale-105 ${tierBgColor[badgeInfo.tier] || tierBgColor['Common']}`}>
+                          {/* Badge Icon - Tier colored lucide icon */}
+                          <div className="flex justify-center mb-4">
+                            {badgeInfo.iconName ? (
+                              <LucideIcon 
+                                iconName={badgeInfo.iconName}
+                                className={`w-16 h-16 ${tierIconColor[badgeInfo.tier] || 'text-gray-400'}`}
+                              />
+                            ) : (
+                              <div className={`text-5xl`}>{badgeInfo.icon}</div>
+                            )}
                           </div>
                           
                           {/* Star Rating Badge - Matches Badge Center tier colors */}
-                          <div className={`mt-3 px-3 py-1 rounded-full text-xs font-bold ${getTierColor(badgeInfo.tier)}`}>
+                          <div className={`px-3 py-1 rounded-full text-xs font-bold ${getTierColor(badgeInfo.tier)}`}>
                             {badgeInfo.stars}
                           </div>
                           
                           {/* Badge Name - Consistent typography */}
-                          <span className="text-base mt-4 font-bold text-center max-w-32 text-cyan-200 group-hover:text-cyan-100 transition line-clamp-2">
+                          <span className="text-base mt-3 font-bold text-center max-w-32 text-white group-hover:text-cyan-100 transition line-clamp-2">
                             {badgeInfo.name}
                           </span>
                           
                           {/* Tier Label - Additional metadata */}
-                          <span className="text-xs text-cyan-300/70 mt-1 font-semibold">
+                          <span className="text-xs text-cyan-300/70 mt-2 font-semibold">
                             {badgeInfo.tier}
                           </span>
                         </div>

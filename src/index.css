@@ -54,6 +54,48 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* Evolving Badge Blue Pulsing Halo */
+.evolving-halo {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.evolving-halo::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.6), 
+              0 0 30px rgba(59, 130, 246, 0.4);
+  animation: blue-flicker 2s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes blue-flicker {
+  0%, 100% { 
+    opacity: 0.4; 
+    transform: scale(1); 
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5), 
+                0 0 20px rgba(59, 130, 246, 0.2);
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.1); 
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.8), 
+                0 0 40px rgba(59, 130, 246, 0.5);
+  }
+  75% {
+    opacity: 0.6;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.6),
+                0 0 30px rgba(59, 130, 246, 0.3);
+  }
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

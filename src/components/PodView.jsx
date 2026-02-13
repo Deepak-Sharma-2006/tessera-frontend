@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '@/lib/api.js';
 import CollabPodPage from '@/components/campus/CollabPodPage.jsx';
 import Navigation from '@/components/Navigation.jsx';
-import XPDisplay from '@/components/ui/XPDisplay.jsx';
 import LoadingSpinner from '@/components/animations/LoadingSpinner.jsx';
 
 /**
@@ -69,7 +68,6 @@ export default function PodView({ user, setUser }) {
     return (
         <>
             <Navigation user={user} setUser={setUser} currentView={currentView} onViewChange={handleTabNavigation} />
-            <XPDisplay user={user} />
             <main className="pb-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <CollabPodPage user={user} podId={podId} />

@@ -827,6 +827,81 @@
   51%, 100% { opacity: 0; }
 }
 
+/* ========== TIER-BASED BADGE ANIMATIONS ========== */
+
+/* Legendary Tier: Gold Animated Glow */
+@keyframes gold-shimmer {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.2);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4);
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), 0 0 50px rgba(255, 215, 0, 0.3);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+  }
+}
+
+/* Epic Tier: Purple Shimmer */
+@keyframes purple-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(160, 32, 240, 0.4), 0 0 15px rgba(160, 32, 240, 0.2);
+    text-shadow: 0 0 10px rgba(160, 32, 240, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(160, 32, 240, 0.7), 0 0 30px rgba(160, 32, 240, 0.3);
+    text-shadow: 0 0 15px rgba(160, 32, 240, 0.8);
+  }
+}
+
+/* Rare Tier: Blue Glow */
+@keyframes blue-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4), 0 0 15px rgba(59, 130, 246, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.6), 0 0 25px rgba(59, 130, 246, 0.3);
+  }
+}
+
+/* Common Tier: Subtle Silver */
+@keyframes silver-subtle {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(200, 200, 200, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(200, 200, 200, 0.4);
+  }
+}
+
+/* Penalty Tier: Red Alert */
+@keyframes red-alert-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.4), 0 0 20px rgba(220, 38, 38, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.8), 0 0 30px rgba(220, 38, 38, 0.4);
+  }
+}
+
+/* Badge Equipped Animation */
+@keyframes badge-equip {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 /* Component-specific styles */
 .card-glass {
   background: var(--glass-bg);
