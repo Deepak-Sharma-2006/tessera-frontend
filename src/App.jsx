@@ -240,7 +240,7 @@ export default function App() {
 
         if (res.ok) {
           const completeUserData = await res.json();
-          console.log("✅ Complete user data fetched:", completeUserData);
+          console.log("✅ User data fetched successfully");
           setUser(completeUserData);
           saveUser(completeUserData);
           return;

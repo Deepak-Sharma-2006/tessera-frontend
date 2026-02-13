@@ -559,8 +559,8 @@ export default function BadgeCenter({ user, setUser }) {
   const [showFeaturedBadgeModal, setShowFeaturedBadgeModal] = useState(false)
   const [featuredBadgesLoading, setFeaturedBadgesLoading] = useState(false)
   const [hardModeBadges, setHardModeBadges] = useState([])
-  // const [hardModeBadgesLoading, setHardModeBadgesLoading] = useState(true) // Unused - badges display from fallback immediately
-  // const [unlockedCountdown, setUnlockedCountdown] = useState({}) // Unused - may be used for penalty badge countdown in future
+  const [hardModeBadgesLoading, setHardModeBadgesLoading] = useState(true)
+  const [unlockedCountdown, setUnlockedCountdown] = useState({})
 
   // 20 Hard-Mode Badge Definitions (Fallback)
   // ========== HARD-MODE BADGE CONFIGURATION ==========
@@ -989,8 +989,7 @@ export default function BadgeCenter({ user, setUser }) {
 
   useEffect(() => {
     const userId = getUserId()
-    console.log('[BadgeCenter] 🔍 User object:', user)
-    console.log('[BadgeCenter] 📍 Extracted user ID:', userId)
+    console.log('[BadgeCenter]  Extracted user ID:', userId)
     
     // ALWAYS show badges (from API or fallback)
     setHardModeBadgesLoading(true)
@@ -1298,7 +1297,6 @@ export default function BadgeCenter({ user, setUser }) {
   // const mergedEvolving = mergedBadges.filter(badge => !badge.isUnlocked && badge.progress?.current > 0 && badge.status !== 'equipped') // Unused
 
   const tabs = [
-    { id: 'all', label: 'All Badges', icon: '🏅' },
     ...(isModerator ? [{ id: 'mod-badge', label: 'Mod Badge', icon: '🛡️' }] : []),
     ...(hasModerationBadges ? [{ id: 'moderation-badges', label: 'Moderation Badges', icon: '🛡️' }] : []),
     ...(hasPenaltyBadges ? [{ id: 'penalty-badges', label: 'Penalty Badges', icon: '🚫' }] : [])
@@ -1389,30 +1387,30 @@ export default function BadgeCenter({ user, setUser }) {
 
   // ✅ Get badge visual style colors (glow effects) for hard-mode badges
   // const getBadgeVisualStyle = (visualStyle) => { // Unused
-    const styles = {
-      'gold-glow': 'text-yellow-300',
-      'purple-shimmer': 'text-purple-300',
-      'electric-blue': 'text-blue-300',
-      'dark-moon-glow': 'text-slate-200',
-      'green-aurora': 'text-green-300',
-      'ruby-red': 'text-red-300',
-      'emerald-shine': 'text-emerald-300',
-      'molten-gold': 'text-yellow-400',
-      'cobalt-steel': 'text-blue-400',
-      'silver-gloss': 'text-gray-200',
-      'animated-fire': 'text-orange-400 animate-pulse',
-      'cyan-pulse': 'text-cyan-300 animate-pulse',
-      'solar-flare': 'text-yellow-300 animate-pulse',
-      'polished-chrome': 'text-gray-300',
-      'amethyst-eye': 'text-violet-300',
-      'white-marble': 'text-white',
-      'bronze-oak': 'text-amber-600',
-      'orange-neon': 'text-orange-400',
-      'multicolor-prism': 'text-transparent bg-clip-text bg-gradient-to-r from-red-300 via-purple-300 to-cyan-300',
-      'red-pulsing-cross': 'text-red-500 animate-pulse'
-    }
-    return styles[visualStyle] || 'text-cyan-300'
-  }
+  //   const styles = {
+  //     'gold-glow': 'text-yellow-300',
+  //     'purple-shimmer': 'text-purple-300',
+  //     'electric-blue': 'text-blue-300',
+  //     'dark-moon-glow': 'text-slate-200',
+  //     'green-aurora': 'text-green-300',
+  //     'ruby-red': 'text-red-300',
+  //     'emerald-shine': 'text-emerald-300',
+  //     'molten-gold': 'text-yellow-400',
+  //     'cobalt-steel': 'text-blue-400',
+  //     'silver-gloss': 'text-gray-200',
+  //     'animated-fire': 'text-orange-400 animate-pulse',
+  //     'cyan-pulse': 'text-cyan-300 animate-pulse',
+  //     'solar-flare': 'text-yellow-300 animate-pulse',
+  //     'polished-chrome': 'text-gray-300',
+  //     'amethyst-eye': 'text-violet-300',
+  //     'white-marble': 'text-white',
+  //     'bronze-oak': 'text-amber-600',
+  //     'orange-neon': 'text-orange-400',
+  //     'multicolor-prism': 'text-transparent bg-clip-text bg-gradient-to-r from-red-300 via-purple-300 to-cyan-300',
+  //     'red-pulsing-cross': 'text-red-500 animate-pulse'
+  //   }
+  //   return styles[visualStyle] || 'text-cyan-300'
+  // }
 
   // ✅ Handle hard-mode badge unlock
   const handleUnlockHardModeBadge = async (badge) => {
@@ -1475,43 +1473,6 @@ export default function BadgeCenter({ user, setUser }) {
     
     // Combine: special badges + featured badges
     return [...specialBadges, ...featuredBadges]
-  }
-
-  // const toggleBadgeActive = (badgeId) => { // Unused
-    const activeBadges = getActiveBadges()
-    const badge = allBadges.find(b => b.id === badgeId)
-    
-    if (!badge || !badge.isUnlocked) return
-    
-    // Cannot toggle special badges
-    if (badgeId === 'signal-guardian' || 
-        moderationBadges.some(mb => mb.id === badgeId) || 
-        penaltyBadges.some(pb => pb.id === badgeId)) {
-      alert('Special badges cannot be hidden or deactivated.')
-      return
-    }
-    
-    // Check if adding would exceed limit
-    const nonSpecialBadgesActive = activeBadges.filter(b => 
-      b.id !== 'signal-guardian' && 
-      !moderationBadges.some(mb => mb.id === b.id) &&
-      !penaltyBadges.some(pb => pb.id === b.id)
-    ).length
-    
-    const specialBadgesCount = activeBadges.length - nonSpecialBadgesActive
-    
-    if (nonSpecialBadgesActive >= (3 - specialBadgesCount) && !badge.isActive) {
-      alert('You can only display 3 badges total. Special badges are always visible.')
-      return
-    }
-
-    badgeCategories.forEach(category => {
-      category.badges.forEach(b => {
-        if (b.id === badgeId) {
-          b.isActive = !b.isActive
-        }
-      })
-    })
   }
 
   const handleSelectFeaturedBadge = async (badge) => {

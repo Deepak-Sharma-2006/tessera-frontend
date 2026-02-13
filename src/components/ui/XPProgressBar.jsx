@@ -2,12 +2,8 @@ import React, { useEffect } from 'react';
 
 export default function XPProgressBar({ user }) {
   useEffect(() => {
-    console.log('🎨 [XPProgressBar] Component rendered/updated with user:', user)
     if (user) {
-      console.log('   - Level:', user.level)
-      console.log('   - XP:', user.xp)
-      console.log('   - Total XP:', user.totalXp)
-      console.log('   - Multiplier:', user.xpMultiplier)
+      console.log('[XPProgressBar] Rendering with level', user.level)
     }
   }, [user])
 

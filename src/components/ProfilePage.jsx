@@ -120,7 +120,7 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
   useXpWs({
     userId: profileOwner?.id,
     onXpUpdate: (updatedUser) => {
-      console.log('📊 XP Update received:', updatedUser)
+      console.log('📊 XP update received')
       setProfileOwner(prev => ({
         ...prev,
         level: updatedUser.level,

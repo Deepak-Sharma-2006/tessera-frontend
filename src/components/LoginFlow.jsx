@@ -147,11 +147,10 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
   useEffect(() => {
     // Whenever 'user' changes (e.g., after login), save it to storage
     if (user && user.token) {
-      console.log("💾 Saving User to Storage:", user); // Debug log
+      console.log("💾 User data saved to storage"); // Debug log
       localStorage.setItem('user', JSON.stringify(user));
 
       // ✅ FORCE SAVE: Save the token in dedicated jwt_token box (priority key)
-      console.log("🔐 AUTO-SAVE TOKEN:", user.token);
       localStorage.setItem('jwt_token', user.token); // Priority token key
       localStorage.setItem('token', user.token);
     }
@@ -250,16 +249,15 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
       const data = response.data;
 
       // ✅ CRITICAL FIX: Save the FULL response data to localStorage immediately
-      console.log("📥 Login Response:", data); // Debug log
+      console.log("📥 Login successful"); // Debug log
       localStorage.setItem('user', JSON.stringify(data));
       if (data.token) {
-        console.log("🔐 FORCE SAVING TOKEN:", data.token);
         localStorage.setItem('jwt_token', data.token); // Priority token key
         localStorage.setItem('token', data.token);
       }
 
       // ✅ FIX: Set local activeUser state immediately so Step 1 can access userId
-      console.log("🔄 Setting activeUser to:", data);
+      console.log("🔄 User profile updated");
       setActiveUser(data);
 
       // Save the complete user data with ALL profile fields
