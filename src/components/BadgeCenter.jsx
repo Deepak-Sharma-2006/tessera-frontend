@@ -1416,10 +1416,55 @@ export default function BadgeCenter({ user, setUser }) {
 
   const allPowerFiveBadges = powerFiveBadges.map(badge => ({ ...badge, category: 'Power Five', categoryColor: 'orange' }))
   
+  // Simple tier normalization function for fallback badges
+  const normalizeTierSimple = (tier) => {
+    if (!tier) return 'Common'
+    const tierMap = {
+      'LEGENDARY': 'Legendary',
+      'EPIC': 'Epic',
+      'RARE': 'Rare',
+      'COMMON': 'Common',
+      'PENALTY': 'Penalty',
+      'BASIC': 'Basic',
+      'ADVANCED': 'Advanced',
+      'ELITE': 'Elite',
+      'UNCOMMON': 'Uncommon',
+      'WARNING': 'Warning',
+      'MINOR': 'Minor',
+      'MAJOR': 'Major',
+      'SEVERE': 'Severe',
+      'PERMANENT': 'Permanent'
+    }
+    return tierMap[tier.toUpperCase()] || tier
+  }
+  
   // ✅ CONSOLIDATED: Merge Power-Five + Hard-Mode badges into single unified array
+  // If hardModeBadges is empty (still loading), use HARD_MODE_BADGE_DEFINITIONS as fallback
+  const hardModeBadgesOrFallback = hardModeBadges.length > 0 ? hardModeBadges : HARD_MODE_BADGE_DEFINITIONS.map(def => ({
+    id: def.id || def.badgeId,
+    badgeId: def.badgeId || def.id,
+    name: def.name || def.badgeName,
+    badgeName: def.badgeName || def.name,
+    iconName: def.iconName || 'award',
+    icon: def.icon,
+    tier: normalizeTierSimple(def.tier),
+    visualStyle: def.visualStyle,
+    category: def.category || 'engagement',
+    description: def.description || 'Elite badge',
+    requirement: def.requirement || 'Meet criteria',
+    unlockedBy: def.unlockedBy,
+    perks: def.perks || ['Elite status'],
+    progress: def.progress || { current: 0, total: 100 },
+    isUnlocked: def.isUnlocked || false,
+    isEquipped: def.isEquipped || false,
+    status: 'locked',
+    evolvesTo: def.evolvesTo,
+    isMaxLevel: def.isMaxLevel || false
+  }))
+  
   const mergedBadges = [
     ...allPowerFiveBadges,
-    ...hardModeBadges.map(badge => ({ 
+    ...hardModeBadgesOrFallback.map(badge => ({ 
       ...badge, 
       category: 'Elite', 
       categoryColor: 'purple',
