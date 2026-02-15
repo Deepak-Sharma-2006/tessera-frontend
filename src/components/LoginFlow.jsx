@@ -285,15 +285,14 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
 
       setFormData(prev => ({ ...prev, ...userData }));
 
-      // ✅ ADMIN REDIRECT: Let App.jsx handle the routing after user state updates
-      // Don't navigate here - let the parent component handle it based on user.role
-      console.log("✅ Admin login detected. Passing role to parent...");
-      
-      // Save admin user to storage and notify parent
-      localStorage.setItem('user', JSON.stringify(data));
-      onComplete(data);
-      // Don't navigate here - let App.jsx route based on user.role
-      return;
+      // ✅ ADMIN REDIRECT: Check if user is admin
+      if (data.role === 'ADMIN') {
+        // Admin user detected - save and let App.jsx route to /dev-dashboard
+        console.log("✅ Admin login detected. role:", data.role);
+        localStorage.setItem('user', JSON.stringify(data));
+        onComplete(data);
+        return;
+      }
 
       // ✅ CRITICAL FIX: Check profileCompleted flag, not username
       if (data.profileCompleted === true) {
