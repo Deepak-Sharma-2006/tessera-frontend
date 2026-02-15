@@ -238,14 +238,12 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
 
   // Badge icon mapping
   const badgeIcons = {
-    'Skill Sage': '🧠',
     'Campus Catalyst': '📢',
     'Pod Pioneer': '🌱',
     'Bridge Builder': '🌉',
     'Founding Dev': '💻',
     'Profile Pioneer': '👤',
     'Spam Alert': '🚫',
-    'skill-sage': '🧠',
     'campus-catalyst': '📢',
     'pod-pioneer': '🌱',
     'bridge-builder': '🌉',
@@ -260,12 +258,10 @@ export default function ProfilePage({ user, onBackToCampus, profileOwner: initia
     'campus-catalyst': { name: 'Campus Catalyst', icon: '📢', iconName: 'megaphone', tier: 'Epic', stars: '★★★★' },
     'pod-pioneer': { name: 'Pod Pioneer', icon: '🌱', iconName: 'sprout', tier: 'Uncommon', stars: '★★' },
     'bridge-builder': { name: 'Bridge Builder', icon: '🌉', iconName: 'bridge', tier: 'Rare', stars: '★★★' },
-    'skill-sage': { name: 'Skill Sage', icon: '🧠', iconName: 'brain', tier: 'Rare', stars: '★★★' },
     'Founding Dev': { name: 'Founding Dev', icon: '💻', iconName: 'code', tier: 'Legendary', stars: '★★★★★' },
     'Campus Catalyst': { name: 'Campus Catalyst', icon: '📢', iconName: 'megaphone', tier: 'Epic', stars: '★★★★' },
     'Pod Pioneer': { name: 'Pod Pioneer', icon: '🌱', iconName: 'sprout', tier: 'Uncommon', stars: '★★' },
     'Bridge Builder': { name: 'Bridge Builder', icon: '🌉', iconName: 'bridge', tier: 'Rare', stars: '★★★' },
-    'Skill Sage': { name: 'Skill Sage', icon: '🧠', iconName: 'brain', tier: 'Rare', stars: '★★★' },
     'Spam Alert': { name: 'Spam Alert', icon: '🚫', iconName: 'alert-circle', tier: 'Penalty', stars: '⚠️' },
     'spam-alert': { name: 'Spam Alert', icon: '🚫', iconName: 'alert-circle', tier: 'Penalty', stars: '⚠️' }
   }

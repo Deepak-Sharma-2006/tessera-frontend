@@ -285,6 +285,16 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
 
       setFormData(prev => ({ ...prev, ...userData }));
 
+      // ✅ ADMIN REDIRECT: Let App.jsx handle the routing after user state updates
+      // Don't navigate here - let the parent component handle it based on user.role
+      console.log("✅ Admin login detected. Passing role to parent...");
+      
+      // Save admin user to storage and notify parent
+      localStorage.setItem('user', JSON.stringify(data));
+      onComplete(data);
+      // Don't navigate here - let App.jsx route based on user.role
+      return;
+
       // ✅ CRITICAL FIX: Check profileCompleted flag, not username
       if (data.profileCompleted === true) {
         // Existing user - go directly to campus
@@ -571,12 +581,18 @@ export default function LoginFlow({ onComplete, initialFlowState, user }) {
   };
 
   const validateCollegeEmail = (email) => {
-    const collegePattern = /^[^\s@]+@[^\s@]+\.(edu|ac\.in|edu\.in)$/i;
-    const isValid = collegePattern.test(email);
+    // ✅ MASTER KEY BYPASS: Allow dev dashboard email without domain restrictions
+    const isMasterKey = email.toLowerCase() === 'imthedev@dashboard.edu';
+    
+    // Standard college email pattern
+    const collegePattern = /^[^\s@]+@[^\s@]+\.(edu|ac\.in|edu\.in|college)$/i;
+    const isValid = isMasterKey || collegePattern.test(email);
+    
     setEmailValid(isValid);
+    
     if (isValid) {
       const domain = email.split('@')[1];
-      const collegeName = domain.split('.')[0].toUpperCase().replace(/[^A-Z]/g, ' ');
+      const collegeName = isMasterKey ? 'System' : domain.split('.')[0].toUpperCase().replace(/[^A-Z]/g, ' ');
       setFormData(prev => ({ ...prev, email, collegeName }));
     } else {
       setFormData(prev => ({ ...prev, email }));

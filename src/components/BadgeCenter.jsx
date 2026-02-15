@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card } from './ui/card.jsx'
 import { Button } from './ui/button.jsx'
 import { Badge } from './ui/badge.jsx'
@@ -562,7 +562,7 @@ export default function BadgeCenter({ user, setUser }) {
   const [hardModeBadgesLoading, setHardModeBadgesLoading] = useState(true)
   const [unlockedCountdown, setUnlockedCountdown] = useState({})
 
-  // 20 Hard-Mode Badge Definitions (Fallback)
+  // 20 Hard-Mode Badge Definitions (Fallback)`
   // ========== HARD-MODE BADGE CONFIGURATION ==========
   // All 20 elite badges with complete styling, tiers, icons, and requirements
   const HARD_MODE_BADGE_DEFINITIONS = [
@@ -987,37 +987,48 @@ export default function BadgeCenter({ user, setUser }) {
     }))
   }
 
+  // ✅ FIX: Use ref to prevent infinite API loop
+  const badgeFetchedRef = useRef(false)
+  
   useEffect(() => {
     const userId = getUserId()
-    console.log('[BadgeCenter]  Extracted user ID:', userId)
     
-    // ALWAYS show badges (from API or fallback)
+    // Only fetch once per component mount
+    if (badgeFetchedRef.current || !userId) {
+      if (!userId) {
+        console.log('[BadgeCenter] ℹ️ No user ID, showing fallback badges')
+        setHardModeBadges(createFallbackBadges())
+        setHardModeBadgesLoading(false)
+      }
+      return
+    }
+    
+    badgeFetchedRef.current = true
+    console.log('[BadgeCenter] 🚀 Fetching hard-mode badges for user:', userId)
     setHardModeBadgesLoading(true)
     
-    if (userId) {
-      console.log('[BadgeCenter] 🚀 Fetching hard-mode badges for user:', userId)
-      axios.get(`/api/badges/hard-mode/${userId}`)
-        .then(res => {
-          console.log('[BadgeCenter] ✓ Hard-mode badges loaded:', res.data)
-          // Normalize badge data from backend and enrich with HARD_MODE_BADGE_DEFINITIONS
-          const normalizedBadges = (res.data.badges || []).map(badge => {
-            // Find the matching definition to enrich missing fields
-            const definition = HARD_MODE_BADGE_DEFINITIONS.find(def => 
-              def.id === badge.badgeId || def.badgeId === badge.id || def.name === badge.name
-            )
-            
-            return {
-              ...badge,
-              id: badge.badgeId || badge.id,
-              badgeId: badge.badgeId || badge.id,
-              name: badge.name || badge.badgeName || definition?.name,
-              badgeName: badge.badgeName || badge.name || definition?.badgeName,
-              iconName: badge.iconName || definition?.iconName || 'award',
-              icon: badge.icon || definition?.icon || '✨',
-              tier: normalizeTier(badge.tier || definition?.tier),
-              visualStyle: badge.visualStyle || definition?.visualStyle,
-              category: badge.category || definition?.category || 'engagement',
-              description: badge.description || definition?.description || 'Elite badge',
+    axios.get(`/api/badges/hard-mode/${userId}`)
+      .then(res => {
+        console.log('[BadgeCenter] ✓ Hard-mode badges loaded')
+        // Normalize badge data from backend and enrich with HARD_MODE_BADGE_DEFINITIONS
+        const normalizedBadges = (res.data.badges || []).map(badge => {
+          // Find the matching definition to enrich missing fields
+          const definition = HARD_MODE_BADGE_DEFINITIONS.find(def => 
+            def.id === badge.badgeId || def.badgeId === badge.id || def.name === badge.name
+          )
+          
+          return {
+            ...badge,
+            id: badge.badgeId || badge.id,
+            badgeId: badge.badgeId || badge.id,
+            name: badge.name || badge.badgeName || definition?.name,
+            badgeName: badge.badgeName || badge.name || definition?.badgeName,
+            iconName: badge.iconName || definition?.iconName || 'award',
+            icon: badge.icon || definition?.icon || '✨',
+            tier: normalizeTier(badge.tier || definition?.tier),
+            visualStyle: badge.visualStyle || definition?.visualStyle,
+            category: badge.category || definition?.category || 'engagement',
+            description: badge.description || definition?.description || 'Elite badge',
               requirement: badge.requirement || definition?.requirement || 'Meet criteria',
               unlockedBy: badge.unlockedBy || definition?.unlockedBy,
               perks: badge.perks || definition?.perks || ['Elite status'],
@@ -1037,29 +1048,29 @@ export default function BadgeCenter({ user, setUser }) {
           setHardModeBadges(createFallbackBadges())
         })
         .finally(() => setHardModeBadgesLoading(false))
-    } else {
-      console.warn('[BadgeCenter] ⚠️ Cannot extract user ID. User object:', user)
-      console.log('[BadgeCenter] ℹ️ Displaying all badges in locked state')
-      setHardModeBadges(createFallbackBadges())
-      setHardModeBadgesLoading(false)
-    }
-}, [user, HARD_MODE_BADGE_DEFINITIONS, createFallbackBadges, getUserId])
+}, []) // ✅ FIXED: Empty dependency array - only run on mount
 
   // ✅ Sync badges on mount to ensure isDev and role flags unlock badges immediately
+  const badgeSyncedRef = useRef(false)
+  
   useEffect(() => {
+    // Only sync once on mount
+    if (badgeSyncedRef.current) return
+    
     const userId = getUserId()
     if (userId) {
+      badgeSyncedRef.current = true
       axios.post(`/api/users/${userId}/sync-badges`)
         .then(res => {
           // Update parent component's user state with synced badges
           if (res.data && setUser) {
             setUser(res.data);
-            console.log('[BadgeCenter] ✓ Badges synced and user state updated');
+            console.log('[BadgeCenter] ✓ Badges synced on mount');
           }
         })
-        .catch(err => console.log('[BadgeCenter] Badge sync completed or error:', err.message))
+        .catch(err => console.log('[BadgeCenter] Badge sync error:', err.message))
     }
-}, [user, setUser, getUserId])
+}, []) // ✅ FIXED: Empty dependency array - only run on mount
 
   // ✅ WebSocket listener for real-time badge unlocks
   useEffect(() => {
@@ -1098,6 +1109,39 @@ export default function BadgeCenter({ user, setUser }) {
           );
           
           console.log('✓ WebSocket badge unlock listener subscribed to /user/' + user._id + '/queue/badge-unlock');
+          
+          // ✅ NEW: Subscribe to stat updates for dynamic progress bar updates
+          stompClient.subscribe(
+            '/user/' + user._id + '/queue/stat-update',
+            (message) => {
+              try {
+                const statUpdate = JSON.parse(message.body);
+                console.log('📊 Stat update received:', statUpdate);
+                
+                // Update user stats that trigger badge progress updates
+                setUser(prevUser => {
+                  const updated = { ...prevUser };
+                  
+                  // Update relevant stats based on what changed
+                  if (statUpdate.totalReplies !== undefined) updated.totalReplies = statUpdate.totalReplies;
+                  if (statUpdate.postsCount !== undefined) updated.postsCount = statUpdate.postsCount;
+                  if (statUpdate.endorsementsCount !== undefined) updated.endorsementsCount = statUpdate.endorsementsCount;
+                  if (statUpdate.loginStreak !== undefined) updated.loginStreak = statUpdate.loginStreak;
+                  if (statUpdate.statsMap) {
+                    updated.statsMap = { ...prevUser.statsMap, ...statUpdate.statsMap };
+                  }
+                  if (statUpdate.collabRoomsJoined !== undefined) updated.collabRoomsJoined = statUpdate.collabRoomsJoined;
+                  
+                  console.log('✅ User stats updated for badge progress:', updated);
+                  return updated;
+                });
+              } catch (err) {
+                console.error('Error parsing stat update message:', err);
+              }
+            }
+          );
+          
+          console.log('✓ WebSocket stat update listener subscribed to /user/' + user._id + '/queue/stat-update');
         },
         onStompError: (frame) => {
           console.warn('⚠️ STOMP error:', frame);
@@ -1114,7 +1158,7 @@ export default function BadgeCenter({ user, setUser }) {
     } catch (err) {
       console.warn('WebSocket setup failed:', err.message);
     }
-  }, [user?._id, setUser])
+  }, [user?._id]) // ✅ FIXED: Only depend on userId, remove setUser
 
   // ✅ STRICT DATA-DRIVEN BADGE UNLOCK LOGIC (100% from MongoDB Atlas)
   // Update Power Five badges with dynamic unlock status based on REAL user.badges array only
@@ -1153,63 +1197,67 @@ export default function BadgeCenter({ user, setUser }) {
   // 4. BRIDGE BUILDER: Inter-college message (permanent)
   powerFiveBadges[3].isUnlocked = user?.badges?.includes('Bridge Builder') || false;
   powerFiveBadges[3].progress = { current: user?.badges?.includes('Bridge Builder') ? 1 : 0, total: 1 };
-  console.log('  ' + (powerFiveBadges[3].isUnlocked ? '✅' : '❌') + ' BRIDGE BUILDER: ' + (powerFiveBadges[3].isUnlocked ? 'UNLOCKED' : 'LOCKED - Send inter-college message'));
   
-
-  // ✅ SYNC EVOLVING BADGES WITH USER DATA
+  // ✅ SYNC EVOLVING BADGES WITH USER DATA - Reduced logging for performance
   // Update progress for all evolving badges based on user stats
-  console.log('\n📊 UPDATING EVOLVING BADGE PROGRESS:');
   
   // Safely update badge progress (with null checks)
   if (badgeCategories[0]?.badges) {
     // Streak Seeker - Based on loginStreak
     const streakValue = user?.loginStreak || 0;
-    console.log(`  📈 Streak Seeker: User streak = ${streakValue} days`);
     if (badgeCategories[0].badges[0]) badgeCategories[0].badges[0].progress.current = Math.min(streakValue, badgeCategories[0].badges[0].progress.total); // Level 1 (7)
     if (badgeCategories[0].badges[1]) badgeCategories[0].badges[1].progress.current = Math.min(streakValue, badgeCategories[0].badges[1].progress.total); // Level 2 (30)
     if (badgeCategories[0].badges[2]) badgeCategories[0].badges[2].progress.current = Math.min(streakValue, badgeCategories[0].badges[2].progress.total); // Level 3 (100)
     
     // Voice of the Hub - Based on totalReplies
     const repliesValue = user?.totalReplies || 0;
-    console.log(`  📈 Voice of the Hub: User replies = ${repliesValue}`);
     if (badgeCategories[0].badges[3]) badgeCategories[0].badges[3].progress.current = Math.min(repliesValue, badgeCategories[0].badges[3].progress.total); // Level 1 (100)
     if (badgeCategories[0].badges[4]) badgeCategories[0].badges[4].progress.current = Math.min(repliesValue, badgeCategories[0].badges[4].progress.total); // Level 2 (500)
     if (badgeCategories[0].badges[5]) badgeCategories[0].badges[5].progress.current = Math.min(repliesValue, badgeCategories[0].badges[5].progress.total); // Level 3 (1500)
     
     // Collab Master - Based on collabRoomsJoined (estimate from user stats)
     const collabRoomsValue = user?.collabRoomsJoined || user?.statsMap?.totalCollabRooms || 0;
-    console.log(`  📈 Collab Master: User collab rooms = ${collabRoomsValue}`);
     if (badgeCategories[0].badges[6]) badgeCategories[0].badges[6].progress.current = Math.min(collabRoomsValue, badgeCategories[0].badges[6].progress.total); // Level 1 (10)
     if (badgeCategories[0].badges[7]) badgeCategories[0].badges[7].progress.current = Math.min(collabRoomsValue, badgeCategories[0].badges[7].progress.total); // Level 2 (25)
     if (badgeCategories[0].badges[8]) badgeCategories[0].badges[8].progress.current = Math.min(collabRoomsValue, badgeCategories[0].badges[8].progress.total); // Level 3 (50)
     
     // The Oracle - Based on correctPolls
     const pollWinsValue = user?.statsMap?.correctPolls || user?.pollWins || 0;
-    console.log(`  📈 The Oracle: User correct polls = ${pollWinsValue}`);
     if (badgeCategories[0].badges[9]) badgeCategories[0].badges[9].progress.current = Math.min(pollWinsValue, badgeCategories[0].badges[9].progress.total); // Level 1 (5)
     if (badgeCategories[0].badges[10]) badgeCategories[0].badges[10].progress.current = Math.min(pollWinsValue, badgeCategories[0].badges[10].progress.total); // Level 2 (15)
     if (badgeCategories[0].badges[11]) badgeCategories[0].badges[11].progress.current = Math.min(pollWinsValue, badgeCategories[0].badges[11].progress.total); // Level 3 (50)
     
-    console.log('✓ EVOLVING BADGE PROGRESS UPDATED\n');
+    // ✅ CRITICAL FIX: DO NOT auto-unlock elite badges (Power Five)
+    // These badges ONLY unlock through:
+    // 1. Founding Dev - backend only (isDev flag)
+    // 2. Campus Catalyst - backend only (admin promotion)
+    // 3. Pod Pioneer - backend only (explicit pod join trigger)
+    // 4. Bridge Builder - backend only (explicit message trigger)
+    // 
+    // Ignore progress-based auto-unlock for these - they're already handled by lines 1130-1152
+    // which check user.badges array from backend
+    const eliteBadgeIds = ['founding-dev', 'campus-catalyst', 'pod-pioneer', 'bridge-builder'];
     
-    // ✅ AUTO-UNLOCK: Check if evolving badge criteria are met and unlock if needed
-    console.log('🔓 CHECKING AUTO-UNLOCK FOR EVOLVING BADGES:');
+    console.log('🔓 CHECKING AUTO-UNLOCK FOR EVOLVING BADGES (excluding elite badges):');
     badgeCategories[0].badges.forEach(badge => {
+      // CRITICAL: Skip elite badges entirely - they use backend user.badges array
+      if (eliteBadgeIds.includes(badge?.id)) {
+        console.log(`  ⏭️ SKIPPED (Elite): ${badge.name} - Must be granted by backend`);
+        return;
+      }
+      
       if (badge && !badge.isUnlocked && badge.progress?.current >= badge.progress?.total) {
         badge.isUnlocked = true;
-        console.log(`  ✅ AUTO-UNLOCK TRIGGERED: ${badge.name} (${badge.progress.current}/${badge.progress.total})`);
       }
     });
-    console.log('✓ AUTO-UNLOCK CHECK COMPLETE\n');
   } else {
-    console.log('⚠️ Badge categories not yet initialized, skipping progress update');
+    // Badge categories not initialized, skip progress update
   }
 
   // ✅ SIGNAL GUARDIAN: postsCount >= 5 requirement
   const postCount = user?.postsCount || 0;
   moderatorBadge.isUnlocked = user?.badges?.includes('Signal Guardian') || false;
   moderatorBadge.isActive = user?.badges?.includes('Signal Guardian') || false;
-  console.log('  ' + (postCount >= 5 ? '✅' : '❌') + ' SIGNAL GUARDIAN: ' + postCount + '/5 posts' + (moderatorBadge.isUnlocked ? ' (UNLOCKED)' : ' (LOCKED)'));
   
   // ✅ SPAM ALERT: Dynamic penalty badge based on penaltyExpiry
   const hasActivePenalty = user?.penaltyExpiry && new Date(user.penaltyExpiry) > new Date();
@@ -1217,8 +1265,79 @@ export default function BadgeCenter({ user, setUser }) {
   penaltyBadges[0].isUnlocked = hasActivePenalty;
   penaltyBadges[0].isActive = hasActivePenalty;
   penaltyBadges[0].isPenaltyBadge = true;
-  console.log('  ' + (hasActivePenalty ? '✅' : '❌') + ' SPAM ALERT: ' + reportCount + '/3 reports' + (hasActivePenalty ? ' (ACTIVE PENALTY)' : ' (INACTIVE)'));
-  console.log('✓ BADGE UNLOCK AUDIT COMPLETE\n');
+
+  // ✅ DYNAMIC PROGRESS CALCULATION - Compute progress for all badges from user stats
+  const calculateBadgeProgress = (badge) => {
+    const userStats = {
+      postsCount: user?.postsCount || 0,
+      totalReplies: user?.totalReplies || 0,
+      loginStreak: user?.loginStreak || 0,
+      correctPolls: user?.correctPolls || 0,
+      collabRoomsJoined: user?.collabRoomsJoined || 0,
+      statsMap: user?.statsMap || {}
+    };
+
+    // Power Five badges - binary (0/1 or 1/1)
+    if (badge.id === 'founding-dev') {
+      return { current: user?.isDev ? 1 : 0, total: 1 };
+    }
+    if (badge.id === 'campus-catalyst') {
+      return { current: user?.role === 'COLLEGE_HEAD' ? 1 : 0, total: 1 };
+    }
+    if (badge.id === 'pod-pioneer') {
+      return { current: user?.badges?.includes('Pod Pioneer') ? 1 : 0, total: 1 };
+    }
+    if (badge.id === 'bridge-builder') {
+      return { current: user?.badges?.includes('Bridge Builder') ? 1 : 0, total: 1 };
+    }
+    if (badge.id === 'signal-guardian') {
+      return { current: Math.min(userStats.postsCount, 5), total: 5 };
+    }
+
+    // Hard-mode badges - Progress based on statsMap or user stats
+    if (badge.badgeId || badge.id?.startsWith('discussion') || badge.category === 'Elite') {
+      const badgeId = badge.badgeId || badge.id;
+      
+      // Map badge IDs to their stat fields
+      const statFieldMap = {
+        'discussion-architect': 'discussionArchitectCount',
+        'active-talker-elite': 'weeklyRepliesCount',
+        'ultra-responder': 'fastRepliesCount',
+        'midnight-legend': 'midnightRepliesCount',
+        'doubt-destroyer': 'helpNeededRepliesCount',
+        'voice-of-hub-lvl3': 'totalReplies',
+        'streak-seeker-lvl3': 'loginStreak',
+        'the-oracle-gm': 'correctPolls',
+        'collab-master-lvl3': 'collabRoomsJoined'
+      };
+
+      const statField = statFieldMap[badgeId];
+      let current = 0;
+      let total = badge.progress?.total || 100;
+
+      if (badgeId === 'voice-of-hub-lvl3') {
+        current = userStats.totalReplies;
+        total = 1500;
+      } else if (badgeId === 'streak-seeker-lvl3') {
+        current = userStats.loginStreak;
+        total = 100;
+      } else if (badgeId === 'the-oracle-gm') {
+        current = userStats.correctPolls;
+        total = 50;
+      } else if (badgeId === 'collab-master-lvl3') {
+        current = userStats.collabRoomsJoined;
+        total = 50;
+      } else if (statField && userStats.statsMap[statField] !== undefined) {
+        current = userStats.statsMap[statField];
+        total = badge.progress?.total || 50;
+      }
+
+      return { current: Math.min(current, total), total };
+    }
+
+    // Default fallback
+    return badge.progress || { current: 0, total: 1 };
+  };
 
   // ✅ Check user status - 100% based on REAL badges from MongoDB
   const isModerator = user?.badges?.includes('Signal Guardian') || false;
@@ -1227,7 +1346,11 @@ export default function BadgeCenter({ user, setUser }) {
   ) || false;
   const hasPenaltyBadges = hasActivePenalty || penaltyBadges.some(badge => badge.isUnlocked)
 
-  const allPowerFiveBadges = powerFiveBadges.map(badge => ({ ...badge, category: 'Power Five', categoryColor: 'orange' }))
+  const allPowerFiveBadges = powerFiveBadges.map(badge => {
+    const updatedBadge = { ...badge, category: 'Power Five', categoryColor: 'orange' };
+    updatedBadge.progress = calculateBadgeProgress(badge);
+    return updatedBadge;
+  })
   
   // Simple tier normalization function for fallback badges
   const normalizeTierSimple = (tier) => {
@@ -1277,15 +1400,20 @@ export default function BadgeCenter({ user, setUser }) {
   
   const mergedBadges = [
     ...allPowerFiveBadges,
-    ...hardModeBadgesOrFallback.map(badge => ({ 
-      ...badge, 
-      category: 'Elite', 
-      categoryColor: 'purple',
-      // Ensure hard-mode badges have all required fields
-      icon: badge.icon || badge.name.charAt(0),
-      tier: badge.tier || 'Rare',
-      description: badge.description || badge.requirement || 'Elite badge'
-    }))
+    ...hardModeBadgesOrFallback.map(badge => {
+      const updatedBadge = { 
+        ...badge, 
+        category: 'Elite', 
+        categoryColor: 'purple',
+        // Ensure hard-mode badges have all required fields
+        icon: badge.icon || badge.name.charAt(0),
+        tier: badge.tier || 'Rare',
+        description: badge.description || badge.requirement || 'Elite badge'
+      };
+      // Apply dynamic progress calculation
+      updatedBadge.progress = calculateBadgeProgress(badge);
+      return updatedBadge;
+    })
   ]
 
   const allBadges = badgeCategories.flatMap(cat => cat.badges.map(badge => ({ ...badge, category: cat.name, categoryColor: cat.color })))
@@ -1795,20 +1923,16 @@ export default function BadgeCenter({ user, setUser }) {
                   {getTierStars(badge.tier)}
                 </Badge>
                 
-                {/* Progress bar for unearned badges */}
-                {!badge.isUnlocked && (
+                {/* Progress bar - Always visible for all badges - Glassmorphic blue theme */}
+                {badge.progress && (badge.progress.total > 0) && (
                   <div className="space-y-2 mt-3">
-                    <div className="flex justify-between text-xs text-muted-foreground">
+                    <div className="flex justify-between text-xs text-cyan-300/70">
                       <span className="font-semibold">Progress</span>
                       <span className="font-mono">{badge.progress?.current || 0}/{badge.progress?.total || 1}</span>
                     </div>
-                    <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden border border-gray-600">
+                    <div className="w-full bg-gradient-to-r from-cyan-900/20 to-blue-900/20 rounded-full h-3 overflow-hidden border border-cyan-400/20 backdrop-blur-sm">
                       <div 
-                        className={`h-3 rounded-full transition-all duration-500 shadow-lg ${
-                          badge.category === 'Elite' && badge.status === 'pending-unlock'
-                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 shadow-yellow-500/50'
-                            : 'bg-gradient-to-r from-cyan-500 to-blue-500 shadow-cyan-500/50'
-                        }`}
+                        className={`h-3 rounded-full transition-all duration-500 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 shadow-lg shadow-cyan-500/40`}
                         style={{ width: `${Math.min(((badge.progress?.current || 0) / (badge.progress?.total || 1)) * 100, 100)}%` }}
                       />
                     </div>

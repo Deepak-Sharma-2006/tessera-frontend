@@ -15,6 +15,7 @@ import BuddyBeacon from '@/components/campus/BuddyBeacon.jsx';
 import PostCommentsPage from '@/components/campus/PostCommentsPage.jsx';
 import PostCommentsView from '@/components/PostCommentsView.jsx';
 import Logout from '@/pages/Logout.jsx';
+import DevDashboard from '@/components/DevDashboard.jsx';
 
 // --- Other Components ---
 import LoadingSpinner from '@/components/animations/LoadingSpinner.jsx';
@@ -189,7 +190,23 @@ const AuthenticatedApp = ({ user, setUser }) => {
   );
 };
 
-// --- 3. Protected Route Wrapper ---
+// --- 3. Admin Route Wrapper ---
+const AdminRoute = ({ user, isVerifying, children }) => {
+  // Show loading while verifying session
+  if (isVerifying) {
+    return <LoadingSpinner />;
+  }
+
+  // Check if user is admin
+  if (user && user.role === 'ADMIN') {
+    return children;
+  }
+
+  // Not admin - redirect to login
+  return <Navigate to="/login" />;
+};
+
+// --- 4. Protected Route Wrapper ---
 const ProtectedRoute = ({ user, isVerifying, isProfileComplete, children, loginProps }) => {
   // CRITICAL: While verifying the token with the backend, show loading spinner
   // This prevents rendering protected content with an invalid token
@@ -328,14 +345,20 @@ export default function App() {
         <Router>
           <Routes>
             <Route path="/" element={
-              isVerifying ? <LoadingSpinner /> : (user && isProfileComplete ? <Navigate to="/campus" /> : <Navigate to="/login" />)
+              isVerifying ? <LoadingSpinner /> : (user && user.role === 'ADMIN' ? <Navigate to="/dev-dashboard" /> : (user && isProfileComplete ? <Navigate to="/campus" /> : <Navigate to="/login" />))
             } />
 
             <Route path="/login" element={
-              isVerifying ? <LoadingSpinner /> : (!user ? <LoginFlow {...loginProps} /> : <Navigate to="/campus" />)
+              isVerifying ? <LoadingSpinner /> : (user && user.role === 'ADMIN' ? <Navigate to="/dev-dashboard" /> : (!user ? <LoginFlow {...loginProps} /> : <Navigate to="/campus" />))
             } />
 
             <Route path="/logout" element={<Logout />} />
+
+            <Route path="/dev-dashboard" element={
+              <AdminRoute user={user} isVerifying={isVerifying}>
+                <DevDashboard user={user} />
+              </AdminRoute>
+            } />
 
             <Route path="/profile-setup" element={<ProfileSetupHandler setAppUser={setUser} setInitialLoginFlowState={setInitialLoginFlowState} />} />
             <Route path="/login-failed" element={<div><h1>Login Failed</h1><p>Please try again.</p></div>} />
