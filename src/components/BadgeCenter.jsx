@@ -973,6 +973,20 @@ export default function BadgeCenter({ user, setUser }) {
     )
   }
 
+  const normalizeProgress = (progress, isUnlocked) => {
+    const totalRaw = Number(progress?.total ?? 1)
+    const total = Number.isFinite(totalRaw) && totalRaw > 0 ? totalRaw : 1
+    const currentRaw = Number(progress?.current ?? 0)
+    let current = Number.isFinite(currentRaw) ? currentRaw : 0
+
+    if (isUnlocked && total === 1) {
+      current = 1
+    }
+
+    current = Math.max(0, Math.min(current, total))
+    return { current, total }
+  }
+
   const hydrateHardModeBadges = (userId) => {
     if (!userId) {
       setHardModeBadges([])
@@ -986,6 +1000,10 @@ export default function BadgeCenter({ user, setUser }) {
           const badgeId = badge.badgeId || badge.id || definition?.badgeId || definition?.id
           const isUnlocked = badge.isUnlocked ?? badge.unlocked ?? false
           const isEquipped = badge.isEquipped ?? false
+          const normalizedProgress = normalizeProgress(
+            badge.progress || definition?.progress,
+            isUnlocked,
+          )
 
           return {
             ...badge,
@@ -1002,7 +1020,7 @@ export default function BadgeCenter({ user, setUser }) {
             requirement: badge.requirement || definition?.requirement || 'Meet criteria',
             unlockedBy: badge.unlockedBy || definition?.unlockedBy,
             perks: badge.perks || definition?.perks || ['Elite status'],
-            progress: badge.progress || { current: 0, total: 1 },
+            progress: normalizedProgress,
             isUnlocked,
             isEquipped,
             status: badge.status || (isEquipped ? 'equipped' : (isUnlocked ? 'unlocked' : 'locked')),
@@ -1081,16 +1099,20 @@ export default function BadgeCenter({ user, setUser }) {
   ) || false;
   const hasPenaltyBadges = hasActivePenalty || penaltyBadges.some(badge => badge.isUnlocked)
 
-  const mergedBadges = hardModeBadges.map(badge => ({
-    ...badge,
-    category: badge.category || 'Elite',
-    categoryColor: 'purple',
-    icon: badge.icon || badge.name?.charAt(0) || '✨',
-    tier: badge.tier || 'Rare',
-    description: badge.description || badge.requirement || 'Elite badge',
-    progress: badge.progress || { current: 0, total: 1 },
-    isUnlocked: badge.isUnlocked || false
-  }))
+  const mergedBadges = hardModeBadges.map(badge => {
+    const normalizedProgress = normalizeProgress(badge.progress, badge.isUnlocked || false)
+
+    return {
+      ...badge,
+      category: badge.category || 'Elite',
+      categoryColor: 'purple',
+      icon: badge.icon || badge.name?.charAt(0) || '✨',
+      tier: badge.tier || 'Rare',
+      description: badge.description || badge.requirement || 'Elite badge',
+      progress: normalizedProgress,
+      isUnlocked: badge.isUnlocked || false,
+    }
+  })
 
   const allBadges = mergedBadges
   const earnedBadges = allBadges.filter(badge => badge.isUnlocked)
@@ -1600,7 +1622,7 @@ export default function BadgeCenter({ user, setUser }) {
                       <div className="space-y-2 mt-3">
                         <div className="flex justify-between text-xs text-cyan-300/70">
                           <span className="font-semibold">Progress</span>
-                          <span className="font-mono">{badge.progress?.current || 0}/{badge.progress?.total || 1}</span>
+                          <span className="font-mono">{Math.min(badge.progress?.current || 0, badge.progress?.total || 1)}/{badge.progress?.total || 1}</span>
                         </div>
                         <div className="w-full bg-gradient-to-r from-cyan-900/20 to-blue-900/20 rounded-full h-3 overflow-hidden border border-cyan-400/20 backdrop-blur-sm">
                           <div
@@ -1816,7 +1838,7 @@ export default function BadgeCenter({ user, setUser }) {
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-xs font-semibold text-blue-300">Progress</span>
                         <span className="text-xs font-mono text-blue-300 bg-blue-500/20 px-2 py-1 rounded">
-                          {selectedBadge.progress.current}/{selectedBadge.progress.total}
+                          {Math.min(selectedBadge.progress.current, selectedBadge.progress.total)}/{selectedBadge.progress.total}
                         </span>
                       </div>
                       <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden border border-gray-600">
@@ -1826,7 +1848,7 @@ export default function BadgeCenter({ user, setUser }) {
                         />
                       </div>
                       <div className="text-xs text-blue-300/70 mt-2">
-                        {selectedBadge.progress.total - selectedBadge.progress.current} more to go!
+                        {Math.max(0, selectedBadge.progress.total - Math.min(selectedBadge.progress.current, selectedBadge.progress.total))} more to go!
                       </div>
                     </div>
                   )}
