@@ -85,46 +85,46 @@ const badgeLevelConfig = {
   'Streak Seeker': {
     series: 'Streak Seeker',
     iconName: 'flame',
-    1: { 
+    1: {
       level: 1,
-      rank: 'Common', 
-      stars: 1, 
+      rank: 'Common',
+      stars: 1,
       color: '#94a3b8',
       bgColor: 'gray-500/70',
       borderColor: 'border-gray-300',
       textColor: 'text-gray-50',
       shadowColor: 'shadow-gray-500/20',
-      req: '7 days', 
+      req: '7 days',
       desc: 'Maintain a login streak for 7 consecutive days',
       fullDesc: 'Start small by logging in and participating every single day. Streaks build momentum!',
       targetValue: 7,
       targetUnit: 'days'
     },
-    2: { 
+    2: {
       level: 2,
-      rank: 'Rare', 
-      stars: 3, 
+      rank: 'Rare',
+      stars: 3,
       color: '#3b82f6',
       bgColor: 'blue-500/70',
       borderColor: 'border-blue-300',
       textColor: 'text-blue-50',
       shadowColor: 'shadow-blue-500/20',
-      req: '30 days', 
+      req: '30 days',
       desc: 'Maintain a login streak for 30 consecutive days',
       fullDesc: 'Consistency is key! Show up every day to compound your engagement.',
       targetValue: 30,
       targetUnit: 'days'
     },
-    3: { 
+    3: {
       level: 3,
-      rank: 'Legendary', 
-      stars: 5, 
+      rank: 'Legendary',
+      stars: 5,
       color: '#f59e0b',
       bgColor: 'yellow-500/70',
       borderColor: 'border-yellow-300',
       textColor: 'text-yellow-50',
       shadowColor: 'shadow-yellow-500/30',
-      req: '100 days (Iron Streak)', 
+      req: '100 days (Iron Streak)',
       desc: 'Maintain an iron login streak for 100 consecutive days',
       fullDesc: 'Become a Tessera legend! Your dedication inspires the community.',
       targetValue: 100,
@@ -134,46 +134,46 @@ const badgeLevelConfig = {
   'Collab Master': {
     series: 'Collab Master',
     iconName: 'handshake',
-    1: { 
+    1: {
       level: 1,
-      rank: 'Common', 
-      stars: 1, 
+      rank: 'Common',
+      stars: 1,
       color: '#94a3b8',
       bgColor: 'gray-500/70',
       borderColor: 'border-gray-300',
       textColor: 'text-gray-50',
       shadowColor: 'shadow-gray-500/20',
-      req: '10 rooms', 
+      req: '10 rooms',
       desc: 'Join and collaborate in 10 different rooms',
       fullDesc: 'Start by exploring different collaboration spaces. Each room brings new perspectives!',
       targetValue: 10,
       targetUnit: 'rooms'
     },
-    2: { 
+    2: {
       level: 2,
-      rank: 'Rare', 
-      stars: 3, 
+      rank: 'Rare',
+      stars: 3,
       color: '#3b82f6',
       bgColor: 'blue-500/70',
       borderColor: 'border-blue-300',
       textColor: 'text-blue-50',
       shadowColor: 'shadow-blue-500/20',
-      req: '25 rooms', 
+      req: '25 rooms',
       desc: 'Join and collaborate in 25 different rooms',
       fullDesc: 'Collaborate across domains to grow your reach. Multi-domain work builds expertise!',
       targetValue: 25,
       targetUnit: 'rooms'
     },
-    3: { 
+    3: {
       level: 3,
-      rank: 'Epic', 
-      stars: 4, 
+      rank: 'Epic',
+      stars: 4,
       color: '#a855f7',
       bgColor: 'purple-500/70',
       borderColor: 'border-purple-300',
       textColor: 'text-purple-50',
       shadowColor: 'shadow-purple-500/30',
-      req: '50 rooms (Expert)', 
+      req: '50 rooms (Expert)',
       desc: 'Join and collaborate in 50 different rooms (Expert)',
       fullDesc: 'Become an expert collaborator! Your deep network makes you invaluable to Tessera.',
       targetValue: 50,
@@ -183,46 +183,46 @@ const badgeLevelConfig = {
   'Voice of the Hub': {
     series: 'Voice of the Hub',
     iconName: 'megaphone',
-    1: { 
+    1: {
       level: 1,
-      rank: 'Common', 
-      stars: 1, 
+      rank: 'Common',
+      stars: 1,
       color: '#94a3b8',
       bgColor: 'gray-500/70',
       borderColor: 'border-gray-300',
       textColor: 'text-gray-50',
       shadowColor: 'shadow-gray-500/20',
-      req: '100 replies', 
+      req: '100 replies',
       desc: 'Accumulate 100 total replies across all Global Hub posts',
       fullDesc: 'Start small by replying to campus hub threads. Every response builds your voice.',
       targetValue: 100,
       targetUnit: 'replies'
     },
-    2: { 
+    2: {
       level: 2,
-      rank: 'Rare', 
-      stars: 3, 
+      rank: 'Rare',
+      stars: 3,
       color: '#3b82f6',
       bgColor: 'blue-500/70',
       borderColor: 'border-blue-300',
       textColor: 'text-blue-50',
       shadowColor: 'shadow-blue-500/20',
-      req: '500 replies', 
+      req: '500 replies',
       desc: 'Accumulate 500 total replies across all Global Hub posts',
       fullDesc: 'Collaborate across domains to grow your reach. Diverse engagement amplifies impact.',
       targetValue: 500,
       targetUnit: 'replies'
     },
-    3: { 
+    3: {
       level: 3,
-      rank: 'Legendary', 
-      stars: 5, 
+      rank: 'Legendary',
+      stars: 5,
       color: '#f59e0b',
       bgColor: 'yellow-500/70',
       borderColor: 'border-yellow-300',
       textColor: 'text-yellow-50',
       shadowColor: 'shadow-yellow-500/30',
-      req: '1,500 replies (The Guru)', 
+      req: '1,500 replies (The Guru)',
       desc: 'Accumulate 1,500 total replies (The Guru) - Become the most active voice',
       fullDesc: 'Become an active voice in the Global Hub community. Your wisdom guides others.',
       targetValue: 1500,
@@ -232,46 +232,46 @@ const badgeLevelConfig = {
   'The Oracle': {
     series: 'The Oracle',
     iconName: 'eye',
-    1: { 
+    1: {
       level: 1,
-      rank: 'Common', 
-      stars: 1, 
+      rank: 'Common',
+      stars: 1,
       color: '#94a3b8',
       bgColor: 'gray-500/70',
       borderColor: 'border-gray-300',
       textColor: 'text-gray-50',
       shadowColor: 'shadow-gray-500/20',
-      req: '5 poll wins', 
+      req: '5 poll wins',
       desc: 'Win 5 poll predictions',
       fullDesc: 'Start your prediction journey! Trust your instincts in campus discussions.',
       targetValue: 5,
       targetUnit: 'poll wins'
     },
-    2: { 
+    2: {
       level: 2,
-      rank: 'Rare', 
-      stars: 3, 
+      rank: 'Rare',
+      stars: 3,
       color: '#3b82f6',
       bgColor: 'blue-500/70',
       borderColor: 'border-blue-300',
       textColor: 'text-blue-50',
       shadowColor: 'shadow-blue-500/20',
-      req: '15 poll wins', 
+      req: '15 poll wins',
       desc: 'Win 15 poll predictions',
       fullDesc: 'Your predictions are getting sharper! You understand campus pulse.',
       targetValue: 15,
       targetUnit: 'poll wins'
     },
-    3: { 
+    3: {
       level: 3,
-      rank: 'Epic', 
-      stars: 4, 
+      rank: 'Epic',
+      stars: 4,
       color: '#a855f7',
       bgColor: 'purple-500/70',
       borderColor: 'border-purple-300',
       textColor: 'text-purple-50',
       shadowColor: 'shadow-purple-500/30',
-      req: '50 poll wins (Grandmaster)', 
+      req: '50 poll wins (Grandmaster)',
       desc: 'Win 50 poll predictions (Grandmaster) - Achieve mastery over collective wisdom',
       fullDesc: 'Your predictive prowess is legendary! Master the art of reading the room.',
       targetValue: 50,
@@ -281,59 +281,59 @@ const badgeLevelConfig = {
 }
 
 const powerFiveBadges = [
-  { 
-    id: 'founding-dev', 
-    name: 'Founding Dev', 
+  {
+    id: 'founding-dev',
+    name: 'Founding Dev',
     iconName: 'code',
-    tier: 'Legendary', 
-    color: 'from-yellow-500 to-orange-600', 
-    description: 'System Architect', 
-    requirement: 'isDev flag = true', 
-    progress: { current: 0, total: 1 }, 
-    isUnlocked: false, 
-    isActive: false, 
+    tier: 'Legendary',
+    color: 'from-yellow-500 to-orange-600',
+    description: 'System Architect',
+    requirement: 'isDev flag = true',
+    progress: { current: 0, total: 1 },
+    isUnlocked: false,
+    isActive: false,
     perks: ['Developer access', 'Event creation privileges'],
     unlockedBy: 'Granted by admin/developer role assignment.'
   },
-  { 
-    id: 'campus-catalyst', 
-    name: 'Campus Catalyst', 
+  {
+    id: 'campus-catalyst',
+    name: 'Campus Catalyst',
     iconName: 'megaphone',
-    tier: 'Epic', 
-    color: 'from-blue-500 to-purple-600', 
-    description: 'Verified College Head', 
+    tier: 'Epic',
+    color: 'from-blue-500 to-purple-600',
+    description: 'Verified College Head',
     requirement: 'role = COLLEGE_HEAD',
-    progress: { current: 1, total: 1 }, 
-    isUnlocked: false, 
-    isActive: false, 
+    progress: { current: 1, total: 1 },
+    isUnlocked: false,
+    isActive: false,
     perks: ['Event creation access', 'College leadership'],
     unlockedBy: 'Granted by authorized campus leader role assignment.'
   },
-  { 
-    id: 'pod-pioneer', 
-    name: 'Pod Pioneer', 
+  {
+    id: 'pod-pioneer',
+    name: 'Pod Pioneer',
     iconName: 'sprout',
-    tier: 'Uncommon', 
-    color: 'from-green-500 to-emerald-600', 
-    description: 'First Pod Entry', 
+    tier: 'Uncommon',
+    color: 'from-green-500 to-emerald-600',
+    description: 'First Pod Entry',
     requirement: 'Join your first pod',
-    progress: { current: 0, total: 1 }, 
-    isUnlocked: false, 
-    isActive: false, 
+    progress: { current: 0, total: 1 },
+    isUnlocked: false,
+    isActive: false,
     perks: ['Pod history tracking', 'Collaboration access'],
     unlockedBy: 'Join your first collaboration pod.'
   },
-  { 
-    id: 'bridge-builder', 
-    name: 'Bridge Builder', 
+  {
+    id: 'bridge-builder',
+    name: 'Bridge Builder',
     iconName: 'bridge',
-    tier: 'Rare', 
-    color: 'from-cyan-500 to-blue-500', 
-    description: 'Inter-college Collaborator', 
+    tier: 'Rare',
+    color: 'from-cyan-500 to-blue-500',
+    description: 'Inter-college Collaborator',
     requirement: 'Message across colleges',
-    progress: { current: 0, total: 1 }, 
-    isUnlocked: false, 
-    isActive: false, 
+    progress: { current: 0, total: 1 },
+    isUnlocked: false,
+    isActive: false,
     perks: ['Cross-campus features', 'Inter-college access'],
     unlockedBy: 'Send an inter-college/inter-domain DM.'
   },
@@ -989,10 +989,10 @@ export default function BadgeCenter({ user, setUser }) {
 
   // ✅ FIX: Use ref to prevent infinite API loop
   const badgeFetchedRef = useRef(false)
-  
+
   useEffect(() => {
     const userId = getUserId()
-    
+
     // Only fetch once per component mount
     if (badgeFetchedRef.current || !userId) {
       if (!userId) {
@@ -1002,21 +1002,21 @@ export default function BadgeCenter({ user, setUser }) {
       }
       return
     }
-    
+
     badgeFetchedRef.current = true
     console.log('[BadgeCenter] 🚀 Fetching hard-mode badges for user:', userId)
     setHardModeBadgesLoading(true)
-    
+
     axios.get(`/api/badges/hard-mode/${userId}`)
       .then(res => {
         console.log('[BadgeCenter] ✓ Hard-mode badges loaded')
         // Normalize badge data from backend and enrich with HARD_MODE_BADGE_DEFINITIONS
         const normalizedBadges = (res.data.badges || []).map(badge => {
           // Find the matching definition to enrich missing fields
-          const definition = HARD_MODE_BADGE_DEFINITIONS.find(def => 
+          const definition = HARD_MODE_BADGE_DEFINITIONS.find(def =>
             def.id === badge.badgeId || def.badgeId === badge.id || def.name === badge.name
           )
-          
+
           return {
             ...badge,
             id: badge.badgeId || badge.id,
@@ -1029,34 +1029,34 @@ export default function BadgeCenter({ user, setUser }) {
             visualStyle: badge.visualStyle || definition?.visualStyle,
             category: badge.category || definition?.category || 'engagement',
             description: badge.description || definition?.description || 'Elite badge',
-              requirement: badge.requirement || definition?.requirement || 'Meet criteria',
-              unlockedBy: badge.unlockedBy || definition?.unlockedBy,
-              perks: badge.perks || definition?.perks || ['Elite status'],
-              progress: badge.progress || definition?.progress || { current: 0, total: 100 },
-              isUnlocked: badge.unlocked || badge.isUnlocked || false,
-              status: badge.status || (badge.unlocked ? 'equipped' : 'locked'),
-              evolvesTo: badge.evolvesTo || definition?.evolvesTo,
-              isMaxLevel: badge.isMaxLevel || definition?.isMaxLevel || false
-            }
-          })
-          console.log('[BadgeCenter] ✓ Normalized', normalizedBadges.length, 'badges')
-          setHardModeBadges(normalizedBadges)
+            requirement: badge.requirement || definition?.requirement || 'Meet criteria',
+            unlockedBy: badge.unlockedBy || definition?.unlockedBy,
+            perks: badge.perks || definition?.perks || ['Elite status'],
+            progress: badge.progress || definition?.progress || { current: 0, total: 100 },
+            isUnlocked: badge.unlocked || badge.isUnlocked || false,
+            status: badge.status || (badge.unlocked ? 'equipped' : 'locked'),
+            evolvesTo: badge.evolvesTo || definition?.evolvesTo,
+            isMaxLevel: badge.isMaxLevel || definition?.isMaxLevel || false
+          }
         })
-        .catch(err => {
-          console.error('[BadgeCenter] ❌ API Fetch failed:', err.response?.status, err.message)
-          console.log('[BadgeCenter] ℹ️ Using fallback badges')
-          setHardModeBadges(createFallbackBadges())
-        })
-        .finally(() => setHardModeBadgesLoading(false))
-}, []) // ✅ FIXED: Empty dependency array - only run on mount
+        console.log('[BadgeCenter] ✓ Normalized', normalizedBadges.length, 'badges')
+        setHardModeBadges(normalizedBadges)
+      })
+      .catch(err => {
+        console.error('[BadgeCenter] ❌ API Fetch failed:', err.response?.status, err.message)
+        console.log('[BadgeCenter] ℹ️ Using fallback badges')
+        setHardModeBadges(createFallbackBadges())
+      })
+      .finally(() => setHardModeBadgesLoading(false))
+  }, []) // ✅ FIXED: Empty dependency array - only run on mount
 
   // ✅ Sync badges on mount to ensure isDev and role flags unlock badges immediately
   const badgeSyncedRef = useRef(false)
-  
+
   useEffect(() => {
     // Only sync once on mount
     if (badgeSyncedRef.current) return
-    
+
     const userId = getUserId()
     if (userId) {
       badgeSyncedRef.current = true
@@ -1070,7 +1070,7 @@ export default function BadgeCenter({ user, setUser }) {
         })
         .catch(err => console.log('[BadgeCenter] Badge sync error:', err.message))
     }
-}, []) // ✅ FIXED: Empty dependency array - only run on mount
+  }, []) // ✅ FIXED: Empty dependency array - only run on mount
 
   // ✅ WebSocket listener for real-time badge unlocks
   useEffect(() => {
@@ -1083,7 +1083,7 @@ export default function BadgeCenter({ user, setUser }) {
         debug: (str) => console.log('[STOMP Debug]', str),
         onConnect: () => {
           console.log('✓ WebSocket connected');
-          
+
           // Subscribe to badge unlock messages
           stompClient.subscribe(
             `/user/${user._id}/queue/badge-unlock`,
@@ -1091,7 +1091,7 @@ export default function BadgeCenter({ user, setUser }) {
               try {
                 const badgeUnlock = JSON.parse(message.body);
                 console.log('🎉 Badge unlocked via WebSocket:', badgeUnlock);
-                
+
                 // Update user state with new badge
                 setUser(prevUser => {
                   if (prevUser.badges && !prevUser.badges.includes(badgeUnlock.badgeName)) {
@@ -1107,9 +1107,9 @@ export default function BadgeCenter({ user, setUser }) {
               }
             }
           );
-          
+
           console.log('✓ WebSocket badge unlock listener subscribed to /user/' + user._id + '/queue/badge-unlock');
-          
+
           // ✅ NEW: Subscribe to stat updates for dynamic progress bar updates
           stompClient.subscribe(
             '/user/' + user._id + '/queue/stat-update',
@@ -1117,11 +1117,11 @@ export default function BadgeCenter({ user, setUser }) {
               try {
                 const statUpdate = JSON.parse(message.body);
                 console.log('📊 Stat update received:', statUpdate);
-                
+
                 // Update user stats that trigger badge progress updates
                 setUser(prevUser => {
                   const updated = { ...prevUser };
-                  
+
                   // Update relevant stats based on what changed
                   if (statUpdate.totalReplies !== undefined) updated.totalReplies = statUpdate.totalReplies;
                   if (statUpdate.postsCount !== undefined) updated.postsCount = statUpdate.postsCount;
@@ -1131,7 +1131,7 @@ export default function BadgeCenter({ user, setUser }) {
                     updated.statsMap = { ...prevUser.statsMap, ...statUpdate.statsMap };
                   }
                   if (statUpdate.collabRoomsJoined !== undefined) updated.collabRoomsJoined = statUpdate.collabRoomsJoined;
-                  
+
                   console.log('✅ User stats updated for badge progress:', updated);
                   return updated;
                 });
@@ -1140,7 +1140,7 @@ export default function BadgeCenter({ user, setUser }) {
               }
             }
           );
-          
+
           console.log('✓ WebSocket stat update listener subscribed to /user/' + user._id + '/queue/stat-update');
         },
         onStompError: (frame) => {
@@ -1162,7 +1162,7 @@ export default function BadgeCenter({ user, setUser }) {
 
   // ✅ STRICT DATA-DRIVEN BADGE UNLOCK LOGIC (100% from MongoDB Atlas)
   // Update Power Five badges with dynamic unlock status based on REAL user.badges array only
-  
+
   // ✅ AUDIT LOG: Check each badge unlock requirement
   console.log('\n🔍 BADGE UNLOCK AUDIT:');
   console.log('  User Badges:', user?.badges || []);
@@ -1170,7 +1170,7 @@ export default function BadgeCenter({ user, setUser }) {
   console.log('  Role:', user?.role);
   console.log('  Posts:', user?.postsCount);
   console.log('  Endorsements:', user?.endorsementsCount);
-  
+
   // 1. FOUNDING DEV: isDev flag = true
   powerFiveBadges[0].isUnlocked = user?.badges?.includes('Founding Dev') || false;
   powerFiveBadges[0].progress = { current: user?.badges?.includes('Founding Dev') ? 1 : 0, total: 1 };
@@ -1179,7 +1179,7 @@ export default function BadgeCenter({ user, setUser }) {
   } else {
     console.log('  ❌ FOUNDING DEV: isDev=false (LOCKED)');
   }
-  
+
   // 2. CAMPUS CATALYST: role = COLLEGE_HEAD
   powerFiveBadges[1].isUnlocked = user?.badges?.includes('Campus Catalyst') || false;
   powerFiveBadges[1].progress = { current: user?.badges?.includes('Campus Catalyst') ? 1 : 0, total: 1 };
@@ -1188,19 +1188,19 @@ export default function BadgeCenter({ user, setUser }) {
   } else {
     console.log('  ❌ CAMPUS CATALYST: role=' + user?.role + ' (LOCKED)');
   }
-  
+
   // 3. POD PIONEER: Unlock on first pod join (permanent)
   powerFiveBadges[2].isUnlocked = user?.badges?.includes('Pod Pioneer') || false;
   powerFiveBadges[2].progress = { current: user?.badges?.includes('Pod Pioneer') ? 1 : 0, total: 1 };
   console.log('  ' + (powerFiveBadges[2].isUnlocked ? '✅' : '❌') + ' POD PIONEER: ' + (powerFiveBadges[2].isUnlocked ? 'UNLOCKED' : 'LOCKED - Join a pod'));
-  
+
   // 4. BRIDGE BUILDER: Inter-college message (permanent)
   powerFiveBadges[3].isUnlocked = user?.badges?.includes('Bridge Builder') || false;
   powerFiveBadges[3].progress = { current: user?.badges?.includes('Bridge Builder') ? 1 : 0, total: 1 };
-  
+
   // ✅ SYNC EVOLVING BADGES WITH USER DATA - Reduced logging for performance
   // Update progress for all evolving badges based on user stats
-  
+
   // Safely update badge progress (with null checks)
   if (badgeCategories[0]?.badges) {
     // Streak Seeker - Based on loginStreak
@@ -1208,25 +1208,25 @@ export default function BadgeCenter({ user, setUser }) {
     if (badgeCategories[0].badges[0]) badgeCategories[0].badges[0].progress.current = Math.min(streakValue, badgeCategories[0].badges[0].progress.total); // Level 1 (7)
     if (badgeCategories[0].badges[1]) badgeCategories[0].badges[1].progress.current = Math.min(streakValue, badgeCategories[0].badges[1].progress.total); // Level 2 (30)
     if (badgeCategories[0].badges[2]) badgeCategories[0].badges[2].progress.current = Math.min(streakValue, badgeCategories[0].badges[2].progress.total); // Level 3 (100)
-    
+
     // Voice of the Hub - Based on totalReplies
     const repliesValue = user?.totalReplies || 0;
     if (badgeCategories[0].badges[3]) badgeCategories[0].badges[3].progress.current = Math.min(repliesValue, badgeCategories[0].badges[3].progress.total); // Level 1 (100)
     if (badgeCategories[0].badges[4]) badgeCategories[0].badges[4].progress.current = Math.min(repliesValue, badgeCategories[0].badges[4].progress.total); // Level 2 (500)
     if (badgeCategories[0].badges[5]) badgeCategories[0].badges[5].progress.current = Math.min(repliesValue, badgeCategories[0].badges[5].progress.total); // Level 3 (1500)
-    
+
     // Collab Master - Based on collabRoomsJoined (estimate from user stats)
     const collabRoomsValue = user?.collabRoomsJoined || user?.statsMap?.totalCollabRooms || 0;
     if (badgeCategories[0].badges[6]) badgeCategories[0].badges[6].progress.current = Math.min(collabRoomsValue, badgeCategories[0].badges[6].progress.total); // Level 1 (10)
     if (badgeCategories[0].badges[7]) badgeCategories[0].badges[7].progress.current = Math.min(collabRoomsValue, badgeCategories[0].badges[7].progress.total); // Level 2 (25)
     if (badgeCategories[0].badges[8]) badgeCategories[0].badges[8].progress.current = Math.min(collabRoomsValue, badgeCategories[0].badges[8].progress.total); // Level 3 (50)
-    
+
     // The Oracle - Based on correctPolls
     const pollWinsValue = user?.statsMap?.correctPolls || user?.pollWins || 0;
     if (badgeCategories[0].badges[9]) badgeCategories[0].badges[9].progress.current = Math.min(pollWinsValue, badgeCategories[0].badges[9].progress.total); // Level 1 (5)
     if (badgeCategories[0].badges[10]) badgeCategories[0].badges[10].progress.current = Math.min(pollWinsValue, badgeCategories[0].badges[10].progress.total); // Level 2 (15)
     if (badgeCategories[0].badges[11]) badgeCategories[0].badges[11].progress.current = Math.min(pollWinsValue, badgeCategories[0].badges[11].progress.total); // Level 3 (50)
-    
+
     // ✅ CRITICAL FIX: DO NOT auto-unlock elite badges (Power Five)
     // These badges ONLY unlock through:
     // 1. Founding Dev - backend only (isDev flag)
@@ -1237,7 +1237,7 @@ export default function BadgeCenter({ user, setUser }) {
     // Ignore progress-based auto-unlock for these - they're already handled by lines 1130-1152
     // which check user.badges array from backend
     const eliteBadgeIds = ['founding-dev', 'campus-catalyst', 'pod-pioneer', 'bridge-builder'];
-    
+
     console.log('🔓 CHECKING AUTO-UNLOCK FOR EVOLVING BADGES (excluding elite badges):');
     badgeCategories[0].badges.forEach(badge => {
       // CRITICAL: Skip elite badges entirely - they use backend user.badges array
@@ -1245,7 +1245,7 @@ export default function BadgeCenter({ user, setUser }) {
         console.log(`  ⏭️ SKIPPED (Elite): ${badge.name} - Must be granted by backend`);
         return;
       }
-      
+
       if (badge && !badge.isUnlocked && badge.progress?.current >= badge.progress?.total) {
         badge.isUnlocked = true;
       }
@@ -1258,7 +1258,7 @@ export default function BadgeCenter({ user, setUser }) {
   const postCount = user?.postsCount || 0;
   moderatorBadge.isUnlocked = user?.badges?.includes('Signal Guardian') || false;
   moderatorBadge.isActive = user?.badges?.includes('Signal Guardian') || false;
-  
+
   // ✅ SPAM ALERT: Dynamic penalty badge based on penaltyExpiry
   const hasActivePenalty = user?.penaltyExpiry && new Date(user.penaltyExpiry) > new Date();
   const reportCount = user?.reportCount || 0;
@@ -1297,7 +1297,7 @@ export default function BadgeCenter({ user, setUser }) {
     // Hard-mode badges - Progress based on statsMap or user stats
     if (badge.badgeId || badge.id?.startsWith('discussion') || badge.category === 'Elite') {
       const badgeId = badge.badgeId || badge.id;
-      
+
       // Map badge IDs to their stat fields
       const statFieldMap = {
         'discussion-architect': 'discussionArchitectCount',
@@ -1341,7 +1341,7 @@ export default function BadgeCenter({ user, setUser }) {
 
   // ✅ Check user status - 100% based on REAL badges from MongoDB
   const isModerator = user?.badges?.includes('Signal Guardian') || false;
-  const hasModerationBadges = user?.badges?.some(b => 
+  const hasModerationBadges = user?.badges?.some(b =>
     ['Chat Warden', 'Content Guardian', 'Event Coordinator', 'Collab Supervisor', 'Community Leader'].includes(b)
   ) || false;
   const hasPenaltyBadges = hasActivePenalty || penaltyBadges.some(badge => badge.isUnlocked)
@@ -1351,7 +1351,7 @@ export default function BadgeCenter({ user, setUser }) {
     updatedBadge.progress = calculateBadgeProgress(badge);
     return updatedBadge;
   })
-  
+
   // Simple tier normalization function for fallback badges
   const normalizeTierSimple = (tier) => {
     if (!tier) return 'Common'
@@ -1373,7 +1373,7 @@ export default function BadgeCenter({ user, setUser }) {
     }
     return tierMap[tier.toUpperCase()] || tier
   }
-  
+
   // ✅ CONSOLIDATED: Merge Power-Five + Hard-Mode badges into single unified array
   // If hardModeBadges is empty (still loading), use HARD_MODE_BADGE_DEFINITIONS as fallback
   const hardModeBadgesOrFallback = hardModeBadges.length > 0 ? hardModeBadges : HARD_MODE_BADGE_DEFINITIONS.map(def => ({
@@ -1397,13 +1397,13 @@ export default function BadgeCenter({ user, setUser }) {
     evolvesTo: def.evolvesTo,
     isMaxLevel: def.isMaxLevel || false
   }))
-  
+
   const mergedBadges = [
     ...allPowerFiveBadges,
     ...hardModeBadgesOrFallback.map(badge => {
-      const updatedBadge = { 
-        ...badge, 
-        category: 'Elite', 
+      const updatedBadge = {
+        ...badge,
+        category: 'Elite',
         categoryColor: 'purple',
         // Ensure hard-mode badges have all required fields
         icon: badge.icon || badge.name.charAt(0),
@@ -1419,7 +1419,7 @@ export default function BadgeCenter({ user, setUser }) {
   const allBadges = badgeCategories.flatMap(cat => cat.badges.map(badge => ({ ...badge, category: cat.name, categoryColor: cat.color })))
   const earnedBadges = allBadges.filter(badge => badge.isUnlocked)
   // const evolvingBadges = allBadges.filter(badge => !badge.isUnlocked && badge.progress.current > 0) // Unused
-  
+
   // ✅ CONSOLIDATED: Earned & Evolving from merged badges
   // const mergedEarned = mergedBadges.filter(badge => badge.isUnlocked || badge.status === 'equipped') // Unused
   // const mergedEvolving = mergedBadges.filter(badge => !badge.isUnlocked && badge.progress?.current > 0 && badge.status !== 'equipped') // Unused
@@ -1460,10 +1460,10 @@ export default function BadgeCenter({ user, setUser }) {
   // Get current preview data for modal using universal config
   const getPreviewTierData = (badgeId) => {
     if (!selectedBadge || !previewLevel) return null
-    
+
     const seriesName = getBadgeSeriesName(badgeId)
     if (!seriesName || !badgeLevelConfig[seriesName]) return null
-    
+
     return badgeLevelConfig[seriesName][previewLevel]
   }
 
@@ -1548,15 +1548,15 @@ export default function BadgeCenter({ user, setUser }) {
         alert('❌ Cannot unlock badge: User ID not available')
         return
       }
-      
+
       const response = await axios.post(`/api/badges/hard-mode/${userId}/unlock/${badge.badgeId}`)
       console.log('[BadgeCenter] ✅ Badge unlocked:', response.data)
-      
+
       // Update hard-mode badges
-      setHardModeBadges(prev => prev.map(b => 
+      setHardModeBadges(prev => prev.map(b =>
         b.badgeId === badge.badgeId ? { ...b, isEquipped: true, status: 'equipped' } : b
       ))
-      
+
       alert(`🎉 ${response.data.badgeName} badge unlocked!`)
     } catch (error) {
       if (error.response?.status === 429) {
@@ -1576,29 +1576,29 @@ export default function BadgeCenter({ user, setUser }) {
   const getActiveBadges = () => {
     // ✅ SYNC WITH SERVER: Check user.featuredBadges from server, not just isActive flag
     const featuredBadgeIds = user?.featuredBadges || []
-    
+
     // Get badges that are featured according to server
-    const featuredBadges = allBadges.filter(badge => 
+    const featuredBadges = allBadges.filter(badge =>
       featuredBadgeIds.some(id => id.toLowerCase() === badge.id.toLowerCase() || id.toLowerCase() === badge.name.toLowerCase())
     )
-    
+
     const specialBadges = []
-    
+
     // Always include moderator badge if user has it
     if (isModerator) {
       specialBadges.push(moderatorBadge)
     }
-    
+
     // Add active moderation badges (cannot be hidden)
     if (hasModerationBadges) {
       const activeModerationBadges = moderationBadges.filter(badge => badge.isUnlocked && badge.isActive)
       specialBadges.push(...activeModerationBadges)
     }
-    
+
     // Add active penalty badges (cannot be hidden)
     const activePenaltyBadges = penaltyBadges.filter(badge => badge.isUnlocked && badge.isActive)
     specialBadges.push(...activePenaltyBadges)
-    
+
     // Combine: special badges + featured badges
     return [...specialBadges, ...featuredBadges]
   }
@@ -1624,12 +1624,12 @@ export default function BadgeCenter({ user, setUser }) {
       )
 
       console.log('✅ Feature badge successful:', response.data)
-      
+
       // ✅ IMMEDIATE STATE UPDATE: Update badge and user state
       badge.isActive = true
       setUser(response.data)
       setShowFeaturedBadgeModal(false)
-      
+
       console.log('✅ Featured badges now:', response.data.featuredBadges)
       alert('✓ Badge featured successfully!')
     } catch (error) {
@@ -1652,10 +1652,10 @@ export default function BadgeCenter({ user, setUser }) {
       )
 
       console.log('✅ Badge removed successfully:', response.data)
-      
+
       // ✅ IMMEDIATE STATE UPDATE: Update user state with new featured badges list
       setUser(response.data)
-      
+
       console.log('✅ Featured badges now:', response.data.featuredBadges)
       alert('✓ Badge removed from featured showcase!')
     } catch (error) {
@@ -1673,12 +1673,12 @@ export default function BadgeCenter({ user, setUser }) {
     const now = new Date()
     const expiry = new Date(expiresAt)
     const diff = expiry.getTime() - now.getTime()
-    
+
     if (diff <= 0) return 'Expired'
-    
+
     const days = Math.floor(diff / (1000 * 60 * 60 * 24))
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-    
+
     if (days > 0) return `${days} days remaining`
     return `${hours} hours remaining`
   }
@@ -1694,11 +1694,10 @@ export default function BadgeCenter({ user, setUser }) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-3 rounded-lg transition-all duration-200 font-medium backdrop-blur-xl border min-h-[44px] focus:ring-2 focus:ring-cyan-400/50 focus:outline-none hover:-translate-y-0.5 ${
-              activeTab === tab.id
-                ? 'bg-cyan-400/25 text-cyan-200 border-cyan-400/50 shadow-lg shadow-cyan-400/30 scale-105'
-                : 'text-muted-foreground/70 border-white/15 bg-white/8 hover:bg-white/12 hover:border-white/20'
-            }`}
+            className={`px-6 py-3 rounded-lg transition-all duration-200 font-medium backdrop-blur-xl border min-h-[44px] focus:ring-2 focus:ring-cyan-400/50 focus:outline-none hover:-translate-y-0.5 ${activeTab === tab.id
+              ? 'bg-cyan-400/25 text-cyan-200 border-cyan-400/50 shadow-lg shadow-cyan-400/30 scale-105'
+              : 'text-muted-foreground/70 border-white/15 bg-white/8 hover:bg-white/12 hover:border-white/20'
+              }`}
             aria-pressed={activeTab === tab.id}
             aria-label={tab.label}
           >
@@ -1715,28 +1714,27 @@ export default function BadgeCenter({ user, setUser }) {
         <h3 className="font-semibold text-lg mb-4 text-center text-cyan-300">Featured Badges (Displayed on Public Profile)</h3>
         <div className="flex justify-center space-x-4">
           {getActiveBadges().map((badge) => (
-            <div 
-              key={badge.id} 
-              className={`flex flex-col items-center p-4 rounded-xl border-2 backdrop-blur-xl transition-all relative group ${
-                badge.name === 'Spam Alert' && user?.penaltyExpiry ? 'w-32 h-32 border-red-500/50 bg-red-600/15 shadow-lg shadow-red-500/20 justify-center' :
-                badge.tier === 'Legendary' || badge.tier === 'Elite' ? 'border-cyan-400/50 bg-cyan-400/15 shadow-lg shadow-cyan-400/20' : 
-                badge.name === 'Spam Alert' ? 'border-red-500/50 bg-red-600/15 shadow-lg shadow-red-500/20' :
-                badge.isPenaltyBadge ? 'border-red-500/50 bg-red-600/15 shadow-lg shadow-red-500/20' : 
-                badge.isModeratorBadge ? 'border-cyan-400/50 bg-cyan-400/15 shadow-lg shadow-cyan-400/20' :
-                'border-cyan-400/30 bg-cyan-950/20'
-              }`}
+            <div
+              key={badge.id}
+              className={`flex flex-col items-center p-4 rounded-xl border-2 backdrop-blur-xl transition-all relative group ${badge.name === 'Spam Alert' && user?.penaltyExpiry ? 'w-32 h-32 border-red-500/50 bg-red-600/15 shadow-lg shadow-red-500/20 justify-center' :
+                badge.tier === 'Legendary' || badge.tier === 'Elite' ? 'border-cyan-400/50 bg-cyan-400/15 shadow-lg shadow-cyan-400/20' :
+                  badge.name === 'Spam Alert' ? 'border-red-500/50 bg-red-600/15 shadow-lg shadow-red-500/20' :
+                    badge.isPenaltyBadge ? 'border-red-500/50 bg-red-600/15 shadow-lg shadow-red-500/20' :
+                      badge.isModeratorBadge ? 'border-cyan-400/50 bg-cyan-400/15 shadow-lg shadow-cyan-400/20' :
+                        'border-cyan-400/30 bg-cyan-950/20'
+                }`}
             >
               {/* Spam Alert Badge - Active Penalty */}
               {badge.name === 'Spam Alert' && user?.penaltyExpiry && (
                 <div className="flex flex-col items-center justify-center w-full h-full">
                   {/* Red Cross Icon */}
                   <XCircle className="w-12 h-12 text-red-500 mb-2 animate-pulse drop-shadow-lg" style={{ filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.6))' }} />
-                  
+
                   {/* Title */}
                   <span className="font-bold text-xs text-center text-red-300 mb-2">SPAM ALERT</span>
-                  
+
                   {/* Countdown Timer Centered */}
-                  <PenaltyCountdownTimer 
+                  <PenaltyCountdownTimer
                     targetDate={user.penaltyExpiry}
                     centered={true}
                     onExpired={() => {
@@ -1768,11 +1766,11 @@ export default function BadgeCenter({ user, setUser }) {
                       <span className="text-white text-sm font-bold">−</span>
                     </button>
                   )}
-                  
+
                   {/* Icon */}
                   <div className={`flex justify-center mb-2 ${badge.tier === 'Legendary' || badge.tier === 'Elite' ? 'animate-pulse' : ''} ${badge.isPenaltyBadge ? 'opacity-80' : ''}`}>
                     {badge.iconName ? (
-                      <LucideIcon 
+                      <LucideIcon
                         iconName={badge.iconName}
                         className="w-8 h-8"
                       />
@@ -1780,14 +1778,14 @@ export default function BadgeCenter({ user, setUser }) {
                       <span className="text-3xl">{badge.icon}</span>
                     )}
                   </div>
-                  
+
                   <span className="font-medium text-sm text-center text-white">{badge.name}</span>
-                  
+
                   {/* Tier Badge */}
                   <Badge className={`${getTierColor(badge.tier)} text-xs mt-1`}>
                     {getTierStars(badge.tier)}
                   </Badge>
-                  
+
                   {/* Duration indicator for timed badges */}
                   {badge.duration && badge.duration !== 'Permanent' && (
                     <div className="text-xs text-cyan-300 mt-1">
@@ -1799,7 +1797,7 @@ export default function BadgeCenter({ user, setUser }) {
             </div>
           ))}
           {getActiveBadges().length < 2 && (
-            <div 
+            <div
               onClick={() => setShowFeaturedBadgeModal(true)}
               className="flex flex-col items-center p-4 rounded-xl border-2 border-dashed border-cyan-400/30 bg-cyan-950/10 backdrop-blur-xl cursor-pointer hover:border-cyan-400/60 hover:bg-cyan-950/20 transition-all"
             >
@@ -1808,7 +1806,7 @@ export default function BadgeCenter({ user, setUser }) {
             </div>
           )}
         </div>
-        
+
         <div className="text-center mt-4 text-sm text-muted-foreground">
           💡 Special badges (Moderator, Moderation, Penalty, Spam Alert) are always visible and cannot be hidden
         </div>
@@ -1831,134 +1829,132 @@ export default function BadgeCenter({ user, setUser }) {
               </div>
             </div>
           )}
-          
+
           {/* Badges Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {getFilteredBadges().map((badge) => {
-            // Determine animation for hard-mode badges
-            let tierAnimation = ''
-            if ((badge.isUnlocked || badge.status === 'equipped') && (badge.category === 'Elite' || badge.badgeId)) {
-              if (badge.tier === 'Legendary') tierAnimation = 'animate-[gold-shimmer_3s_ease-in-out_infinite]'
-              else if (badge.tier === 'Epic') tierAnimation = 'animate-[purple-pulse_2.5s_ease-in-out_infinite]'
-              else if (badge.tier === 'Rare') tierAnimation = 'animate-[blue-glow_2s_ease-in-out_infinite]'
-              else if (badge.tier === 'Common') tierAnimation = 'animate-[silver-subtle_2s_ease-in-out_infinite]'
-              else if (badge.tier === 'Penalty') tierAnimation = 'animate-[red-alert-pulse_1.5s_ease-in-out_infinite]'
-            }
+            {getFilteredBadges().map((badge) => {
+              // Determine animation for hard-mode badges
+              let tierAnimation = ''
+              if ((badge.isUnlocked || badge.status === 'equipped') && (badge.category === 'Elite' || badge.badgeId)) {
+                if (badge.tier === 'Legendary') tierAnimation = 'animate-[gold-shimmer_3s_ease-in-out_infinite]'
+                else if (badge.tier === 'Epic') tierAnimation = 'animate-[purple-pulse_2.5s_ease-in-out_infinite]'
+                else if (badge.tier === 'Rare') tierAnimation = 'animate-[blue-glow_2s_ease-in-out_infinite]'
+                else if (badge.tier === 'Common') tierAnimation = 'animate-[silver-subtle_2s_ease-in-out_infinite]'
+                else if (badge.tier === 'Penalty') tierAnimation = 'animate-[red-alert-pulse_1.5s_ease-in-out_infinite]'
+              }
 
-            // Determine card styling based on badge type and status
-            let cardStyle = ''
-            if (badge.category === 'Elite' || badge.badgeId) {
-              // Hard-mode badge styling
-              cardStyle = badge.status === 'equipped' 
-                ? `border-cyan-400/80 bg-gradient-to-br from-cyan-900/40 to-blue-900/40 shadow-lg shadow-cyan-400/40 ${tierAnimation}`
-                : badge.status === 'pending-unlock'
-                ? `border-yellow-400/60 bg-gradient-to-br from-yellow-900/30 to-orange-900/30 shadow-lg shadow-yellow-400/20`
-                : badge.isUnlocked
-                ? `border-purple-400/60 bg-gradient-to-br from-purple-900/30 to-blue-900/30 shadow-lg shadow-purple-400/20 ${tierAnimation}`
-                : 'border-gray-500/40 opacity-60 bg-gray-900/20'
-            } else {
-              // Power-five badge styling
-              cardStyle = badge.isUnlocked 
-                ? `border-2 shadow-lg ${
-                    badge.tier === 'Legendary' ? 'border-yellow-500/60 shadow-yellow-500/20 bg-gradient-to-br from-yellow-900/20 to-orange-900/20' :
+              // Determine card styling based on badge type and status
+              let cardStyle = ''
+              if (badge.category === 'Elite' || badge.badgeId) {
+                // Hard-mode badge styling
+                cardStyle = badge.status === 'equipped'
+                  ? `border-cyan-400/80 bg-gradient-to-br from-cyan-900/40 to-blue-900/40 shadow-lg shadow-cyan-400/40 ${tierAnimation}`
+                  : badge.status === 'pending-unlock'
+                    ? `border-yellow-400/60 bg-gradient-to-br from-yellow-900/30 to-orange-900/30 shadow-lg shadow-yellow-400/20`
+                    : badge.isUnlocked
+                      ? `border-purple-400/60 bg-gradient-to-br from-purple-900/30 to-blue-900/30 shadow-lg shadow-purple-400/20 ${tierAnimation}`
+                      : 'border-gray-500/40 opacity-60 bg-gray-900/20'
+              } else {
+                // Power-five badge styling
+                cardStyle = badge.isUnlocked
+                  ? `border-2 shadow-lg ${badge.tier === 'Legendary' ? 'border-yellow-500/60 shadow-yellow-500/20 bg-gradient-to-br from-yellow-900/20 to-orange-900/20' :
                     badge.tier === 'Epic' ? 'border-purple-500/60 shadow-purple-500/20 bg-gradient-to-br from-purple-900/20 to-blue-900/20' :
-                    badge.tier === 'Rare' ? 'border-blue-500/60 shadow-blue-500/20 bg-gradient-to-br from-blue-900/20 to-cyan-900/20' :
-                    'border-cyan-500/40 shadow-cyan-500/10 bg-gradient-to-br from-cyan-900/10 to-slate-900/10'
+                      badge.tier === 'Rare' ? 'border-blue-500/60 shadow-blue-500/20 bg-gradient-to-br from-blue-900/20 to-cyan-900/20' :
+                        'border-cyan-500/40 shadow-cyan-500/10 bg-gradient-to-br from-cyan-900/10 to-slate-900/10'
                   }`
-                : 'border-2 border-gray-700/40 opacity-50 bg-gray-900/20 hover:opacity-70'
-            }
+                  : 'border-2 border-gray-700/40 opacity-50 bg-gray-900/20 hover:opacity-70'
+              }
 
-            return (
-            <Card 
-              key={badge.id || badge.badgeId} 
-              className={`relative component-badge-card p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-2xl cursor-pointer backdrop-blur-xl border-2 ${cardStyle}`}
-              onClick={() => { setSelectedBadge(badge); setPreviewLevel(badge.evolvesTo ? 1 : null); }}
-            >
-              {/* Status badges for hard-mode */}
-              {badge.category === 'Elite' && badge.status === 'pending-unlock' && (
-                <div className="absolute -top-3 -right-3 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                  ⏳ PENDING
-                </div>
-              )}
-              {badge.category === 'Elite' && badge.status === 'equipped' && (
-                <div className="absolute -top-3 -right-3 bg-cyan-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
-                  ✓ EQUIPPED
-                </div>
-              )}
-              {badge.category === 'Elite' && badge.tier === 'Legendary' && badge.isUnlocked && badge.status !== 'equipped' && (
-                <div className="absolute top-2 right-2 text-yellow-300 text-lg animate-pulse">⭐</div>
-              )}
-              {badge.category === 'Elite' && badge.tier === 'Epic' && badge.isUnlocked && badge.status !== 'equipped' && (
-                <div className="absolute top-2 right-2 text-purple-300 text-lg animate-pulse">✨</div>
-              )}
-              
-              {/* Evolving Badge Indicator */}
-              {badge.evolvesTo && (
-                <div className="absolute top-2 left-2 bg-blue-500/80 text-white text-xs font-bold px-2 py-1 rounded-full">
-                  📈 Evolving
-                </div>
-              )}
-
-              <div className="text-center space-y-3">
-                <div className={`flex justify-center ${badge.evolvesTo ? 'evolving-halo' : ''} ${(badge.tier === 'Legendary' || badge.tier === 'Epic') && badge.isUnlocked ? 'animate-pulse' : ''}`}>
-                  {badge.isUnlocked || badge.status === 'equipped' ? (
-                    <LucideIcon 
-                      iconName={badge.iconName || 'award'}
-                      className={`w-12 h-12 relative z-10 ${
-                        !badge.isUnlocked && badge.category !== 'Elite' ? 'opacity-40 grayscale' : 
-                        badge.tier === 'Legendary' ? 'text-yellow-400' :
-                        badge.tier === 'Epic' ? 'text-purple-400' :
-                        badge.tier === 'Rare' ? 'text-blue-400' :
-                        'text-gray-300'
-                      }`}
-                    />
-                  ) : (
-                    <XCircle className="w-12 h-12 text-gray-500" />
+              return (
+                <Card
+                  key={badge.id || badge.badgeId}
+                  className={`relative component-badge-card p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105 rounded-2xl cursor-pointer backdrop-blur-xl border-2 ${cardStyle}`}
+                  onClick={() => { setSelectedBadge(badge); setPreviewLevel(badge.evolvesTo ? 1 : null); }}
+                >
+                  {/* Status badges for hard-mode */}
+                  {badge.category === 'Elite' && badge.status === 'pending-unlock' && (
+                    <div className="absolute -top-3 -right-3 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                      ⏳ PENDING
+                    </div>
                   )}
-                </div>
-                <h3 className={`font-semibold text-lg ${!badge.isUnlocked ? 'text-gray-500' : 'text-white'}`}>
-                  {badge.name || badge.badgeName}
-                </h3>
-                <Badge className={`${getTierColor(badge.tier)} px-3 py-1 rounded-full w-fit mx-auto`}>
-                  {getTierStars(badge.tier)}
-                </Badge>
-                
-                {/* Progress bar - Always visible for all badges - Glassmorphic blue theme */}
-                {badge.progress && (badge.progress.total > 0) && (
-                  <div className="space-y-2 mt-3">
-                    <div className="flex justify-between text-xs text-cyan-300/70">
-                      <span className="font-semibold">Progress</span>
-                      <span className="font-mono">{badge.progress?.current || 0}/{badge.progress?.total || 1}</span>
+                  {badge.category === 'Elite' && badge.status === 'equipped' && (
+                    <div className="absolute -top-3 -right-3 bg-cyan-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+                      ✓ EQUIPPED
                     </div>
-                    <div className="w-full bg-gradient-to-r from-cyan-900/20 to-blue-900/20 rounded-full h-3 overflow-hidden border border-cyan-400/20 backdrop-blur-sm">
-                      <div 
-                        className={`h-3 rounded-full transition-all duration-500 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 shadow-lg shadow-cyan-500/40`}
-                        style={{ width: `${Math.min(((badge.progress?.current || 0) / (badge.progress?.total || 1)) * 100, 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-                
-                {/* Action buttons for hard-mode badges */}
-                {badge.category === 'Elite' && badge.isUnlocked && badge.status !== 'equipped' && (
-                  <Button 
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleUnlockHardModeBadge(badge)
-                    }}
-                    className="w-full mt-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold min-h-[40px]"
-                  >
-                    🔓 Equip Badge
-                  </Button>
-                )}
+                  )}
+                  {badge.category === 'Elite' && badge.tier === 'Legendary' && badge.isUnlocked && badge.status !== 'equipped' && (
+                    <div className="absolute top-2 right-2 text-yellow-300 text-lg animate-pulse">⭐</div>
+                  )}
+                  {badge.category === 'Elite' && badge.tier === 'Epic' && badge.isUnlocked && badge.status !== 'equipped' && (
+                    <div className="absolute top-2 right-2 text-purple-300 text-lg animate-pulse">✨</div>
+                  )}
 
-              </div>
-            </Card>
-            )
-          })}
+                  {/* Evolving Badge Indicator */}
+                  {badge.evolvesTo && (
+                    <div className="absolute top-2 left-2 bg-blue-500/80 text-white text-xs font-bold px-2 py-1 rounded-full">
+                      📈 Evolving
+                    </div>
+                  )}
+
+                  <div className="text-center space-y-3">
+                    <div className={`flex justify-center ${badge.evolvesTo ? 'evolving-halo' : ''} ${(badge.tier === 'Legendary' || badge.tier === 'Epic') && badge.isUnlocked ? 'animate-pulse' : ''}`}>
+                      {badge.isUnlocked || badge.status === 'equipped' ? (
+                        <LucideIcon
+                          iconName={badge.iconName || 'award'}
+                          className={`w-12 h-12 relative z-10 ${!badge.isUnlocked && badge.category !== 'Elite' ? 'opacity-40 grayscale' :
+                            badge.tier === 'Legendary' ? 'text-yellow-400' :
+                              badge.tier === 'Epic' ? 'text-purple-400' :
+                                badge.tier === 'Rare' ? 'text-blue-400' :
+                                  'text-gray-300'
+                            }`}
+                        />
+                      ) : (
+                        <XCircle className="w-12 h-12 text-gray-500" />
+                      )}
+                    </div>
+                    <h3 className={`font-semibold text-lg ${!badge.isUnlocked ? 'text-gray-500' : 'text-white'}`}>
+                      {badge.name || badge.badgeName}
+                    </h3>
+                    <Badge className={`${getTierColor(badge.tier)} px-3 py-1 rounded-full w-fit mx-auto`}>
+                      {getTierStars(badge.tier)}
+                    </Badge>
+
+                    {/* Progress bar - Always visible for all badges - Glassmorphic blue theme */}
+                    {badge.progress && (badge.progress.total > 0) && (
+                      <div className="space-y-2 mt-3">
+                        <div className="flex justify-between text-xs text-cyan-300/70">
+                          <span className="font-semibold">Progress</span>
+                          <span className="font-mono">{badge.progress?.current || 0}/{badge.progress?.total || 1}</span>
+                        </div>
+                        <div className="w-full bg-gradient-to-r from-cyan-900/20 to-blue-900/20 rounded-full h-3 overflow-hidden border border-cyan-400/20 backdrop-blur-sm">
+                          <div
+                            className={`h-3 rounded-full transition-all duration-500 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 shadow-lg shadow-cyan-500/40`}
+                            style={{ width: `${Math.min(((badge.progress?.current || 0) / (badge.progress?.total || 1)) * 100, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Action buttons for hard-mode badges */}
+                    {badge.category === 'Elite' && badge.isUnlocked && badge.status !== 'equipped' && (
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleUnlockHardModeBadge(badge)
+                        }}
+                        className="w-full mt-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold min-h-[40px]"
+                      >
+                        🔓 Equip Badge
+                      </Button>
+                    )}
+
+                  </div>
+                </Card>
+              )
+            })}
           </div>
         </div>
-        )}
+      )}
 
       {/* Badge Detail Modal */}
       {selectedBadge && (
@@ -1967,32 +1963,31 @@ export default function BadgeCenter({ user, setUser }) {
             <div className="text-center space-y-4">
               <div className={`flex justify-center ${selectedBadge.evolvesTo ? 'evolving-halo' : ''} ${selectedBadge.tier === 'Legendary' || selectedBadge.tier === 'Epic' ? 'animate-pulse' : ''}`}>
                 {selectedBadge.isUnlocked ? (
-                  <LucideIcon 
+                  <LucideIcon
                     iconName={selectedBadge.iconName || 'award'}
-                    className={`w-16 h-16 ${
-                      (() => {
-                        // For evolving badges, use preview tier color based on previewLevel
-                        if (previewLevel && selectedBadge.evolvesTo) {
-                          const seriesName = getBadgeSeriesName(selectedBadge.badgeId)
-                          const config = badgeLevelConfig[seriesName]?.[previewLevel]
-                          if (config) {
-                            // Convert tier color names to lucide icon colors
-                            const tierColorMap = {
-                              'Common': 'text-gray-300',
-                              'Rare': 'text-blue-400',
-                              'Epic': 'text-purple-400',
-                              'Legendary': 'text-yellow-400'
-                            }
-                            return tierColorMap[config.rank] || 'text-gray-300'
+                    className={`w-16 h-16 ${(() => {
+                      // For evolving badges, use preview tier color based on previewLevel
+                      if (previewLevel && selectedBadge.evolvesTo) {
+                        const seriesName = getBadgeSeriesName(selectedBadge.badgeId)
+                        const config = badgeLevelConfig[seriesName]?.[previewLevel]
+                        if (config) {
+                          // Convert tier color names to lucide icon colors
+                          const tierColorMap = {
+                            'Common': 'text-gray-300',
+                            'Rare': 'text-blue-400',
+                            'Epic': 'text-purple-400',
+                            'Legendary': 'text-yellow-400'
                           }
+                          return tierColorMap[config.rank] || 'text-gray-300'
                         }
-                        // Default to current tier color
-                        return selectedBadge.tier === 'Legendary' ? 'text-yellow-400' :
-                               selectedBadge.tier === 'Epic' ? 'text-purple-400' :
-                               selectedBadge.tier === 'Rare' ? 'text-blue-400' :
-                               'text-gray-300'
-                      })()
-                    }`}
+                      }
+                      // Default to current tier color
+                      return selectedBadge.tier === 'Legendary' ? 'text-yellow-400' :
+                        selectedBadge.tier === 'Epic' ? 'text-purple-400' :
+                          selectedBadge.tier === 'Rare' ? 'text-blue-400' :
+                            'text-gray-300'
+                    })()
+                      }`}
                   />
                 ) : (
                   <XCircle className="w-16 h-16 text-gray-500" />
@@ -2002,7 +1997,7 @@ export default function BadgeCenter({ user, setUser }) {
                 // Compute the display tier based on previewLevel for evolving badges
                 let displayTier = selectedBadge.tier
                 let displayLevel = null
-                
+
                 if (previewLevel && selectedBadge.evolvesTo) {
                   const seriesName = getBadgeSeriesName(selectedBadge.badgeId)
                   const config = badgeLevelConfig[seriesName]?.[previewLevel]
@@ -2011,7 +2006,7 @@ export default function BadgeCenter({ user, setUser }) {
                     displayLevel = previewLevel
                   }
                 }
-                
+
                 return (
                   <>
                     <h2 className="text-2xl font-bold text-white">
@@ -2026,20 +2021,20 @@ export default function BadgeCenter({ user, setUser }) {
                   </>
                 )
               })()}
-              
+
               {/* Evolution Path - Comprehensive */}
               {(selectedBadge.evolvesTo || selectedBadge.isMaxLevel) && (
                 <div className="w-full space-y-3 border-t-2 border-cyan-500/30 pt-3 mt-2">
                   <div className="text-xs font-bold text-center text-cyan-300 uppercase tracking-widest px-2 py-1 bg-cyan-500/10 rounded">
                     📈 Part of an Evolving Badge Series
                   </div>
-                  
+
                   {/* Evolution Chain Display - Universal */}
                   <div className="space-y-1.5">
                     {(() => {
                       const seriesConfig = getBadgeSeriesConfig(selectedBadge.badgeId)
                       if (!seriesConfig) return null
-                      
+
                       return (
                         <div className="space-y-1">
                           {/* Render all 3 levels for this badge series */}
@@ -2048,16 +2043,15 @@ export default function BadgeCenter({ user, setUser }) {
                             const isActive = previewLevel === level
                             const starCount = levelConfig.stars
                             const star = '★'.repeat(starCount)
-                            
+
                             return (
                               <div key={level}>
-                                <button 
+                                <button
                                   onClick={() => setPreviewLevel(level)}
-                                  className={`w-full text-xs font-bold p-2.5 rounded text-center transition-all cursor-pointer hover:shadow-lg ${
-                                    isActive 
-                                      ? `bg-${levelConfig.bgColor} border-2 ${levelConfig.borderColor} ${levelConfig.textColor} shadow-lg ${levelConfig.shadowColor}` 
-                                      : 'bg-gray-900/20 border border-gray-700/40 text-gray-400 hover:border-gray-600/60'
-                                  }`}>
+                                  className={`w-full text-xs font-bold p-2.5 rounded text-center transition-all cursor-pointer hover:shadow-lg ${isActive
+                                    ? `bg-${levelConfig.bgColor} border-2 ${levelConfig.borderColor} ${levelConfig.textColor} shadow-lg ${levelConfig.shadowColor}`
+                                    : 'bg-gray-900/20 border border-gray-700/40 text-gray-400 hover:border-gray-600/60'
+                                    }`}>
                                   {star} Level {level}: {levelConfig.rank} • {levelConfig.req}
                                 </button>
                                 {level < 3 && <div className="text-center text-gray-600/60 text-lg">↓</div>}
@@ -2070,7 +2064,7 @@ export default function BadgeCenter({ user, setUser }) {
                   </div>
                 </div>
               )}
-              
+
               {/* Show preview content for evolving badges when a tier is selected */}
               {previewLevel && selectedBadge.evolvesTo && (
                 <div>
@@ -2088,13 +2082,13 @@ export default function BadgeCenter({ user, setUser }) {
                               <div className="text-sm text-cyan-200 mt-1">{previewData.desc}</div>
                             </div>
                           </div>
-                          
+
                           {/* Tip section */}
                           <div className="mt-3 pt-3 border-t border-cyan-500/30 text-xs text-cyan-300">
                             <span className="font-semibold">💡 Tip: </span>{previewData.fullDesc}
                           </div>
                         </div>
-                        
+
                         {/* Progress Information for preview */}
                         <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
                           <div className="flex justify-between items-center mb-2">
@@ -2104,7 +2098,7 @@ export default function BadgeCenter({ user, setUser }) {
                             </span>
                           </div>
                           <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden border border-gray-600">
-                            <div 
+                            <div
                               className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full transition-all duration-500 shadow-lg shadow-cyan-500/50"
                               style={{ width: '0%' }}
                             />
@@ -2118,7 +2112,7 @@ export default function BadgeCenter({ user, setUser }) {
                   })()}
                 </div>
               )}
-              
+
               {/* Show unlock requirement for locked badges - ENHANCED */}
               {!selectedBadge.isUnlocked && !previewLevel && (
                 <div className="space-y-3">
@@ -2131,7 +2125,7 @@ export default function BadgeCenter({ user, setUser }) {
                         <div className="text-sm text-red-200 mt-1">{selectedBadge.requirement}</div>
                       </div>
                     </div>
-                    
+
                     {/* Additional criteria info if available */}
                     {selectedBadge.unlockedBy && (
                       <div className="mt-3 pt-3 border-t border-red-500/30 text-xs text-red-300">
@@ -2139,7 +2133,7 @@ export default function BadgeCenter({ user, setUser }) {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Progress Information */}
                   {selectedBadge.progress && selectedBadge.progress.total > 1 && (
                     <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
@@ -2150,7 +2144,7 @@ export default function BadgeCenter({ user, setUser }) {
                         </span>
                       </div>
                       <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden border border-gray-600">
-                        <div 
+                        <div
                           className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all duration-500 shadow-lg shadow-blue-500/50"
                           style={{ width: `${Math.min((selectedBadge.progress.current / selectedBadge.progress.total) * 100, 100)}%` }}
                         />
@@ -2162,7 +2156,7 @@ export default function BadgeCenter({ user, setUser }) {
                   )}
                 </div>
               )}
-              
+
               {/* Unlocked badge info */}
               {selectedBadge.isUnlocked && (
                 <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4">
@@ -2175,7 +2169,7 @@ export default function BadgeCenter({ user, setUser }) {
                   </div>
                 </div>
               )}
-              
+
               <Button onClick={() => { setSelectedBadge(null); setPreviewLevel(null); }} className="w-full min-h-[44px]">
                 Close
               </Button>
@@ -2191,7 +2185,7 @@ export default function BadgeCenter({ user, setUser }) {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-cyan-300">Select Badge to Feature</h2>
-                <button 
+                <button
                   onClick={() => setShowFeaturedBadgeModal(false)}
                   className="text-gray-400 hover:text-gray-200 text-2xl"
                 >
@@ -2224,7 +2218,7 @@ export default function BadgeCenter({ user, setUser }) {
                       >
                         <div className="flex flex-col items-center space-y-2">
                           {badge.iconName ? (
-                            <LucideIcon 
+                            <LucideIcon
                               iconName={badge.iconName}
                               className={`w-10 h-10 ${tierIconColor[badge.tier] || 'text-gray-400'}`}
                             />
