@@ -9,7 +9,7 @@ export default function useCommentWs({ postId, onMessage }) {
         if (!postId) return
 
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-        
+
         const client = new Client({
             webSocketFactory: () => new SockJS(`${API_BASE_URL}/ws-studcollab`, null, {
                 transports: ['websocket']
@@ -40,10 +40,18 @@ export default function useCommentWs({ postId, onMessage }) {
         }
     }, [postId, onMessage])
 
-    const send = ({ content, parentId, authorName }) => {
+    const send = ({ content, parentId, authorName, userId }) => {
         if (!clientRef.current || !clientRef.current.connected) return
         const payload = { content, parentId, authorName }
-        clientRef.current.publish({ destination: `/app/post.${postId}.comment`, body: JSON.stringify(payload) })
+        const destination = `/app/post.${postId}.comment`
+        const currentUserId = userId
+        const normalizedUserId = userId != null ? String(userId) : ''
+        console.log('[WS-SEND] Destination:', destination, 'userId Header:', currentUserId)
+        clientRef.current.publish({
+            destination,
+            body: JSON.stringify(payload),
+            headers: normalizedUserId ? { userId: normalizedUserId } : {}
+        })
     }
 
     return { send }

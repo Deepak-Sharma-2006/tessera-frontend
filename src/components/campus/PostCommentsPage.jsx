@@ -72,7 +72,12 @@ export default function PostCommentsPage({ user }) {
                 </CardContent>
             </Card>
 
-            <HelpChatSection post={post} comments={comments} currentUserName={user?.fullName || user?.email || 'You'} />
+            <HelpChatSection
+                post={post}
+                comments={comments}
+                currentUserName={user?.fullName || user?.email || 'You'}
+                currentUserId={user?._id || user?.id || null}
+            />
         </div>
     )
 }
