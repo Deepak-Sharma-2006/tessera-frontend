@@ -963,6 +963,16 @@ export default function BadgeCenter({ user, setUser }) {
 
   const findBadgeDefinition = (badge) => {
     const allDefinitions = [...powerFiveBadges, ...HARD_MODE_BADGE_DEFINITIONS]
+    const incomingBadgeId = badge?.badgeId || badge?.id
+
+    if (incomingBadgeId) {
+      const exactMatch = allDefinitions.find(def =>
+        def.id === incomingBadgeId ||
+        def.badgeId === incomingBadgeId
+      )
+      if (exactMatch) return exactMatch
+    }
+
     return allDefinitions.find(def =>
       def.id === badge.badgeId ||
       def.badgeId === badge.badgeId ||
@@ -1016,9 +1026,9 @@ export default function BadgeCenter({ user, setUser }) {
             tier: normalizeTier(badge.tier || definition?.tier),
             visualStyle: badge.visualStyle || definition?.visualStyle,
             category: badge.category || definition?.category || 'Elite',
-            description: badge.description || definition?.description || 'Elite badge',
-            requirement: badge.requirement || definition?.requirement || 'Meet criteria',
-            unlockedBy: badge.unlockedBy || definition?.unlockedBy,
+            description: badge.description ?? definition?.description ?? 'Elite badge',
+            requirement: badge.requirement ?? definition?.requirement ?? 'Meet criteria',
+            unlockedBy: badge.unlockedBy ?? definition?.unlockedBy ?? null,
             perks: badge.perks || definition?.perks || ['Elite status'],
             progress: normalizedProgress,
             isUnlocked,
@@ -1047,11 +1057,15 @@ export default function BadgeCenter({ user, setUser }) {
     const userId = getUserId()
     if (!userId) return
 
+    const rawToken = localStorage.getItem('token') || localStorage.getItem('jwt_token')
+    const token = rawToken ? rawToken.replace(/['"]+/g, '').trim() : ''
+
     try {
       const baseUrl = (api.defaults.baseURL || 'http://localhost:8080').replace(/\/$/, '')
       const socket = new SockJS(`${baseUrl}/ws`)
       const stompClient = new Stomp.Client({
         webSocketFactory: () => socket,
+        connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
         debug: (str) => console.log('[STOMP Debug]', str),
         onConnect: () => {
           console.log('✓ WebSocket connected')
